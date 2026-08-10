@@ -1,0 +1,1669 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>مدير مصاريف مشروع التخرج</title>
+    <style>
+      :root {
+        --bg: #080b1a;
+        --surface: #10182d;
+        --surface-soft: #14203f;
+        --card: rgba(18, 32, 72, 0.88);
+        --text: #f3f7ff;
+        --muted: #a6b8d8;
+        --primary: #7c3aed;
+        --primary-strong: #5b21b6;
+        --primary-soft: #c7b9ff;
+        --success: #22c55e;
+        --danger: #fb923c;
+        --warning: #facc15;
+        --border: rgba(146, 156, 255, 0.16);
+        --shadow: 0 28px 80px rgba(0, 0, 0, 0.24);
+      }
+
+      * { box-sizing: border-box; }
+      html, body { min-height:100%; }
+      body {
+        margin: 0;
+        font-family: "Inter", "Segoe UI", Tahoma, sans-serif;
+        background: radial-gradient(circle at top left, rgba(124, 58, 237, 0.18), transparent 24%),
+                    radial-gradient(circle at 85% 10%, rgba(56, 189, 248, 0.14), transparent 18%),
+                    linear-gradient(180deg, #081021 0%, #0c1224 100%);
+        color: var(--text);
+        min-height: 100vh;
+      }
+
+      .app {
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        min-height: 100vh;
+      }
+      .app.hidden { display: none; }
+
+      .sidebar {
+        padding: 28px 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+        background: linear-gradient(180deg, rgba(15,23,42,0.96), rgba(15,23,42,0.8));
+        border-right: 1px solid rgba(255,255,255,0.06);
+      }
+
+      .brand {
+        font-size: 1.35rem;
+        font-weight: 800;
+        letter-spacing: 0.02em;
+      }
+      .brand small {
+        display:block;
+        margin-top: 8px;
+        color: #a5b4fc;
+        font-size: 0.94rem;
+        opacity: 0.85;
+      }
+
+      .panel.sidebar-panel {
+        background: rgba(15, 23, 42, 0.85);
+        border: 1px solid rgba(148, 163, 184, 0.16);
+        padding: 18px;
+      }
+
+      .nav-btn {
+        width: 100%;
+        text-align: right;
+        padding: 14px 18px;
+        border: none;
+        border-radius: 16px;
+        color: rgba(226, 232, 255, 0.82);
+        background: transparent;
+        font-size: 0.98rem;
+        cursor: pointer;
+        transition: all 0.25s ease;
+      }
+      .nav-btn:hover {
+        background: rgba(124, 58, 237, 0.14);
+        color: white;
+        transform: translateX(-2px);
+      }
+      .nav-btn.active {
+        background: linear-gradient(135deg, rgba(124, 58, 237, 0.24), rgba(59, 130, 246, 0.2));
+        color: #f8fafc;
+        box-shadow: 0 20px 40px rgba(124, 58, 237, 0.18);
+      }
+
+      .main {
+        padding: 28px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .topbar, .card, .panel {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 28px;
+        box-shadow: var(--shadow);
+        transition: transform 0.28s ease, border-color 0.28s ease, background 0.28s ease;
+      }
+
+      .topbar {
+        padding: 22px 26px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+        backdrop-filter: blur(18px);
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .btn {
+        border: 0;
+        border-radius: 18px;
+        padding: 12px 20px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform 0.22s ease, box-shadow 0.22s ease, background 0.22s ease, filter 0.22s ease;
+      }
+      .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 18px 30px rgba(124, 58, 237, 0.18);
+      }
+      .btn:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
+      .btn-primary {
+        background: linear-gradient(135deg, #8b5cf6, #4f46e5);
+        color: white;
+        box-shadow: 0 20px 36px rgba(124, 58, 237, 0.22);
+      }
+      .btn-secondary {
+        background: rgba(255,255,255,0.08);
+        color: #dbeafe;
+        border: 1px solid rgba(146, 156, 255, 0.2);
+        backdrop-filter: blur(8px);
+      }
+      .btn-danger {
+        background: rgba(251, 113, 133, 0.15);
+        color: #f97316;
+      }
+
+      .permission-badge {
+        padding: 10px 14px;
+        border-radius: 999px;
+        font-size: 0.9rem;
+        font-weight: 700;
+        background: rgba(148, 163, 184, 0.1);
+        color: var(--muted);
+        border: 1px solid rgba(148, 163, 184, 0.16);
+      }
+      .permission-badge.owner {
+        background: rgba(34, 197, 94, 0.14);
+        color: #bbf7d0;
+        border-color: rgba(34, 197, 94, 0.22);
+      }
+      .permission-badge.readonly {
+        background: rgba(251, 113, 133, 0.14);
+        color: #fed7aa;
+        border-color: rgba(251, 113, 133, 0.22);
+      }
+
+      .helper-text {
+        font-size: 0.92rem;
+        color: rgba(226, 232, 255, 0.72);
+        margin-top: 6px;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .card {
+        padding: 22px;
+      }
+      .card .label {
+        font-size: 0.88rem;
+        color: rgba(226, 232, 255, 0.65);
+      }
+      .card .value {
+        font-size: 1.5rem;
+        font-weight: 800;
+        margin-top: 10px;
+      }
+
+      .panel {
+        padding: 22px;
+      }
+
+      .content-section { display: none; }
+      .content-section.active { display: block; }
+
+      .members-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .member-card {
+        padding: 18px;
+        border-radius: 24px;
+        border: 1px solid rgba(146, 156, 255, 0.16);
+        background: rgba(255,255,255,0.05);
+        backdrop-filter: blur(16px);
+        transition: transform 0.22s ease, border-color 0.22s ease, background 0.22s ease;
+      }
+      .member-card:hover {
+        transform: translateY(-2px);
+        border-color: rgba(124, 58, 237, 0.3);
+        background: rgba(255,255,255,0.08);
+      }
+      .member-card strong { display:block; margin-bottom:10px; color:#f8fafc; }
+      .balance-pos { color: #86efac; }
+      .balance-neg { color: #fb7185; }
+      .balance-zero { color: #94a3b8; }
+
+      .toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 14px;
+        flex-wrap: wrap;
+        margin-bottom: 16px;
+      }
+      .filters {
+        display:flex;
+        gap:12px;
+        flex-wrap:wrap;
+      }
+
+      table {
+        width:100%;
+        border-collapse: collapse;
+        background: rgba(255,255,255,0.04);
+      }
+      th, td {
+        text-align:right;
+        padding: 14px 12px;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.11);
+      }
+      th {
+        color: rgba(226, 232, 255, 0.7);
+        font-size: 0.92rem;
+      }
+      tr:hover { background: rgba(255,255,255,0.08); }
+      .actions-col { display:flex; gap:8px; justify-content:flex-end; }
+
+      input, select, textarea {
+        width:100%;
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        border-radius: 16px;
+        padding: 14px 16px;
+        font: inherit;
+        color: #e2e8f0;
+        background: rgba(255,255,255,0.05);
+        transition: border 0.2s ease, box-shadow 0.2s ease;
+      }
+      input:focus, select:focus, textarea:focus {
+        outline: none;
+        border-color: rgba(124, 58, 237, 0.7);
+        box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.12);
+      }
+      textarea { min-height: 100px; resize: vertical; }
+
+      .form-grid {
+        display:grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap:16px;
+      }
+      .field { display:flex; flex-direction:column; gap:8px; }
+      .field.full { grid-column: 1 / -1; }
+
+      .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(7, 11, 21, 0.82);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 18px;
+        z-index: 60;
+        animation: fadeIn 0.28s ease both;
+      }
+      .modal-backdrop.open { display: flex; }
+      .modal {
+        background: rgba(17, 29, 61, 0.96);
+        width: min(560px, 100%);
+        border-radius: 28px;
+        padding: 26px;
+        box-shadow: var(--shadow);
+        transform: translateY(0);
+        transition: transform 0.24s ease, opacity 0.24s ease;
+      }
+      .modal-backdrop.open .modal {
+        transform: translateY(-4px);
+      }
+      .modal-actions {
+        display:flex;
+        justify-content:flex-end;
+        gap:12px;
+        margin-top:18px;
+      }
+
+      .login-screen {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        background: radial-gradient(circle at top left, rgba(124, 58, 237, 0.2), transparent 25%),
+                    radial-gradient(circle at bottom right, rgba(56, 189, 248, 0.16), transparent 20%),
+                    linear-gradient(135deg, #090d18 0%, #0f172a 100%);
+      }
+      .login-box {
+        width: min(460px, 100%);
+        background: rgba(17, 31, 62, 0.96);
+        border: 1px solid rgba(146, 156, 255, 0.16);
+        border-radius: 32px;
+        padding: 36px;
+        box-shadow: var(--shadow);
+      }
+      .login-box h1 {
+        margin: 0 0 10px;
+        font-size: 2rem;
+        letter-spacing: 0.01em;
+      }
+      .login-box p {
+        color: rgba(226, 232, 255, 0.75);
+        margin: 0 0 22px;
+        line-height: 1.6;
+      }
+      .login-box .field { margin-bottom: 14px; }
+      .login-box label {
+        color: rgba(226, 232, 255, 0.75);
+        font-size: 0.95rem;
+      }
+      .login-box input {
+        border-radius: 18px;
+      }
+
+      .empty {
+        text-align:center;
+        color: rgba(226, 232, 255, 0.72);
+        padding: 24px 12px;
+        border: 1px dashed rgba(146, 156, 255, 0.22);
+        border-radius: 22px;
+        background: rgba(255,255,255,0.04);
+      }
+
+      .toast {
+        position: fixed;
+        left: 50%;
+        bottom: 24px;
+        transform: translateX(-50%);
+        background: rgba(15, 23, 42, 0.94);
+        color: white;
+        padding: 12px 18px;
+        border-radius: 999px;
+        display: none;
+        z-index: 70;
+      }
+      .toast.show { display:block; }
+
+      .mobile-nav {
+        display:none;
+        position: sticky;
+        bottom: 0;
+        background: rgba(15, 23, 42, 0.96);
+        backdrop-filter: blur(12px);
+        border-top:1px solid rgba(148, 163, 184, 0.16);
+        padding:10px 12px;
+        gap:8px;
+      }
+      .mobile-nav button {
+        flex:1;
+        border:0;
+        background: rgba(255,255,255,0.06);
+        padding:10px 8px;
+        border-radius:16px;
+        font-size:0.95rem;
+        color:var(--text);
+      }
+      .mobile-nav button.active {
+        background: rgba(124, 58, 237, 0.14);
+        color: white;
+      }
+
+      .auth-card {
+        display:flex;
+        align-items:center;
+        gap:10px;
+        padding:10px 12px;
+        border:1px solid rgba(148, 163, 184, 0.18);
+        border-radius:18px;
+        background: rgba(255,255,255,0.06);
+      }
+      .auth-card img {
+        width:40px;
+        height:40px;
+        border-radius:50%;
+        object-fit:cover;
+        border: 1px solid rgba(255,255,255,0.14);
+      }
+
+      @keyframes fadeUp { from { opacity:0; transform:translateY(10px);} to { opacity:1; transform:translateY(0);} }
+      @keyframes slideUp { from { opacity:0; transform:translateY(16px);} to { opacity:1; transform:translateY(0);} }
+      @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+
+      @media (max-width: 920px) {
+        .app { grid-template-columns: 1fr; }
+        .sidebar { display: none; }
+        .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .members-grid { grid-template-columns: 1fr; }
+        .mobile-nav { display:flex; }
+      }
+
+      @media (max-width: 640px) {
+        .main { padding: 16px; }
+        .stats-grid { grid-template-columns: 1fr; }
+        .form-grid { grid-template-columns: 1fr; }
+        .toolbar { flex-direction:column; align-items:flex-start; }
+        table { font-size:0.92rem; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="login-screen" id="loginScreen">
+      <div class="login-box">
+        <h1>تسجيل الدخول</h1>
+        <p>سجل الدخول للوصول إلى إدارة مصاريف مشروع التخرج</p>
+        <div class="field" style="margin-bottom:12px;">
+          <label>البريد الإلكتروني</label>
+          <input id="loginEmail" type="email" placeholder="you@example.com" />
+        </div>
+        <div class="field" style="margin-bottom:12px;">
+          <label>كلمة المرور</label>
+          <input id="loginPassword" type="password" placeholder="••••••••" />
+        </div>
+        <button class="btn btn-primary" id="loginSubmitBtn" style="width:100%;">تسجيل الدخول</button>
+        <button class="btn btn-secondary" id="googleSignInBtn" style="width:100%; margin-top:10px; background:#4285f4; color:white; border:none;">تسجيل دخول بجوجل</button>
+        <button class="btn btn-secondary" id="resetPasswordBtn" style="width:100%; margin-top:10px;">نسيت كلمة المرور؟</button>
+        <button class="btn btn-secondary" id="createAccountBtn" style="width:100%; margin-top:10px;">إنشاء حساب جديد</button>
+        <div class="helper-text" id="loginHint" style="margin-top:12px; text-align:center;">استخدم جوجل أو أنشئ حساب جديد أو سجل الدخول بالبريد</div>
+      </div>
+    </div>
+
+    <div class="app hidden" id="appRoot">
+      <aside class="sidebar">
+        <div class="brand">
+          Expense Tracker
+          <small>مشروع التخرج</small>
+        </div>
+        <div class="panel" style="margin:16px 0; padding:14px; background:#f8fafc; border-radius:18px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+            <strong style="font-size:0.95rem;">المشاريع</strong>
+            <button class="btn btn-primary" id="createProjectBtn" style="font-size:0.9rem;">مشروع جديد</button>
+          </div>
+          <div id="projectList" style="margin-top:12px;"></div>
+        </div>
+        <button class="nav-btn active" data-section="dashboard">📊 لوحة التحكم</button>
+        <button class="nav-btn" data-section="expenses">🧾 المصاريف</button>
+        <button class="nav-btn" data-section="settle">🤝 التسوية</button>
+        <button class="nav-btn" data-section="settings">⚙️ الإعدادات</button>
+        <div class="card" style="margin-top:auto;">
+          <div class="label">العملة</div>
+          <div class="value" id="currencyLabel">EGP</div>
+        </div>
+      </aside>
+
+      <main class="main">
+        <div class="topbar">
+          <div>
+            <h2 style="margin:0;">إدارة مصاريف المشروع</h2>
+            <div class="label" id="topSubtitle">تتبع مصاريف الفريق بسهولة</div>
+          </div>
+          <div class="actions">
+            <div id="permissionBadge" class="permission-badge readonly">عرض فقط</div>
+            <div id="permissionHint" class="helper-text">سجل الدخول بحساب المالك لتعديل البيانات</div>
+            <div id="authCard" class="auth-card" style="display:none;">
+              <img id="userAvatar" alt="avatar" />
+              <div>
+                <div id="userName" style="font-weight:700;"></div>
+                <div class="label" id="userEmail"></div>
+              </div>
+            </div>
+            <button class="btn btn-secondary" id="exportCsvBtn">تصدير CSV</button>
+            <button class="btn btn-secondary" id="authBtn">تسجيل الدخول</button>
+            <button class="btn btn-secondary" id="settingsBtn">الإعدادات</button>
+            <button class="btn btn-primary" id="addExpenseBtn">+ إضافة مصروف</button>
+          </div>
+        </div>
+
+        <section class="content-section active" id="dashboard">
+          <div class="stats-grid">
+            <div class="card">
+              <div class="label">اسم المشروع</div>
+              <div class="value" id="projectNameCard">-</div>
+            </div>
+            <div class="card">
+              <div class="label">عدد الأعضاء</div>
+              <div class="value" id="memberCount">0</div>
+            </div>
+            <div class="card">
+              <div class="label">إجمالي المصاريف</div>
+              <div class="value" id="totalExpenses">0 EGP</div>
+            </div>
+            <div class="card">
+              <div class="label">متوسط نصيب الفرد</div>
+              <div class="value" id="sharePerMember">0 EGP</div>
+            </div>
+          </div>
+          <div class="panel">
+            <h3 style="margin-top:0;">Team Members</h3>
+            <div class="members-grid" id="membersList"></div>
+          </div>
+          <div class="panel">
+            <h3 style="margin-top:0;">وصف المشروع</h3>
+            <p id="projectDescriptionCard" style="line-height:1.7; color: rgba(226, 232, 255, 0.8); margin:0;">-</p>
+          </div>
+          <div class="panel">
+            <h3 style="margin-top:0;">سجل النشاط</h3>
+            <div id="activityList"></div>
+          </div>
+        </section>
+
+        <section class="content-section" id="expenses">
+          <div class="panel">
+            <div class="toolbar">
+              <h3 style="margin:0;">Expenses</h3>
+              <div class="filters">
+                <input id="searchInput" placeholder="بحث عن مصروف..." />
+                <select id="filterMember"><option value="">كل الأشخاص</option></select>
+                <select id="filterCategory"><option value="">كل الفئات</option></select>
+                <input type="date" id="filterDate" />
+                <button class="btn btn-secondary" id="clearFiltersBtn">مسح الفلاتر</button>
+              </div>
+            </div>
+            <div style="overflow:auto;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>الاسم</th>
+                    <th>السعر</th>
+                    <th>الفئة</th>
+                    <th>المدفوع من</th>
+                    <th>التاريخ</th>
+                    <th>ملاحظات</th>
+                    <th>الإجراءات</th>
+                  </tr>
+                </thead>
+                <tbody id="expensesTable"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="content-section" id="settle">
+          <div class="panel">
+            <h3 style="margin-top:0;">Settle Up</h3>
+            <div id="settlementList"></div>
+          </div>
+        </section>
+
+        <section class="content-section" id="settings">
+          <div class="panel">
+            <div class="field" style="margin-bottom:12px;">
+              <label>اسم المشروع</label>
+              <input id="projectNameInput" />
+            </div>
+            <div class="field" style="margin-bottom:12px;">
+              <label>وصف المشروع</label>
+              <textarea id="projectDescriptionInput" placeholder="اكتب وصفًا للمشروع يساعد الفريق على فهم الهدف."></textarea>
+            </div>
+            <div class="field" style="margin-bottom:12px;">
+              <label>العملة</label>
+              <input id="currencyInput" value="EGP" />
+            </div>
+            <button class="btn btn-primary" id="saveSettingsBtn">حفظ الإعدادات</button>
+          </div>
+
+          <div class="panel" style="margin-top:14px;">
+            <h3 style="margin-top:0;">إدارة أعضاء الفريق</h3>
+            <div class="form-grid" style="margin-bottom:12px;">
+              <div class="field">
+                <label>اسم العضو الجديد</label>
+                <input id="newMemberName" placeholder="مثال: Karim" />
+              </div>
+              <div class="field">
+                <label>&nbsp;</label>
+                <button class="btn btn-primary" id="addMemberBtn">+ إضافة عضو</button>
+              </div>
+            </div>
+            <div id="memberSettingsList"></div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div class="mobile-nav">
+      <button class="active" data-section="dashboard">لوحة</button>
+      <button data-section="expenses">مصاريف</button>
+      <button data-section="settle">تسوية</button>
+      <button data-section="settings">إعدادات</button>
+    </div>
+
+    <div class="modal-backdrop" id="expenseModal">
+      <div class="modal">
+        <h3 id="expenseModalTitle">إضافة مصروف</h3>
+        <div class="form-grid">
+          <div class="field full">
+            <label>اسم الحاجة</label>
+            <input id="expenseItem" placeholder="مثال: Arduino Uno" />
+          </div>
+          <div class="field">
+            <label>السعر</label>
+            <input id="expenseAmount" type="number" step="0.01" placeholder="500" />
+          </div>
+          <div class="field">
+            <label>الشخص الذي دفع</label>
+            <select id="expensePaidBy"></select>
+          </div>
+          <div class="field">
+            <label>الفئة</label>
+            <select id="expenseCategory"></select>
+          </div>
+          <div class="field">
+            <label>التاريخ</label>
+            <input id="expenseDate" type="date" />
+          </div>
+          <div class="field full">
+            <label>ملاحظات</label>
+            <textarea id="expenseNotes" placeholder="مثال: تم الشراء من المتجر"></textarea>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-secondary" onclick="closeExpenseModal()">إلغاء</button>
+          <button class="btn btn-primary" id="saveExpenseBtn">حفظ المصروف</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-backdrop" id="authModal">
+      <div class="modal">
+        <h3 id="authModalTitle">تسجيل الدخول</h3>
+        <div class="field">
+          <label>البريد الإلكتروني</label>
+          <input id="authEmail" type="email" placeholder="you@example.com" />
+        </div>
+        <div class="field" style="margin-top:12px;">
+          <label>كلمة المرور</label>
+          <input id="authPassword" type="password" placeholder="••••••••" />
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-secondary" id="authCancelBtn">إلغاء</button>
+          <button class="btn btn-secondary" id="authSwitchBtn">إنشاء حساب</button>
+          <button class="btn btn-primary" id="authSubmitBtn">تسجيل الدخول</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script type="module">
+      window.firebaseRules = `rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /projects/{projectId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null
+        && request.resource.data.ownerId == request.auth.uid;
+      allow update, delete: if request.auth != null
+        && resource.data.ownerId == request.auth.uid;
+    }
+  }
+}`;
+      import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js';
+      import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut, updateProfile, GoogleAuthProvider, signInWithPopup } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js';
+      import { getFirestore, collection, query, where, doc, setDoc, onSnapshot, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js';
+
+      const firebaseConfig = {
+        apiKey: 'AIzaSyAjDRJSIhRRxDZ7U3iSaz9PV7R4wqNdaEA',
+        authDomain: 'accounts-projects.firebaseapp.com',
+        projectId: 'accounts-projects',
+        storageBucket: 'accounts-projects.firebasestorage.app',
+        messagingSenderId: '56359318422',
+        appId: '1:56359318422:web:a6d82a2bb402062cede3b7'
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+      const ALLOWED_EMAIL = 'ahmedsaadelshahat@gmail.com';
+
+      const STORAGE_KEY = 'grad_expense_app_v2';
+      const DEFAULT_CATEGORIES = ['أخرى', 'مواد', 'معدات', 'نقل', 'طعام'];
+
+      let currentUser = null;
+
+      function getStorageKey() {
+        return currentUser ? `${STORAGE_KEY}_${currentUser.uid}` : STORAGE_KEY;
+      }
+
+      function createDefaultState() {
+        return {
+          projectName: 'Graduation Project',
+          projectDescription: 'سجل مُصاريفك وشارك نتائج الفريق بسهولة.',
+          currency: 'EGP',
+          members: [
+            { id: crypto.randomUUID(), name: 'Ahmed', active: true, createdAt: new Date().toISOString() },
+            { id: crypto.randomUUID(), name: 'Mohamed', active: true, createdAt: new Date().toISOString() },
+            { id: crypto.randomUUID(), name: 'Ali', active: true, createdAt: new Date().toISOString() },
+            { id: crypto.randomUUID(), name: 'Omar', active: true, createdAt: new Date().toISOString() }
+          ],
+          expenses: [],
+          activityLog: []
+        };
+      }
+
+      const defaultState = createDefaultState();
+      let state = loadState();
+      let editingExpenseId = null;
+      let isFirebaseReady = false;
+      let authMode = 'login';
+      let currentProjectId = null;
+      let currentProjectOwnerId = null;
+      let projectDocs = [];
+      let projectListUnsubscribe = null;
+      let projectDocUnsubscribe = null;
+      const provider = new GoogleAuthProvider();
+
+      const els = {
+        projectNameCard: document.getElementById('projectNameCard'),
+        memberCount: document.getElementById('memberCount'),
+        totalExpenses: document.getElementById('totalExpenses'),
+        sharePerMember: document.getElementById('sharePerMember'),
+        membersList: document.getElementById('membersList'),
+        expensesTable: document.getElementById('expensesTable'),
+        settlementList: document.getElementById('settlementList'),
+        projectNameInput: document.getElementById('projectNameInput'),
+        currencyInput: document.getElementById('currencyInput'),
+        memberSettingsList: document.getElementById('memberSettingsList'),
+        currencyLabel: document.getElementById('currencyLabel'),
+        topSubtitle: document.getElementById('topSubtitle'),
+        searchInput: document.getElementById('searchInput'),
+        filterMember: document.getElementById('filterMember'),
+        filterCategory: document.getElementById('filterCategory'),
+        filterDate: document.getElementById('filterDate'),
+        clearFiltersBtn: document.getElementById('clearFiltersBtn'),
+        expenseModal: document.getElementById('expenseModal'),
+        expenseModalTitle: document.getElementById('expenseModalTitle'),
+        expenseItem: document.getElementById('expenseItem'),
+        expenseAmount: document.getElementById('expenseAmount'),
+        expensePaidBy: document.getElementById('expensePaidBy'),
+        expenseCategory: document.getElementById('expenseCategory'),
+        expenseDate: document.getElementById('expenseDate'),
+        expenseNotes: document.getElementById('expenseNotes'),
+        saveExpenseBtn: document.getElementById('saveExpenseBtn'),
+        saveSettingsBtn: document.getElementById('saveSettingsBtn'),
+        projectDescriptionCard: document.getElementById('projectDescriptionCard'),
+        projectDescriptionInput: document.getElementById('projectDescriptionInput'),
+        activityList: document.getElementById('activityList'),
+        exportCsvBtn: document.getElementById('exportCsvBtn'),
+        toast: document.getElementById('toast'),
+        newMemberName: document.getElementById('newMemberName'),
+        addMemberBtn: document.getElementById('addMemberBtn'),
+        permissionBadge: document.getElementById('permissionBadge'),
+        permissionHint: document.getElementById('permissionHint'),
+        authBtn: document.getElementById('authBtn'),
+        authCard: document.getElementById('authCard'),
+        settingsBtn: document.getElementById('settingsBtn'),
+        addExpenseBtn: document.getElementById('addExpenseBtn'),
+        userAvatar: document.getElementById('userAvatar'),
+        userName: document.getElementById('userName'),
+        userEmail: document.getElementById('userEmail'),
+        authModal: document.getElementById('authModal'),
+        authModalTitle: document.getElementById('authModalTitle'),
+        authEmail: document.getElementById('authEmail'),
+        authPassword: document.getElementById('authPassword'),
+        authCancelBtn: document.getElementById('authCancelBtn'),
+        createAccountBtn: document.getElementById('createAccountBtn'),
+        authSwitchBtn: document.getElementById('authSwitchBtn'),
+        authSubmitBtn: document.getElementById('authSubmitBtn'),
+        resetPasswordBtn: document.getElementById('resetPasswordBtn'),
+        loginScreen: document.getElementById('loginScreen'),
+        appRoot: document.getElementById('appRoot'),
+        loginEmail: document.getElementById('loginEmail'),
+        loginPassword: document.getElementById('loginPassword'),
+        loginSubmitBtn: document.getElementById('loginSubmitBtn'),
+        loginHint: document.getElementById('loginHint'),
+        googleSignInBtn: document.getElementById('googleSignInBtn'),
+        createProjectBtn: document.getElementById('createProjectBtn'),
+        projectList: document.getElementById('projectList')
+      };
+
+      function normalizeState(inputState) {
+        const base = inputState && typeof inputState === 'object' ? inputState : {};
+        const members = Array.isArray(base.members) ? base.members : [];
+        const expenses = Array.isArray(base.expenses) ? base.expenses : [];
+        const activityLog = Array.isArray(base.activityLog) ? base.activityLog : [];
+
+        return {
+          projectName: typeof base.projectName === 'string' && base.projectName.trim() ? base.projectName : defaultState.projectName,
+          projectDescription: typeof base.projectDescription === 'string' ? base.projectDescription : defaultState.projectDescription,
+          currency: typeof base.currency === 'string' && base.currency.trim() ? base.currency : defaultState.currency,
+          members: members.map((member, index) => ({
+            id: member?.id || crypto.randomUUID(),
+            name: member?.name || `Member ${index + 1}`,
+            active: member?.active !== false,
+            createdAt: member?.createdAt || new Date().toISOString()
+          })),
+          expenses: expenses.map((expense) => ({
+            id: expense?.id || crypto.randomUUID(),
+            itemName: expense?.itemName || 'مصروف',
+            amount: Number(expense?.amount) || 0,
+            paidBy: expense?.paidBy || members[0]?.id || '',
+            category: typeof expense?.category === 'string' && expense.category ? expense.category : 'أخرى',
+            date: expense?.date || new Date().toISOString().slice(0, 10),
+            notes: expense?.notes || '',
+            createdAt: expense?.createdAt || new Date().toISOString()
+          })),
+          activityLog: activityLog.slice(-30).map(entry => ({
+            id: entry?.id || crypto.randomUUID(),
+            message: entry?.message || '',
+            createdAt: entry?.createdAt || new Date().toISOString()
+          }))
+        };
+      }
+
+      function loadState() {
+        try {
+          const saved = JSON.parse(localStorage.getItem(getStorageKey()));
+          if (saved) return normalizeState(saved);
+        } catch (error) {
+          console.warn('No saved state yet', error);
+        }
+        return normalizeState(defaultState);
+      }
+
+      function saveState({ syncRemote = true } = {}) {
+        state = normalizeState(state);
+        localStorage.setItem(getStorageKey(), JSON.stringify(state));
+        if (syncRemote && isFirebaseReady && canEdit() && currentProjectId) {
+          syncToFirebase();
+        }
+      }
+
+      function logActivity(message) {
+        const entry = { id: crypto.randomUUID(), message, createdAt: new Date().toISOString() };
+        state.activityLog = state.activityLog || [];
+        state.activityLog.unshift(entry);
+        if (state.activityLog.length > 30) state.activityLog.length = 30;
+      }
+
+      function canEdit() {
+        return !!currentUser && currentProjectOwnerId && currentUser.uid === currentProjectOwnerId;
+      }
+
+      async function syncToFirebase() {
+        if (!currentProjectId) return;
+        try {
+          const projectRef = doc(db, 'projects', currentProjectId);
+          await setDoc(projectRef, { state, updatedAt: serverTimestamp() }, { merge: true });
+        } catch (error) {
+          console.error('Firebase save failed', error);
+          showToast('تم الحفظ محليًا فقط بسبب مشكلة في Firebase');
+        }
+      }
+
+      function subscribeToProjectList() {
+        if (projectListUnsubscribe) {
+          projectListUnsubscribe();
+        }
+        if (!currentUser) return;
+        const projectsQuery = query(collection(db, 'projects'), where('ownerId', '==', currentUser.uid));
+        projectListUnsubscribe = onSnapshot(projectsQuery, (snapshot) => {
+          projectDocs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          renderProjectList();
+          if (!currentProjectId && projectDocs.length) {
+            selectProject(projectDocs[0].id);
+          }
+        }, (error) => {
+          console.error('Firestore project list error', error);
+          showToast('خطأ في جلب المشاريع من Firebase');
+        });
+      }
+
+      function subscribeToProject(projectId) {
+        if (projectDocUnsubscribe) projectDocUnsubscribe();
+        currentProjectId = projectId;
+        const projectRef = doc(db, 'projects', projectId);
+        projectDocUnsubscribe = onSnapshot(projectRef, (snapshot) => {
+          if (snapshot.exists()) {
+            const remoteData = snapshot.data();
+            currentProjectOwnerId = remoteData.ownerId;
+            if (remoteData && remoteData.state) {
+              state = normalizeState(remoteData.state);
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            }
+            render();
+          } else {
+            showToast('المشروع غير موجود');
+          }
+        }, (error) => {
+          console.error('Firestore project error', error);
+          showToast('خطأ في تحميل المشروع');
+        });
+      }
+
+      function selectProject(projectId) {
+        if (!projectId) return;
+        currentProjectId = projectId;
+        subscribeToProject(projectId);
+        renderProjectList();
+      }
+
+      async function createProject() {
+        if (!currentUser) {
+          showToast('سجل الدخول أولا');
+          return;
+        }
+        const projectName = prompt('اكتب اسم المشروع الجديد', 'مشروعي الجديد');
+        if (!projectName || !projectName.trim()) return;
+        const newProjectRef = doc(collection(db, 'projects'));
+        const newProject = {
+          ownerId: currentUser.uid,
+          ownerEmail: currentUser.email || '',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          state: {
+            projectName: projectName.trim(),
+            projectDescription: 'ابدأ بإضافة أعضاء ومصاريفك هنا.',
+            currency: 'EGP',
+            members: [
+              { id: crypto.randomUUID(), name: currentUser.displayName || currentUser.email || 'Owner', active: true, createdAt: new Date().toISOString() }
+            ],
+            expenses: [],
+            activityLog: []
+          }
+        };
+        try {
+          await setDoc(newProjectRef, newProject);
+          selectProject(newProjectRef.id);
+          showToast('تم إنشاء المشروع');
+        } catch (error) {
+          console.error('Create project failed', error);
+          showToast('فشل إنشاء المشروع');
+        }
+      }
+
+      function renderProjectList() {
+        if (!projectDocs.length) {
+          els.projectList.innerHTML = '<div class="empty">ليس لديك مشروعات بعد. اضغط مشروع جديد لإنشاء أول مشروع.</div>';
+          return;
+        }
+        els.projectList.innerHTML = projectDocs.map(project => `
+          <div class="member-card" style="margin-bottom:8px; cursor:pointer; border-color:${project.id === currentProjectId ? '#2563eb' : '#e5eaf2'};" onclick="selectProject('${project.id}')">
+            <strong>${project.state?.projectName || 'مشروع'}</strong>
+            <div class="label">${project.state?.currency || 'EGP'}</div>
+          </div>
+        `).join('');
+      }
+
+      function formatCurrency(value) {
+        const amount = Number(value || 0);
+        return `${amount.toLocaleString('en-US', { maximumFractionDigits: 2 })} ${state.currency}`;
+      }
+
+      function getActiveMembers() {
+        return state.members.filter(member => member.active !== false);
+      }
+
+      function calculateMetrics() {
+        const activeMembers = getActiveMembers();
+        const totalExpenses = state.expenses.reduce((sum, expense) => sum + Number(expense.amount || 0), 0);
+        const sharePerMember = activeMembers.length ? totalExpenses / activeMembers.length : 0;
+        const paidByMember = Object.fromEntries(activeMembers.map(member => [member.id, 0]));
+
+        state.expenses.forEach(expense => {
+          if (paidByMember[expense.paidBy] !== undefined) {
+            paidByMember[expense.paidBy] += Number(expense.amount || 0);
+          }
+        });
+
+        const balances = activeMembers.map(member => ({
+          ...member,
+          paid: paidByMember[member.id] || 0,
+          share: sharePerMember,
+          balance: (paidByMember[member.id] || 0) - sharePerMember
+        }));
+
+        return { totalExpenses, sharePerMember, balances };
+      }
+
+      function computeSettlement(balances) {
+        const creditors = balances.filter(item => item.balance > 0).sort((a, b) => b.balance - a.balance);
+        const debtors = balances.filter(item => item.balance < 0).sort((a, b) => a.balance - b.balance);
+        const transfers = [];
+
+        let i = 0; let j = 0;
+        while (i < creditors.length && j < debtors.length) {
+          const creditor = creditors[i];
+          const debtor = debtors[j];
+          const amount = Math.min(creditor.balance, Math.abs(debtor.balance));
+          if (amount > 0.0001) {
+            transfers.push({ from: debtor.name, to: creditor.name, amount });
+            creditor.balance -= amount;
+            debtor.balance += amount;
+          }
+          if (creditor.balance < 0.0001) i += 1;
+          if (debtor.balance > -0.0001) j += 1;
+        }
+        return transfers;
+      }
+
+      function showToast(message) {
+        els.toast.textContent = message;
+        els.toast.classList.add('show');
+        clearTimeout(showToast.timeout);
+        showToast.timeout = setTimeout(() => els.toast.classList.remove('show'), 2200);
+      }
+
+      function openAuthModal(mode = 'login') {
+        authMode = mode;
+        els.authModalTitle.textContent = mode === 'login' ? 'تسجيل الدخول' : 'إنشاء حساب';
+        els.authSubmitBtn.textContent = mode === 'login' ? 'تسجيل الدخول' : 'إنشاء حساب';
+        els.authSwitchBtn.textContent = mode === 'login' ? 'إنشاء حساب' : 'تسجيل الدخول';
+        els.authEmail.value = '';
+        els.authPassword.value = '';
+        els.authModal.classList.add('open');
+      }
+
+      function closeAuthModal() {
+        els.authModal.classList.remove('open');
+      }
+
+      function getAuthErrorMessage(code) {
+        switch (code) {
+          case 'auth/invalid-email': return 'البريد الإلكتروني غير صالح';
+          case 'auth/user-disabled': return 'هذا الحساب تم تعطيله';
+          case 'auth/user-not-found': return 'لا يوجد حساب بهذا البريد';
+          case 'auth/wrong-password': return 'كلمة المرور غير صحيحة';
+          case 'auth/email-already-in-use': return 'هذا البريد مستخدم بالفعل';
+          case 'auth/weak-password': return 'كلمة المرور ضعيفة جدًا';
+          default: return 'حدث خطأ في المصادقة';
+        }
+      }
+
+      async function submitAuthForm() {
+        const email = els.authEmail.value.trim();
+        const password = els.authPassword.value;
+        if (!email || !password) {
+          showToast('أدخل البريد وكلمة المرور');
+          return;
+        }
+
+        els.authSubmitBtn.disabled = true;
+        els.authSubmitBtn.textContent = 'جارٍ المعالجة...';
+
+        try {
+          if (authMode === 'login') {
+            await signInWithEmailAndPassword(auth, email, password);
+            showToast('تم تسجيل الدخول بنجاح');
+          } else {
+            const result = await createUserWithEmailAndPassword(auth, email, password);
+            const username = email.split('@')[0];
+            if (!result.user.displayName) {
+              await updateProfile(result.user, { displayName: username });
+            }
+            showToast('تم إنشاء الحساب بنجاح');
+          }
+          closeAuthModal();
+        } catch (error) {
+          console.error(error);
+          const message = error?.code === 'auth/network-request-failed'
+            ? 'فشل الاتصال بالشبكة. تأكد من اتصال الإنترنت ثم حاول مرة أخرى.'
+            : getAuthErrorMessage(error?.code);
+          showToast(message);
+        } finally {
+          els.authSubmitBtn.disabled = false;
+          els.authSubmitBtn.textContent = authMode === 'login' ? 'تسجيل الدخول' : 'إنشاء حساب';
+        }
+      }
+
+      async function submitLoginForm() {
+        const email = els.loginEmail.value.trim();
+        const password = els.loginPassword.value;
+        if (!email || !password) {
+          els.loginHint.textContent = 'أدخل البريد وكلمة المرور';
+          return;
+        }
+
+        els.loginSubmitBtn.disabled = true;
+        els.loginSubmitBtn.textContent = 'جارٍ الدخول...';
+
+        try {
+          await signInWithEmailAndPassword(auth, email, password);
+          els.loginHint.textContent = 'تم تسجيل الدخول بنجاح';
+        } catch (error) {
+          console.error(error);
+          const message = error?.code === 'auth/network-request-failed'
+            ? 'فشل الاتصال بالشبكة. تأكد من اتصال الإنترنت ثم حاول مرة أخرى.'
+            : getAuthErrorMessage(error?.code);
+          els.loginHint.textContent = message;
+        } finally {
+          els.loginSubmitBtn.disabled = false;
+          els.loginSubmitBtn.textContent = 'تسجيل الدخول';
+        }
+      }
+
+      async function resetPassword() {
+        const email = els.loginEmail.value.trim();
+        if (!email) {
+          els.loginHint.textContent = 'أدخل البريد الإلكتروني أولاً لإرسال رابط الاستعادة';
+          return;
+        }
+
+        els.resetPasswordBtn.disabled = true;
+        els.resetPasswordBtn.textContent = 'جارٍ الإرسال...';
+
+        try {
+          await sendPasswordResetEmail(auth, email);
+          els.loginHint.textContent = 'تم إرسال رابط استعادة كلمة المرور إلى بريدك';
+        } catch (error) {
+          console.error(error);
+          const message = error?.code === 'auth/user-not-found'
+            ? 'لا يوجد حساب بهذا البريد'
+            : error?.code === 'auth/invalid-email'
+              ? 'البريد الإلكتروني غير صالح'
+              : 'فشل إرسال رابط الاستعادة';
+          els.loginHint.textContent = message;
+        } finally {
+          els.resetPasswordBtn.disabled = false;
+          els.resetPasswordBtn.textContent = 'نسيت كلمة المرور؟';
+        }
+      }
+
+      async function signInWithGoogle() {
+        try {
+          await signInWithPopup(auth, provider);
+          els.loginHint.textContent = 'تم تسجيل الدخول بجوجل';
+        } catch (error) {
+          console.error(error);
+          els.loginHint.textContent = getAuthErrorMessage(error?.code) || 'فشل تسجيل الدخول بجوجل';
+        }
+      }
+
+      async function toggleAuth() {
+        if (auth.currentUser) {
+          await signOut(auth);
+          showToast('تم تسجيل الخروج');
+          return;
+        }
+        openAuthModal('login');
+      }
+
+      function renderAuth(user) {
+        currentUser = user;
+        if (!user) {
+          if (projectListUnsubscribe) projectListUnsubscribe();
+          if (projectDocUnsubscribe) projectDocUnsubscribe();
+          currentProjectId = null;
+          currentProjectOwnerId = null;
+          projectDocs = [];
+          state = loadState();
+          els.appRoot.classList.add('hidden');
+          els.loginScreen.style.display = 'flex';
+          els.authCard.style.display = 'none';
+          els.authBtn.textContent = 'تسجيل الدخول';
+        } else {
+          state = loadState();
+          els.appRoot.classList.remove('hidden');
+          els.loginScreen.style.display = 'none';
+          els.authCard.style.display = 'flex';
+          els.authBtn.textContent = 'تسجيل الخروج';
+          els.userAvatar.src = user.photoURL || '';
+          els.userName.textContent = user.displayName || 'User';
+          els.userEmail.textContent = user.email || '';
+          subscribeToProjectList();
+        }
+        render();
+      }
+
+      function diagnoseAuthIssue() {
+        const isLocalFile = window.location.protocol === 'file:';
+        if (isLocalFile) {
+          showToast('افتح الصفحة عبر خادم محلي مثل http://localhost:8000 حتى يعمل تسجيل الدخول');
+        }
+      }
+
+      function updatePermissionUI() {
+        const editable = canEdit();
+        els.permissionBadge.textContent = editable ? 'أنت المالك' : 'عرض فقط';
+        els.permissionBadge.className = `permission-badge ${editable ? 'owner' : 'readonly'}`;
+        els.permissionHint.textContent = editable
+          ? 'يمكنك إضافة وتعديل وحذف البيانات الآن'
+          : 'سجل الدخول بحساب المالك لتعديل البيانات';
+        els.addExpenseBtn.disabled = !editable;
+        els.settingsBtn.disabled = !editable;
+        els.addMemberBtn.disabled = !editable;
+        els.saveSettingsBtn.disabled = !editable;
+        document.querySelectorAll('.btn-danger, .btn-secondary').forEach((button) => {
+          if (button.id === 'authBtn' || button.id === 'settingsBtn' || button.id === 'addExpenseBtn') {
+            return;
+          }
+          const actionName = button.textContent.trim();
+          if (actionName === 'تعديل' || actionName === 'حذف' || actionName === '+ إضافة عضو') {
+            button.disabled = !editable;
+          }
+        });
+      }
+
+      function showSection(section) {
+        document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.section === section));
+        document.querySelectorAll('.mobile-nav button').forEach(btn => btn.classList.toggle('active', btn.dataset.section === section));
+        document.querySelectorAll('.content-section').forEach(panel => panel.classList.toggle('active', panel.id === section));
+      }
+
+      window.selectProject = selectProject;
+      window.closeExpenseModal = closeExpenseModal;
+      window.duplicateExpense = duplicateExpense;
+      window.editExpense = editExpense;
+      window.deleteExpense = deleteExpense;
+      window.renameMember = renameMember;
+      window.deleteMember = deleteMember;
+
+      function render() {
+        const metrics = calculateMetrics();
+        const activeMembers = getActiveMembers();
+
+        els.projectNameCard.textContent = currentProjectId ? state.projectName : 'لا يوجد مشروع محدد';
+        els.memberCount.textContent = activeMembers.length;
+        els.totalExpenses.textContent = formatCurrency(metrics.totalExpenses);
+        els.sharePerMember.textContent = formatCurrency(metrics.sharePerMember);
+        els.currencyLabel.textContent = state.currency;
+        els.projectDescriptionCard.textContent = state.projectDescription || 'لا يوجد وصف للمشروع بعد.';
+        els.projectNameInput.value = state.projectName;
+        els.currencyInput.value = state.currency;
+        els.projectDescriptionInput.value = state.projectDescription || '';
+        const editStateText = currentProjectId ? (canEdit() ? 'يمكنك التعديل' : 'عرض فقط') : 'اختر مشروعًا أو أنشئ مشروعًا جديدًا';
+        els.topSubtitle.textContent = `${activeMembers.length} أعضاء • ${state.expenses.length} مصروف • ${editStateText}`;
+
+        updatePermissionUI();
+        renderMembers(metrics.balances);
+        renderExpenses();
+        renderSettlement(metrics.balances);
+        renderSettingsMembers();
+        renderActivityLog();
+        populatePaidByOptions();
+        populateCategoryOptions();
+      }
+
+      function renderMembers(balances) {
+        if (!balances.length) {
+          els.membersList.innerHTML = '<div class="empty">Add team members to start tracking expenses.</div>';
+          return;
+        }
+
+        els.membersList.innerHTML = balances.map(member => {
+          let balanceClass = 'balance-zero';
+          let balanceText = 'متوازن';
+          if (member.balance > 0.0001) {
+            balanceClass = 'balance-pos';
+            balanceText = `له: ${formatCurrency(member.balance)}`;
+          } else if (member.balance < -0.0001) {
+            balanceClass = 'balance-neg';
+            balanceText = `عليه: ${formatCurrency(Math.abs(member.balance))}`;
+          }
+          return `
+            <div class="member-card">
+              <strong>${member.name}</strong>
+              <div class="label">دفع: ${formatCurrency(member.paid)}</div>
+              <div class="label">نصيبه: ${formatCurrency(member.share)}</div>
+              <div class="${balanceClass}">${balanceText}</div>
+            </div>`;
+        }).join('');
+      }
+
+      function renderExpenses() {
+        const search = els.searchInput.value.toLowerCase();
+        const memberFilter = els.filterMember.value;
+        const categoryFilter = els.filterCategory.value;
+        const dateFilter = els.filterDate.value;
+        const editable = canEdit();
+
+        const filtered = state.expenses.filter(expense => {
+          const matchesSearch = `${expense.itemName} ${expense.notes}`.toLowerCase().includes(search);
+          const matchesMember = !memberFilter || expense.paidBy === memberFilter;
+          const matchesCategory = !categoryFilter || expense.category === categoryFilter;
+          const matchesDate = !dateFilter || expense.date === dateFilter;
+          return matchesSearch && matchesMember && matchesCategory && matchesDate;
+        });
+
+        if (!filtered.length) {
+          els.expensesTable.innerHTML = '<tr><td colspan="7"><div class="empty">No expenses yet. Add your first expense.</div></td></tr>';
+          return;
+        }
+
+        els.expensesTable.innerHTML = filtered.map(expense => `
+          <tr>
+            <td>${expense.itemName}</td>
+            <td>${formatCurrency(expense.amount)}</td>
+            <td>${expense.category || 'أخرى'}</td>
+            <td>${getMemberName(expense.paidBy)}</td>
+            <td>${expense.date}</td>
+            <td>${expense.notes || '—'}</td>
+            <td class="actions-col">
+              <button class="btn btn-secondary" onclick="duplicateExpense('${expense.id}')" ${editable ? '' : 'disabled'}>نسخ</button>
+              <button class="btn btn-secondary" onclick="editExpense('${expense.id}')" ${editable ? '' : 'disabled'}>تعديل</button>
+              <button class="btn btn-danger" onclick="deleteExpense('${expense.id}')" ${editable ? '' : 'disabled'}>حذف</button>
+            </td>
+          </tr>
+        `).join('');
+      }
+
+      function renderSettlement(balances) {
+        const transfers = computeSettlement(balances.map(item => ({ ...item, balance: item.balance })));
+        if (!transfers.length) {
+          els.settlementList.innerHTML = '<div class="empty">لا توجد تسويات مطلوبة حالياً.</div>';
+          return;
+        }
+        els.settlementList.innerHTML = transfers.map(tx => `
+          <div class="member-card" style="margin-bottom:8px;">
+            <strong>${tx.from} → ${tx.to}</strong>
+            <div class="label">المبلغ: ${formatCurrency(tx.amount)}</div>
+          </div>
+        `).join('');
+      }
+
+      function renderActivityLog() {
+        if (!state.activityLog || !state.activityLog.length) {
+          els.activityList.innerHTML = '<div class="empty">لا توجد نشاطات بعد.</div>';
+          return;
+        }
+        els.activityList.innerHTML = state.activityLog.slice(0, 6).map(entry => `
+          <div class="member-card" style="margin-bottom:10px; padding:14px;">
+            <div class="label">${new Date(entry.createdAt).toLocaleString('ar-EG')}</div>
+            <div style="margin-top:8px;">${entry.message}</div>
+          </div>
+        `).join('');
+      }
+
+      function populateCategoryOptions() {
+        els.expenseCategory.innerHTML = DEFAULT_CATEGORIES.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+        els.filterCategory.innerHTML = '<option value="">كل الفئات</option>' + DEFAULT_CATEGORIES.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+      }
+
+      function duplicateExpense(id) {
+        if (!canEdit()) {
+          showToast('هذا الحساب لا يملك صلاحية التعديل');
+          return;
+        }
+        const original = state.expenses.find(item => item.id === id);
+        if (!original) return;
+        const copy = { ...original, id: crypto.randomUUID(), createdAt: new Date().toISOString() };
+        state.expenses.unshift(copy);
+        logActivity(`تم تكرار المصروف "${original.itemName}"`);
+        saveState();
+        render();
+        showToast('تم نسخ المصروف');
+      }
+
+      function exportCsv() {
+        const rows = [
+          ['اسم المصروف', 'القيمة', 'الفئة', 'المدفوع من', 'التاريخ', 'ملاحظات']
+        ];
+        state.expenses.forEach(expense => {
+          rows.push([
+            expense.itemName,
+            expense.amount,
+            expense.category || 'أخرى',
+            getMemberName(expense.paidBy),
+            expense.date,
+            expense.notes || ''
+          ]);
+        });
+        const csvContent = rows.map(r => r.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `${state.projectName || 'expenses'}-export.csv`;
+        link.click();
+        URL.revokeObjectURL(link.href);
+        showToast('تم تصدير CSV');
+      }
+
+      function renderSettingsMembers() {
+        const members = getActiveMembers();
+        const editable = canEdit();
+        if (!members.length) {
+          els.memberSettingsList.innerHTML = '<div class="empty">لا يوجد أعضاء بعد.</div>';
+          return;
+        }
+        els.memberSettingsList.innerHTML = members.map(member => `
+          <div class="member-card" style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:8px;">
+            <div>
+              <strong>${member.name}</strong>
+              <div class="label">تمت الإضافة في ${new Date(member.createdAt).toLocaleDateString('en-GB')}</div>
+            </div>
+            <div class="actions">
+              <button class="btn btn-secondary" onclick="renameMember('${member.id}')" ${editable ? '' : 'disabled'}>تعديل</button>
+              <button class="btn btn-danger" onclick="deleteMember('${member.id}')" ${editable ? '' : 'disabled'}>حذف</button>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      function populatePaidByOptions() {
+        const members = getActiveMembers();
+        els.expensePaidBy.innerHTML = members.map(member => `<option value="${member.id}">${member.name}</option>`).join('');
+        els.filterMember.innerHTML = '<option value="">كل الأشخاص</option>' + members.map(member => `<option value="${member.id}">${member.name}</option>`).join('');
+      }
+
+      function getMemberName(id) {
+        return state.members.find(member => member.id === id)?.name || 'Unknown';
+      }
+
+      function openExpenseModal() {
+        if (!canEdit()) {
+          showToast('هذا الحساب لا يملك صلاحية التعديل');
+          return;
+        }
+        editingExpenseId = null;
+        els.expenseModalTitle.textContent = 'إضافة مصروف';
+        els.expenseItem.value = '';
+        els.expenseAmount.value = '';
+        els.expenseNotes.value = '';
+        els.expenseCategory.value = DEFAULT_CATEGORIES[0];
+        els.expenseDate.value = new Date().toISOString().slice(0, 10);
+        els.saveExpenseBtn.textContent = 'حفظ المصروف';
+        els.expenseModal.classList.add('open');
+      }
+
+      function closeExpenseModal() {
+        els.expenseModal.classList.remove('open');
+      }
+
+      function saveExpense() {
+        if (!canEdit()) {
+          showToast('هذا الحساب لا يملك صلاحية التعديل');
+          return;
+        }
+        const itemName = els.expenseItem.value.trim();
+        const amount = Number(els.expenseAmount.value);
+        const paidBy = els.expensePaidBy.value;
+        const category = els.expenseCategory.value || 'أخرى';
+        const date = els.expenseDate.value || new Date().toISOString().slice(0, 10);
+        const notes = els.expenseNotes.value.trim();
+        const activeMembers = getActiveMembers();
+
+        if (!activeMembers.length) {
+          showToast('أضف عضوًا واحدًا على الأقل قبل إضافة مصروف');
+          return;
+        }
+
+        if (!itemName || !amount || !paidBy) {
+          showToast('يرجى إدخال الاسم والسعر والشخص الذي دفع');
+          return;
+        }
+
+        const expense = { id: editingExpenseId || crypto.randomUUID(), itemName, amount, paidBy, category, date, notes, createdAt: new Date().toISOString() };
+        if (editingExpenseId) {
+          state.expenses = state.expenses.map(item => item.id === editingExpenseId ? expense : item);
+          logActivity(`تم تعديل المصروف "${itemName}" بنجاح`);
+          showToast('تم تعديل المصروف بنجاح');
+        } else {
+          state.expenses.unshift(expense);
+          logActivity(`تم إضافة المصروف "${itemName}" بقيمة ${formatCurrency(amount)}`);
+          showToast('تم إضافة المصروف بنجاح');
+        }
+        saveState();
+        closeExpenseModal();
+        render();
+      }
+
+      function editExpense(id) {
+        if (!canEdit()) {
+          showToast('هذا الحساب لا يملك صلاحية التعديل');
+          return;
+        }
+        const expense = state.expenses.find(item => item.id === id);
+        if (!expense) return;
+        editingExpenseId = id;
+        els.expenseModalTitle.textContent = 'تعديل مصروف';
+        els.expenseItem.value = expense.itemName;
+        els.expenseAmount.value = expense.amount;
+        els.expensePaidBy.value = expense.paidBy;
+        els.expenseCategory.value = expense.category || 'أخرى';
+        els.expenseDate.value = expense.date;
+        els.expenseNotes.value = expense.notes || '';
+        els.saveExpenseBtn.textContent = 'تحديث المصروف';
+        els.expenseModal.classList.add('open');
+      }
+
+      function deleteExpense(id) {
+        if (!canEdit()) {
+          showToast('هذا الحساب لا يملك صلاحية التعديل');
+          return;
+        }
+        const expense = state.expenses.find(item => item.id === id);
+        if (!expense) return;
+        if (!confirm('هل تريد حذف هذا المصروف؟')) return;
+        state.expenses = state.expenses.filter(item => item.id !== id);
+        logActivity(`تم حذف المصروف "${expense.itemName}"`);
+        saveState();
+        render();
+        showToast('تم حذف المصروف');
+      }
+
+      function addMember() {
+        if (!canEdit()) {
+          showToast('هذا الحساب لا يملك صلاحية التعديل');
+          return;
+        }
+        const name = els.newMemberName.value.trim();
+        if (!name) {
+          showToast('أدخل اسم العضو أولاً');
+          return;
+        }
+        state = normalizeState(state);
+        state.members.push({ id: crypto.randomUUID(), name, active: true, createdAt: new Date().toISOString() });
+        els.newMemberName.value = '';
+        logActivity(`تمت إضافة عضو "${name}"`);
+        saveState();
+        render();
+        showToast('تمت إضافة العضو');
+      }
+
+      function renameMember(id) {
+        if (!canEdit()) {
+          showToast('هذا الحساب لا يملك صلاحية التعديل');
+          return;
+        }
+        const member = state.members.find(item => item.id === id);
+        if (!member) return;
+        const newName = prompt('أدخل الاسم الجديد', member.name);
+        if (newName && newName.trim()) {
+          const oldName = member.name;
+          member.name = newName.trim();
+          logActivity(`تم تعديل اسم العضو من "${oldName}" إلى "${member.name}"`);
+          saveState();
+          render();
+          showToast('تم تعديل الاسم');
+        }
+      }
+
+      function deleteMember(id) {
+        if (!canEdit()) {
+          showToast('هذا الحساب لا يملك صلاحية التعديل');
+          return;
+        }
+        const member = state.members.find(item => item.id === id);
+        if (!member) return;
+        if (!confirm(`هل تريد حذف ${member.name}؟`)) return;
+        member.active = false;
+        saveState();
+        render();
+        showToast('تم حذف العضو مع الاحتفاظ بالبيانات السابقة');
+      }
+
+      function saveProjectSettings() {
+        if (!canEdit()) {
+          showToast('هذا الحساب لا يملك صلاحية التعديل');
+          return;
+        }
+        const previousName = state.projectName;
+        state.projectName = els.projectNameInput.value.trim() || state.projectName;
+        state.currency = els.currencyInput.value.trim() || state.currency;
+        state.projectDescription = els.projectDescriptionInput.value.trim();
+        if (previousName !== state.projectName) {
+          logActivity(`تم تغيير اسم المشروع إلى "${state.projectName}"`);
+        }
+        logActivity('تم حفظ إعدادات المشروع');
+        saveState();
+        render();
+        showToast('تم حفظ الإعدادات');
+      }
+
+      document.querySelectorAll('.nav-btn').forEach(btn => btn.addEventListener('click', () => showSection(btn.dataset.section)));
+      document.querySelectorAll('.mobile-nav button').forEach(btn => btn.addEventListener('click', () => showSection(btn.dataset.section)));
+      els.searchInput.addEventListener('input', renderExpenses);
+      els.filterMember.addEventListener('change', renderExpenses);
+      els.filterCategory.addEventListener('change', renderExpenses);
+      els.filterDate.addEventListener('change', renderExpenses);
+      els.clearFiltersBtn.addEventListener('click', () => {
+        els.searchInput.value = '';
+        els.filterMember.value = '';
+        els.filterCategory.value = '';
+        els.filterDate.value = '';
+        renderExpenses();
+      });
+      els.saveExpenseBtn.addEventListener('click', saveExpense);
+      els.saveSettingsBtn.addEventListener('click', saveProjectSettings);
+      els.addMemberBtn.addEventListener('click', addMember);
+      els.addExpenseBtn.addEventListener('click', () => {
+        if (!canEdit()) {
+          showToast('هذا الحساب لا يملك صلاحية التعديل');
+          return;
+        }
+        openExpenseModal();
+      });
+      els.settingsBtn.addEventListener('click', () => showSection('settings'));
+      els.expenseModal.addEventListener('click', event => { if (event.target.id === 'expenseModal') closeExpenseModal(); });
+      els.authBtn.addEventListener('click', async () => {
+        try {
+          await toggleAuth();
+        } catch (error) {
+          console.error(error);
+          showToast('فشل العملية');
+        }
+      });
+      els.authCancelBtn.addEventListener('click', closeAuthModal);
+      els.authSwitchBtn.addEventListener('click', () => {
+        openAuthModal(authMode === 'login' ? 'signup' : 'login');
+      });
+      els.authSubmitBtn.addEventListener('click', submitAuthForm);
+      els.loginSubmitBtn.addEventListener('click', submitLoginForm);
+      els.resetPasswordBtn.addEventListener('click', resetPassword);
+      els.googleSignInBtn.addEventListener('click', signInWithGoogle);
+      els.createAccountBtn.addEventListener('click', () => openAuthModal('signup'));
+      els.exportCsvBtn.addEventListener('click', exportCsv);
+      els.createProjectBtn.addEventListener('click', createProject);
+      els.authModal.addEventListener('click', (event) => {
+        if (event.target.id === 'authModal') closeAuthModal();
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+          closeExpenseModal();
+          closeAuthModal();
+        }
+      });
+
+      document.addEventListener('DOMContentLoaded', () => {
+        diagnoseAuthIssue();
+        els.loginEmail.value = '';
+        els.loginPassword.value = '';
+        onAuthStateChanged(auth, (user) => {
+          renderAuth(user);
+          if (user) {
+            isFirebaseReady = true;
+            showToast(`مرحبًا ${user.displayName || 'بك'}`);
+          }
+        });
+        isFirebaseReady = true;
+        render();
+        els.expenseDate.value = new Date().toISOString().slice(0, 10);
+      });
+    </script>
+  </body>
+</html>
