@@ -1221,10 +1221,24 @@
 service cloud.firestore {
   match /databases/{database}/documents {
     match /projects/{projectId} {
-      allow read: if request.auth != null;
+      allow read: if request.auth != null
+        && (
+          resource.data.ownerId == request.auth.uid ||
+          (resource.data.sharedWithEmails is list &&
+           request.auth.token.email in resource.data.sharedWithEmails)
+        );
+
       allow create: if request.auth != null
         && request.resource.data.ownerId == request.auth.uid;
-      allow update, delete: if request.auth != null
+
+      allow update: if request.auth != null
+        && (
+          resource.data.ownerId == request.auth.uid ||
+          (resource.data.sharedWithEmails is list &&
+           request.auth.token.email in resource.data.sharedWithEmails)
+        );
+
+      allow delete: if request.auth != null
         && resource.data.ownerId == request.auth.uid;
     }
   }
