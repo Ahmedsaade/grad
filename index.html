@@ -1942,29 +1942,29 @@ service cloud.firestore {
           currentProjectOwnerId = null;
           projectDocs = [];
           state = loadState();
-          els.appRoot.classList.add('hidden');
-          els.loginScreen.style.display = 'flex';
-          els.authBtn.style.display = 'flex';
-          els.profileTopBtn.style.display = 'none';
-          els.profileSidebarBtn.style.display = 'none';
-          els.logoutBtn.style.display = 'none';
-          els.logoutBtnSidebar.style.display = 'none';
-          els.authBtnLabel.textContent = 'تسجيل الدخول';
+          if (els.appRoot) els.appRoot.classList.add('hidden');
+          if (els.loginScreen) els.loginScreen.style.display = 'flex';
+          if (els.authBtn) els.authBtn.style.display = 'flex';
+          if (els.profileTopBtn) els.profileTopBtn.style.display = 'none';
+          if (els.profileSidebarBtn) els.profileSidebarBtn.style.display = 'none';
+          if (els.logoutBtn) els.logoutBtn.style.display = 'none';
+          if (els.logoutBtnSidebar) els.logoutBtnSidebar.style.display = 'none';
+          if (els.authBtnLabel) els.authBtnLabel.textContent = 'تسجيل الدخول';
         } else {
           state = loadState();
-          els.appRoot.classList.remove('hidden');
-          els.loginScreen.style.display = 'none';
-          els.authBtn.style.display = 'none';
-          els.profileTopBtn.style.display = 'none';
-          els.profileSidebarBtn.style.display = 'flex';
-          els.logoutBtn.style.display = 'none';
-          els.logoutBtnSidebar.style.display = 'inline-flex';
-          els.userAvatar.src = user.photoURL || '';
-          els.userAvatarSidebar.src = user.photoURL || '';
-          els.userName.textContent = user.displayName || 'User';
-          els.userNameSidebar.textContent = user.displayName || 'User';
-          els.userEmail.textContent = user.email || '';
-          els.userEmailSidebar.textContent = user.email || '';
+          if (els.appRoot) els.appRoot.classList.remove('hidden');
+          if (els.loginScreen) els.loginScreen.style.display = 'none';
+          if (els.authBtn) els.authBtn.style.display = 'none';
+          if (els.profileTopBtn) els.profileTopBtn.style.display = 'none';
+          if (els.profileSidebarBtn) els.profileSidebarBtn.style.display = 'flex';
+          if (els.logoutBtn) els.logoutBtn.style.display = 'none';
+          if (els.logoutBtnSidebar) els.logoutBtnSidebar.style.display = 'inline-flex';
+          if (els.userAvatar) els.userAvatar.src = user.photoURL || '';
+          if (els.userAvatarSidebar) els.userAvatarSidebar.src = user.photoURL || '';
+          if (els.userName) els.userName.textContent = user.displayName || 'User';
+          if (els.userNameSidebar) els.userNameSidebar.textContent = user.displayName || 'User';
+          if (els.userEmail) els.userEmail.textContent = user.email || '';
+          if (els.userEmailSidebar) els.userEmailSidebar.textContent = user.email || '';
           subscribeToProjectList();
         }
         render();
@@ -2492,21 +2492,21 @@ service cloud.firestore {
 
       document.querySelectorAll('.nav-btn').forEach(btn => btn.addEventListener('click', () => showSection(btn.dataset.section)));
       document.querySelectorAll('.mobile-nav button').forEach(btn => btn.addEventListener('click', () => showSection(btn.dataset.section)));
-      els.searchInput.addEventListener('input', renderExpenses);
-      els.filterMember.addEventListener('change', renderExpenses);
-      els.filterCategory.addEventListener('change', renderExpenses);
-      els.filterDate.addEventListener('change', renderExpenses);
-      els.clearFiltersBtn.addEventListener('click', () => {
+      if (els.searchInput) els.searchInput.addEventListener('input', renderExpenses);
+      if (els.filterMember) els.filterMember.addEventListener('change', renderExpenses);
+      if (els.filterCategory) els.filterCategory.addEventListener('change', renderExpenses);
+      if (els.filterDate) els.filterDate.addEventListener('change', renderExpenses);
+      if (els.clearFiltersBtn) els.clearFiltersBtn.addEventListener('click', () => {
         els.searchInput.value = '';
         els.filterMember.value = '';
         els.filterCategory.value = '';
         els.filterDate.value = '';
         renderExpenses();
       });
-      els.saveExpenseBtn.addEventListener('click', saveExpense);
-      els.saveSettingsBtn.addEventListener('click', saveProjectSettings);
-      els.addMemberBtn.addEventListener('click', addMember);
-      els.addExpenseBtn.addEventListener('click', () => {
+      if (els.saveExpenseBtn) els.saveExpenseBtn.addEventListener('click', saveExpense);
+      if (els.saveSettingsBtn) els.saveSettingsBtn.addEventListener('click', saveProjectSettings);
+      if (els.addMemberBtn) els.addMemberBtn.addEventListener('click', addMember);
+      if (els.addExpenseBtn) els.addExpenseBtn.addEventListener('click', () => {
         if (!canEdit()) {
           showToast('هذا الحساب لا يملك صلاحية التعديل');
           return;
@@ -2523,9 +2523,9 @@ service cloud.firestore {
           openExpenseModal();
         });
       }
-      els.settingsBtn.addEventListener('click', () => showSection('settings'));
-      els.expenseModal.addEventListener('click', event => { if (event.target.id === 'expenseModal') closeExpenseModal(); });
-      els.authBtn.addEventListener('click', async () => {
+      if (els.settingsBtn) els.settingsBtn.addEventListener('click', () => showSection('settings'));
+      if (els.expenseModal) els.expenseModal.addEventListener('click', event => { if (event.target.id === 'expenseModal') closeExpenseModal(); });
+      if (els.authBtn) els.authBtn.addEventListener('click', async () => {
         try {
           await toggleAuth();
         } catch (error) {
@@ -2533,14 +2533,16 @@ service cloud.firestore {
           showToast('فشل العملية');
         }
       });
-      els.logoutBtn.addEventListener('click', async () => {
-        try {
-          await toggleAuth();
-        } catch (error) {
-          console.error(error);
-          showToast('فشل العملية');
-        }
-      });
+      if (els.logoutBtn) {
+        els.logoutBtn.addEventListener('click', async () => {
+          try {
+            await toggleAuth();
+          } catch (error) {
+            console.error(error);
+            showToast('فشل العملية');
+          }
+        });
+      }
       if (els.logoutBtnSidebar) {
         els.logoutBtnSidebar.addEventListener('click', async () => {
           try {
@@ -2551,24 +2553,22 @@ service cloud.firestore {
           }
         });
       }
-      els.authCancelBtn.addEventListener('click', closeAuthModal);
-      els.authSwitchBtn.addEventListener('click', () => {
+      if (els.authCancelBtn) els.authCancelBtn.addEventListener('click', closeAuthModal);
+      if (els.authSwitchBtn) els.authSwitchBtn.addEventListener('click', () => {
         openAuthModal(authMode === 'login' ? 'signup' : 'login');
       });
-      els.authSubmitBtn.addEventListener('click', submitAuthForm);
-      els.loginSubmitBtn.addEventListener('click', submitLoginForm);
-      els.resetPasswordBtn.addEventListener('click', resetPassword);
-      els.googleSignInBtn.addEventListener('click', signInWithGoogle);
-      els.createAccountBtn.addEventListener('click', () => openAuthModal('signup'));
-      els.downloadPdfBtn.addEventListener('click', downloadProjectPdf);
-      els.saveProfileBtn.addEventListener('click', saveProfile);
-      els.createProjectBtn.addEventListener('click', createProject);
-      els.createProjectFromProfileBtn.addEventListener('click', createProject);
-      els.profileTopBtn.addEventListener('click', () => showSection('profile'));
-      if (els.profileSidebarBtn) {
-        els.profileSidebarBtn.addEventListener('click', () => showSection('profile'));
-      }
-      els.authModal.addEventListener('click', (event) => {
+      if (els.authSubmitBtn) els.authSubmitBtn.addEventListener('click', submitAuthForm);
+      if (els.loginSubmitBtn) els.loginSubmitBtn.addEventListener('click', submitLoginForm);
+      if (els.resetPasswordBtn) els.resetPasswordBtn.addEventListener('click', resetPassword);
+      if (els.googleSignInBtn) els.googleSignInBtn.addEventListener('click', signInWithGoogle);
+      if (els.createAccountBtn) els.createAccountBtn.addEventListener('click', () => openAuthModal('signup'));
+      if (els.downloadPdfBtn) els.downloadPdfBtn.addEventListener('click', downloadProjectPdf);
+      if (els.saveProfileBtn) els.saveProfileBtn.addEventListener('click', saveProfile);
+      if (els.createProjectBtn) els.createProjectBtn.addEventListener('click', createProject);
+      if (els.createProjectFromProfileBtn) els.createProjectFromProfileBtn.addEventListener('click', createProject);
+      if (els.profileTopBtn) els.profileTopBtn.addEventListener('click', () => showSection('profile'));
+      if (els.profileSidebarBtn) els.profileSidebarBtn.addEventListener('click', () => showSection('profile'));
+      if (els.authModal) els.authModal.addEventListener('click', (event) => {
         if (event.target.id === 'authModal') closeAuthModal();
       });
 
