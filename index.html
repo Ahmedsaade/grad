@@ -1244,7 +1244,7 @@ service cloud.firestore {
   }
 }`;
       import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js';
-      import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut, updateProfile, GoogleAuthProvider, signInWithPopup } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js';
+      import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, onAuthStateChanged, signOut, updateProfile, GoogleAuthProvider, signInWithPopup } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js';
       import { getFirestore, collection, query, where, doc, setDoc, deleteDoc, onSnapshot, serverTimestamp, or } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js';
 
       const firebaseConfig = {
@@ -1259,7 +1259,6 @@ service cloud.firestore {
       const app = initializeApp(firebaseConfig);
       const auth = getAuth(app);
       const db = getFirestore(app);
-      const ALLOWED_EMAIL = 'ahmedsaadelshahat@gmail.com';
 
       const STORAGE_KEY = 'grad_expense_app_v2';
       const DEFAULT_CATEGORIES = ['أخرى', 'مواد', 'معدات', 'نقل', 'طعام'];
@@ -1860,7 +1859,13 @@ service cloud.firestore {
             if (!result.user.displayName) {
               await updateProfile(result.user, { displayName: username });
             }
-            showToast('تم إنشاء الحساب بنجاح');
+            try {
+              await sendEmailVerification(result.user);
+              showToast('تم إنشاء الحساب. تم إرسال رابط تأكيد إلى بريدك الإلكتروني');
+            } catch (verifyError) {
+              console.warn('Failed to send verification email', verifyError);
+              showToast('تم إنشاء الحساب بنجاح');
+            }
           }
           closeAuthModal();
         } catch (error) {
@@ -1979,6 +1984,9 @@ service cloud.firestore {
           if (els.userNameSidebar) els.userNameSidebar.textContent = user.displayName || 'User';
           if (els.userEmail) els.userEmail.textContent = user.email || '';
           if (els.userEmailSidebar) els.userEmailSidebar.textContent = user.email || '';
+          if (user.providerData?.some(p => p.providerId === 'password') && !user.emailVerified) {
+            showToast('لم يتم تأكيد بريدك الإلكتروني بعد، تحقق من صندوق الوارد');
+          }
           subscribeToProjectList();
         }
         render();
