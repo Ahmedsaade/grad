@@ -1340,13 +1340,18 @@ service cloud.firestore {
         userProjectsList: document.getElementById('userProjectsList'),
         createProjectFromProfileBtn: document.getElementById('createProjectFromProfileBtn'),
         profileTopBtn: document.getElementById('profileTopBtn'),
+        profileSidebarBtn: document.getElementById('profileSidebarBtn'),
         profileAvatarPreview: document.getElementById('profileAvatarPreview'),
         profileNamePreview: document.getElementById('profileNamePreview'),
         profileEmailPreview: document.getElementById('profileEmailPreview'),
         logoutBtn: document.getElementById('logoutBtn'),
+        logoutBtnSidebar: document.getElementById('logoutBtnSidebar'),
         userAvatar: document.getElementById('userAvatar'),
+        userAvatarSidebar: document.getElementById('userAvatarSidebar'),
         userName: document.getElementById('userName'),
+        userNameSidebar: document.getElementById('userNameSidebar'),
         userEmail: document.getElementById('userEmail'),
+        userEmailSidebar: document.getElementById('userEmailSidebar'),
         authModal: document.getElementById('authModal'),
         authModalTitle: document.getElementById('authModalTitle'),
         authEmail: document.getElementById('authEmail'),
@@ -1941,18 +1946,25 @@ service cloud.firestore {
           els.loginScreen.style.display = 'flex';
           els.authBtn.style.display = 'flex';
           els.profileTopBtn.style.display = 'none';
+          els.profileSidebarBtn.style.display = 'none';
           els.logoutBtn.style.display = 'none';
+          els.logoutBtnSidebar.style.display = 'none';
           els.authBtnLabel.textContent = 'تسجيل الدخول';
         } else {
           state = loadState();
           els.appRoot.classList.remove('hidden');
           els.loginScreen.style.display = 'none';
           els.authBtn.style.display = 'none';
-          els.profileTopBtn.style.display = 'flex';
-          els.logoutBtn.style.display = 'inline-flex';
+          els.profileTopBtn.style.display = 'none';
+          els.profileSidebarBtn.style.display = 'flex';
+          els.logoutBtn.style.display = 'none';
+          els.logoutBtnSidebar.style.display = 'inline-flex';
           els.userAvatar.src = user.photoURL || '';
+          els.userAvatarSidebar.src = user.photoURL || '';
           els.userName.textContent = user.displayName || 'User';
+          els.userNameSidebar.textContent = user.displayName || 'User';
           els.userEmail.textContent = user.email || '';
+          els.userEmailSidebar.textContent = user.email || '';
           subscribeToProjectList();
         }
         render();
@@ -2033,7 +2045,9 @@ service cloud.firestore {
         try {
           await updateProfile(currentUser, { displayName: displayName || currentUser.displayName, photoURL: photoURL || currentUser.photoURL || '' });
           els.userAvatar.src = currentUser.photoURL || '';
+          els.userAvatarSidebar.src = currentUser.photoURL || '';
           els.userName.textContent = currentUser.displayName || currentUser.email || 'User';
+          els.userNameSidebar.textContent = currentUser.displayName || currentUser.email || 'User';
           showToast('تم حفظ الملف الشخصي بنجاح');
           renderProfile();
         } catch (error) {
@@ -2527,6 +2541,16 @@ service cloud.firestore {
           showToast('فشل العملية');
         }
       });
+      if (els.logoutBtnSidebar) {
+        els.logoutBtnSidebar.addEventListener('click', async () => {
+          try {
+            await toggleAuth();
+          } catch (error) {
+            console.error(error);
+            showToast('فشل العملية');
+          }
+        });
+      }
       els.authCancelBtn.addEventListener('click', closeAuthModal);
       els.authSwitchBtn.addEventListener('click', () => {
         openAuthModal(authMode === 'login' ? 'signup' : 'login');
@@ -2541,6 +2565,9 @@ service cloud.firestore {
       els.createProjectBtn.addEventListener('click', createProject);
       els.createProjectFromProfileBtn.addEventListener('click', createProject);
       els.profileTopBtn.addEventListener('click', () => showSection('profile'));
+      if (els.profileSidebarBtn) {
+        els.profileSidebarBtn.addEventListener('click', () => showSection('profile'));
+      }
       els.authModal.addEventListener('click', (event) => {
         if (event.target.id === 'authModal') closeAuthModal();
       });
