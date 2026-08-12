@@ -1224,8 +1224,7 @@ service cloud.firestore {
       allow read: if request.auth != null
         && (
           resource.data.ownerId == request.auth.uid ||
-          (resource.data.sharedWithEmails is list &&
-           request.auth.token.email in resource.data.sharedWithEmails)
+          request.auth.token.email.lower() in resource.data.sharedWithEmails
         );
 
       allow create: if request.auth != null
@@ -1234,8 +1233,7 @@ service cloud.firestore {
       allow update: if request.auth != null
         && (
           resource.data.ownerId == request.auth.uid ||
-          (resource.data.sharedWithEmails is list &&
-           request.auth.token.email in resource.data.sharedWithEmails)
+          request.auth.token.email.lower() in resource.data.sharedWithEmails
         );
 
       allow delete: if request.auth != null
@@ -1245,7 +1243,7 @@ service cloud.firestore {
 }`;
       import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js';
       import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, onAuthStateChanged, signOut, updateProfile, GoogleAuthProvider, signInWithPopup } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js';
-      import { getFirestore, collection, collectionGroup, query, where, doc, getDoc, setDoc, deleteDoc, onSnapshot, serverTimestamp, or } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js';
+      import { getFirestore, collection, query, where, doc, setDoc, deleteDoc, onSnapshot, serverTimestamp, or } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js';
 
       const firebaseConfig = {
         apiKey: 'AIzaSyAjDRJSIhRRxDZ7U3iSaz9PV7R4wqNdaEA',
@@ -1300,7 +1298,6 @@ service cloud.firestore {
       let projectDocs = [];
       let projectListUnsubscribe = null;
       let projectDocUnsubscribe = null;
-      let lastSyncedMemberEmails = [];
       const provider = new GoogleAuthProvider();
 
       const els = {
@@ -1466,21 +1463,6 @@ service cloud.firestore {
             .map(member => normalizeEmail(member.email))
             .filter(email => email);
           await setDoc(projectRef, { state, sharedWithEmails, updatedAt: serverTimestamp() }, { merge: true });
-
-          const previousEmails = new Set(lastSyncedMemberEmails);
-          const currentEmails = new Set(sharedWithEmails);
-
-          const writes = [];
-          currentEmails.forEach(email => {
-            writes.push(setDoc(doc(db, 'projects', currentProjectId, 'members', email), { email, updatedAt: serverTimestamp() }));
-          });
-          previousEmails.forEach(email => {
-            if (!currentEmails.has(email)) {
-              writes.push(deleteDoc(doc(db, 'projects', currentProjectId, 'members', email)).catch(() => {}));
-            }
-          });
-          await Promise.all(writes);
-          lastSyncedMemberEmails = sharedWithEmails;
         } catch (error) {
           console.error('Firebase save failed', error);
           showToast('تم الحفظ محليًا فقط بسبب مشكلة في Firebase');
@@ -1499,7 +1481,7 @@ service cloud.firestore {
         }
         const userEmail = normalizeEmail(currentUser.email);
         const ownerQuery = query(collection(db, 'projects'), where('ownerId', '==', currentUser.uid));
-        const sharedQuery = userEmail ? query(collectionGroup(db, 'members'), where('email', '==', userEmail)) : null;
+        const sharedQuery = userEmail ? query(collection(db, 'projects'), where('sharedWithEmails', 'array-contains', userEmail)) : null;
         let ownerProjectDocs = [];
         let sharedProjectDocs = [];
 
@@ -1523,20 +1505,9 @@ service cloud.firestore {
 
         let sharedUnsub = null;
         if (sharedQuery) {
-          sharedUnsub = onSnapshot(sharedQuery, async (snapshot) => {
-            try {
-              const projectRefs = snapshot.docs
-                .map(memberDoc => memberDoc.ref.parent.parent)
-                .filter(Boolean);
-              const projectSnaps = await Promise.all(projectRefs.map(ref => getDoc(ref)));
-              sharedProjectDocs = projectSnaps
-                .filter(snap => snap.exists())
-                .map(snap => ({ id: snap.id, ...snap.data() }));
-              updateProjects();
-            } catch (error) {
-              console.error('Firestore shared project resolve error', error);
-              showToast('خطأ في جلب المشاريع المشتركة من Firebase');
-            }
+          sharedUnsub = onSnapshot(sharedQuery, (snapshot) => {
+            sharedProjectDocs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            updateProjects();
           }, (error) => {
             console.error('Firestore shared project list error', error);
             showToast('خطأ في جلب المشاريع المشتركة من Firebase');
@@ -1558,7 +1529,6 @@ service cloud.firestore {
             const remoteData = snapshot.data();
             currentProjectOwnerId = remoteData.ownerId;
             currentProjectOwnerName = remoteData.ownerName || remoteData.ownerEmail || '';
-            lastSyncedMemberEmails = Array.isArray(remoteData.sharedWithEmails) ? remoteData.sharedWithEmails : [];
             if (remoteData && remoteData.state) {
               state = normalizeState(remoteData.state);
               localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -1608,10 +1578,6 @@ service cloud.firestore {
         };
         try {
           await setDoc(newProjectRef, newProject);
-          if (ownerEmail) {
-            await setDoc(doc(db, 'projects', newProjectRef.id, 'members', ownerEmail), { email: ownerEmail, updatedAt: serverTimestamp() });
-          }
-          lastSyncedMemberEmails = ownerEmail ? [ownerEmail] : [];
           selectProject(newProjectRef.id);
           showToast('تم إنشاء المشروع');
         } catch (error) {
