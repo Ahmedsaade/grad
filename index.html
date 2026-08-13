@@ -631,17 +631,24 @@
         gap: 4px;
       }
       .mobile-nav button {
-        flex: 1; 
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
         border: 0; 
         background: transparent;
-        padding: 10px 4px; 
-        min-height: 44px; 
+        padding: 6px 2px; 
+        min-height: 48px; 
         border-radius: var(--radius-sm);
-        font-size: 0.8rem; 
+        font-size: 0.68rem; 
         color: var(--text-secondary); 
         font-weight: 500;
         transition: all 0.2s ease;
+        white-space: nowrap;
       }
+      .mobile-nav-icon { font-size: 1.05rem; line-height: 1; }
       .mobile-nav button.active { 
         background: rgba(90, 142, 255, 0.1); 
         color: #fff;
@@ -759,8 +766,8 @@
       .mobile-fab {
         display: none;
         position: fixed;
-        left: 18px;
-        bottom: calc(78px + env(safe-area-inset-bottom, 0px));
+        right: 18px;
+        bottom: calc(84px + env(safe-area-inset-bottom, 0px));
         width: 56px; 
         height: 56px;
         border-radius: 50%;
@@ -777,6 +784,36 @@
       }
       .mobile-fab:active { transform: scale(0.94); }
 
+      .mobile-profile-btn {
+        display: none;
+        position: fixed;
+        top: calc(14px + env(safe-area-inset-top, 0px));
+        left: 14px;
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        border: 1px solid var(--border-strong);
+        background: linear-gradient(135deg, rgba(15, 26, 48, 0.9), rgba(10, 16, 32, 0.85));
+        color: var(--text);
+        z-index: 56;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        cursor: pointer;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(8px);
+        padding: 0;
+      }
+      .mobile-profile-btn img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+        display: none;
+      }
+      .mobile-profile-btn img[src]:not([src=""]) { display: block; }
+      .mobile-profile-btn img[src]:not([src=""]) + span { display: none; }
+
       @media (max-width: 1120px) {
         .main { padding: var(--space-5); }
         .dashboard-grid { grid-template-columns: 1fr; }
@@ -792,12 +829,22 @@
         .members-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         .mobile-nav { display: flex; }
         .mobile-fab { display: flex; }
+        .mobile-profile-btn.visible { display: flex; }
         .main { padding-bottom: 100px; }
+
+        /* dashboard order on mobile: money summary first, then activity/category, static info last */
+        .dashboard-grid { display: flex; flex-direction: column; gap: var(--space-4); }
+        .dashboard-col { display: contents; }
+        #categoryPanel { order: 1; }
+        #activityPanel { order: 2; }
+        #membersPanel { order: 3; }
+        #descriptionPanel { order: 4; }
       }
 
       @media (max-width: 760px) {
         .main { padding: var(--space-4); padding-bottom: 100px; }
         .stats-grid { grid-template-columns: 1fr; }
+        #statName { order: 4; }
         .form-grid { grid-template-columns: 1fr; }
         .toolbar { flex-direction: column; align-items: flex-start; }
         .filters { width: 100%; }
@@ -807,14 +854,17 @@
         .login-aside { padding: var(--space-6); }
         .login-aside-features { display: none; }
 
-        /* topbar: compact, icon-first */
+        /* topbar: compact, icon-first — settings/profile already live in bottom nav, so drop the duplicates */
         .topbar { padding: var(--space-3) var(--space-4); gap: var(--space-2); }
         .topbar h2 { font-size: 1.05rem; }
+        #topSubtitle { display: none; }
         #ownerLabel { display: none; }
         .actions-secondary { gap: 6px; }
         .auth-card-user-info { display: none; }
         .auth-card-user { padding: 6px; }
         .actions-primary { display: none; }
+        #settingsBtn { display: none; }
+        .permission-badge { font-size: 0.72rem; padding: 5px 8px; }
 
         /* bigger tap targets everywhere */
         .btn, input, select, textarea { min-height: 44px; font-size: 16px; }
@@ -997,41 +1047,41 @@
 
         <section class="content-section active" id="dashboard">
           <div class="stats-grid">
-            <div class="card">
-              <div class="label">اسم المشروع</div>
-              <div class="value" id="projectNameCard">-</div>
-            </div>
-            <div class="card">
-              <div class="label">عدد الأعضاء</div>
-              <div class="value" id="memberCount">0</div>
-            </div>
-            <div class="card">
+            <div class="card" id="statTotal">
               <div class="label">إجمالي المصاريف</div>
               <div class="value" id="totalExpenses">0 EGP</div>
             </div>
-            <div class="card">
+            <div class="card" id="statShare">
               <div class="label">متوسط نصيب الفرد</div>
               <div class="value" id="sharePerMember">0 EGP</div>
+            </div>
+            <div class="card" id="statMembers">
+              <div class="label">عدد الأعضاء</div>
+              <div class="value" id="memberCount">0</div>
+            </div>
+            <div class="card" id="statName">
+              <div class="label">اسم المشروع</div>
+              <div class="value" id="projectNameCard">-</div>
             </div>
           </div>
 
           <div class="dashboard-grid">
-            <div class="dashboard-col">
-              <div class="panel">
+            <div class="dashboard-col" id="dashboardColPrimary">
+              <div class="panel" id="membersPanel">
                 <div class="panel-header">
                   <h3>أعضاء الفريق</h3>
                 </div>
                 <div class="members-grid" id="membersList"></div>
               </div>
-              <div class="panel">
+              <div class="panel" id="descriptionPanel">
                 <div class="panel-header">
                   <h3>وصف المشروع</h3>
                 </div>
                 <p id="projectDescriptionCard" style="line-height:1.7; color: var(--muted); margin:0;">-</p>
               </div>
             </div>
-            <div class="dashboard-col">
-              <div class="panel">
+            <div class="dashboard-col" id="dashboardColSecondary">
+              <div class="panel" id="categoryPanel">
                 <div class="panel-header">
                   <h3>المصاريف حسب الفئة</h3>
                 </div>
@@ -1128,7 +1178,16 @@
         </section>
 
         <section class="content-section" id="settings">
-          <div class="panel">
+          <div class="sidebar-nav" style="flex-direction:row; margin-bottom:14px; background:rgba(15,26,48,0.4); border:1px solid var(--border); border-radius:var(--radius-md); padding:4px; gap:4px;">
+            <button class="nav-btn active" data-settings-tab="project" style="flex:1; justify-content:center;" onclick="showSettingsTab('project')">📋 بيانات المشروع</button>
+            <button class="nav-btn" data-settings-tab="members" style="flex:1; justify-content:center;" onclick="showSettingsTab('members')">👥 الأعضاء</button>
+          </div>
+
+          <div class="panel settings-tab-panel" id="settingsTabProject">
+            <div class="panel-header">
+              <h3>بيانات المشروع</h3>
+              <div class="helper-text">الاسم والوصف والعملة المستخدمة في المشروع</div>
+            </div>
             <div class="field" style="margin-bottom:12px;">
               <label>اسم المشروع</label>
               <input id="projectNameInput" />
@@ -1144,8 +1203,11 @@
             <button class="btn btn-primary" id="saveSettingsBtn">حفظ الإعدادات</button>
           </div>
 
-          <div class="panel" style="margin-top:14px;">
-            <h3 style="margin-top:0;">إدارة أعضاء الفريق</h3>
+          <div class="panel settings-tab-panel" id="settingsTabMembers" style="display:none;">
+            <div class="panel-header">
+              <h3>إدارة أعضاء الفريق</h3>
+              <div class="helper-text">أضف أعضاء جدد وتحكم في صلاحياتهم</div>
+            </div>
             <div class="form-grid" style="margin-bottom:12px;">
                   <div class="field">
                 <label>اسم العضو الجديد</label>
@@ -1176,10 +1238,11 @@
     <button class="mobile-fab" id="mobileFabBtn" title="إضافة مصروف">＋</button>
 
     <div class="mobile-nav">
-      <button class="active" data-section="dashboard">لوحة</button>
-      <button data-section="expenses">المصاريف</button>
-      <button data-section="profile">الملف</button>
-      <button data-section="settings">إعدادات</button>
+      <button class="active" data-section="dashboard"><span class="mobile-nav-icon">📊</span><span>لوحة</span></button>
+      <button data-section="expenses"><span class="mobile-nav-icon">🧾</span><span>المصاريف</span></button>
+      <button data-section="settle"><span class="mobile-nav-icon">🤝</span><span>التسوية</span></button>
+      <button data-section="profile"><span class="mobile-nav-icon">👤</span><span>الملف</span></button>
+      <button data-section="settings"><span class="mobile-nav-icon">⚙️</span><span>إعدادات</span></button>
     </div>
 
     <div class="modal-backdrop" id="expenseModal">
@@ -1233,6 +1296,31 @@
           <button class="btn btn-secondary" id="authCancelBtn">إلغاء</button>
           <button class="btn btn-secondary" id="authSwitchBtn">إنشاء حساب</button>
           <button class="btn btn-primary" id="authSubmitBtn">تسجيل الدخول</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-backdrop" id="promptModal">
+      <div class="modal">
+        <h3 id="promptModalTitle">إدخال قيمة</h3>
+        <div class="field">
+          <label id="promptModalLabel">القيمة</label>
+          <input id="promptModalInput" />
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-secondary" id="promptModalCancelBtn">إلغاء</button>
+          <button class="btn btn-primary" id="promptModalConfirmBtn">حفظ</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-backdrop" id="confirmModal">
+      <div class="modal">
+        <h3 id="confirmModalTitle">تأكيد</h3>
+        <p id="confirmModalMessage" style="color:var(--text-secondary); line-height:1.6; margin:0 0 4px;"></p>
+        <div class="modal-actions">
+          <button class="btn btn-secondary" id="confirmModalCancelBtn">إلغاء</button>
+          <button class="btn btn-danger" id="confirmModalConfirmBtn">تأكيد</button>
         </div>
       </div>
     </div>
@@ -1404,7 +1492,9 @@ service cloud.firestore {
         loginHint: document.getElementById('loginHint'),
         googleSignInBtn: document.getElementById('googleSignInBtn'),
         createProjectBtn: document.getElementById('createProjectBtn'),
-        projectList: document.getElementById('projectList')
+        projectList: document.getElementById('projectList'),
+        mobileProfileBtn: document.getElementById('mobileProfileBtn'),
+        mobileProfileAvatar: document.getElementById('mobileProfileAvatar')
       };
 
       function normalizeState(inputState) {
@@ -1579,7 +1669,7 @@ service cloud.firestore {
           showToast('سجل الدخول أولا');
           return;
         }
-        const projectName = prompt('اكتب اسم المشروع الجديد', 'مشروعي الجديد');
+        const projectName = await promptModal('مشروع جديد', 'اسم المشروع', 'مشروعي الجديد');
         if (!projectName || !projectName.trim()) return;
         const ownerEmail = normalizeEmail(currentUser.email);
         const newProjectRef = doc(collection(db, 'projects'));
@@ -1610,10 +1700,10 @@ service cloud.firestore {
         }
       }
 
-      function renameProject(id) {
+      async function renameProject(id) {
         const project = projectDocs.find(item => item.id === id);
         if (!project) return;
-        const newName = prompt('اسم المشروع الجديد', project.state?.projectName || 'مشروع');
+        const newName = await promptModal('إعادة تسمية المشروع', 'اسم المشروع', project.state?.projectName || 'مشروع');
         if (!newName || !newName.trim()) return;
         setDoc(doc(db, 'projects', id), { state: { projectName: newName.trim() }, updatedAt: new Date().toISOString() }, { merge: true })
           .then(() => {
@@ -1639,7 +1729,8 @@ service cloud.firestore {
           showToast('فقط مالك المشروع يمكنه حذفه');
           return;
         }
-        if (!confirm('سيتم حذف المشروع نهائيًا مع جميع المصاريف. هل أنت متأكد؟')) return;
+        const confirmed = await confirmModal('حذف المشروع', 'سيتم حذف المشروع نهائيًا مع جميع المصاريف. هل أنت متأكد؟', { confirmText: 'حذف نهائيًا' });
+        if (!confirmed) return;
 
         const wasActive = targetId === currentProjectId;
         if (wasActive) {
@@ -1937,6 +2028,80 @@ service cloud.firestore {
         showToast.timeout = setTimeout(() => els.toast.classList.remove('show'), 2200);
       }
 
+      function promptModal(title, label, defaultValue = '') {
+        return new Promise((resolve) => {
+          const backdrop = document.getElementById('promptModal');
+          const titleEl = document.getElementById('promptModalTitle');
+          const labelEl = document.getElementById('promptModalLabel');
+          const input = document.getElementById('promptModalInput');
+          const confirmBtn = document.getElementById('promptModalConfirmBtn');
+          const cancelBtn = document.getElementById('promptModalCancelBtn');
+
+          titleEl.textContent = title;
+          labelEl.textContent = label;
+          input.value = defaultValue || '';
+          backdrop.classList.add('open');
+          setTimeout(() => { input.focus(); input.select(); }, 50);
+
+          const cleanup = (result) => {
+            backdrop.classList.remove('open');
+            confirmBtn.removeEventListener('click', onConfirm);
+            cancelBtn.removeEventListener('click', onCancel);
+            backdrop.removeEventListener('click', onBackdrop);
+            input.removeEventListener('keydown', onKeydown);
+            resolve(result);
+          };
+          const onConfirm = () => cleanup(input.value.trim() || null);
+          const onCancel = () => cleanup(null);
+          const onBackdrop = (event) => { if (event.target === backdrop) cleanup(null); };
+          const onKeydown = (event) => {
+            if (event.key === 'Enter') { event.preventDefault(); onConfirm(); }
+            if (event.key === 'Escape') { event.preventDefault(); onCancel(); }
+          };
+
+          confirmBtn.addEventListener('click', onConfirm);
+          cancelBtn.addEventListener('click', onCancel);
+          backdrop.addEventListener('click', onBackdrop);
+          input.addEventListener('keydown', onKeydown);
+        });
+      }
+
+      function confirmModal(title, message, { confirmText = 'تأكيد', danger = true } = {}) {
+        return new Promise((resolve) => {
+          const backdrop = document.getElementById('confirmModal');
+          const titleEl = document.getElementById('confirmModalTitle');
+          const messageEl = document.getElementById('confirmModalMessage');
+          const confirmBtn = document.getElementById('confirmModalConfirmBtn');
+          const cancelBtn = document.getElementById('confirmModalCancelBtn');
+
+          titleEl.textContent = title;
+          messageEl.textContent = message;
+          confirmBtn.textContent = confirmText;
+          confirmBtn.className = danger ? 'btn btn-danger' : 'btn btn-primary';
+          backdrop.classList.add('open');
+
+          const cleanup = (result) => {
+            backdrop.classList.remove('open');
+            confirmBtn.removeEventListener('click', onConfirm);
+            cancelBtn.removeEventListener('click', onCancel);
+            backdrop.removeEventListener('click', onBackdrop);
+            document.removeEventListener('keydown', onKeydown);
+            resolve(result);
+          };
+          const onConfirm = () => cleanup(true);
+          const onCancel = () => cleanup(false);
+          const onBackdrop = (event) => { if (event.target === backdrop) cleanup(false); };
+          const onKeydown = (event) => {
+            if (event.key === 'Escape') { event.preventDefault(); onCancel(); }
+          };
+
+          confirmBtn.addEventListener('click', onConfirm);
+          cancelBtn.addEventListener('click', onCancel);
+          backdrop.addEventListener('click', onBackdrop);
+          document.addEventListener('keydown', onKeydown);
+        });
+      }
+
       function openAuthModal(mode = 'login') {
         authMode = mode;
         els.authModalTitle.textContent = mode === 'login' ? 'تسجيل الدخول' : 'إنشاء حساب';
@@ -2094,6 +2259,7 @@ service cloud.firestore {
           if (els.logoutBtn) els.logoutBtn.style.display = 'none';
           if (els.logoutBtnSidebar) els.logoutBtnSidebar.style.display = 'none';
           if (els.authBtnLabel) els.authBtnLabel.textContent = 'تسجيل الدخول';
+          if (els.mobileProfileBtn) els.mobileProfileBtn.classList.remove('visible');
         } else {
           state = loadState();
           if (els.appRoot) els.appRoot.classList.remove('hidden');
@@ -2109,6 +2275,8 @@ service cloud.firestore {
           if (els.userNameSidebar) els.userNameSidebar.textContent = user.displayName || 'User';
           if (els.userEmail) els.userEmail.textContent = user.email || '';
           if (els.userEmailSidebar) els.userEmailSidebar.textContent = user.email || '';
+          if (els.mobileProfileBtn) els.mobileProfileBtn.classList.add('visible');
+          if (els.mobileProfileAvatar) els.mobileProfileAvatar.src = user.photoURL || '';
           if (user.providerData?.some(p => p.providerId === 'password') && !user.emailVerified) {
             showToast('لم يتم تأكيد بريدك الإلكتروني بعد، تحقق من صندوق الوارد');
           }
@@ -2202,6 +2370,17 @@ service cloud.firestore {
           showToast('فشل حفظ الملف الشخصي');
         }
       }
+
+      function showSettingsTab(tab) {
+        const projectPanel = document.getElementById('settingsTabProject');
+        const membersPanel = document.getElementById('settingsTabMembers');
+        if (projectPanel) projectPanel.style.display = tab === 'project' ? 'block' : 'none';
+        if (membersPanel) membersPanel.style.display = tab === 'members' ? 'block' : 'none';
+        document.querySelectorAll('[data-settings-tab]').forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.settingsTab === tab);
+        });
+      }
+      window.showSettingsTab = showSettingsTab;
 
       function showSection(section) {
         document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.section === section));
@@ -2532,14 +2711,15 @@ service cloud.firestore {
         els.expenseModal.classList.add('open');
       }
 
-      function deleteExpense(id) {
+      async function deleteExpense(id) {
         if (!canEdit()) {
           showToast('هذا الحساب لا يملك صلاحية التعديل');
           return;
         }
         const expense = state.expenses.find(item => item.id === id);
         if (!expense) return;
-        if (!confirm('هل تريد حذف هذا المصروف؟')) return;
+        const confirmed = await confirmModal('حذف المصروف', `هل تريد حذف "${expense.itemName}"؟`, { confirmText: 'حذف' });
+        if (!confirmed) return;
         state.expenses = state.expenses.filter(item => item.id !== id);
         logActivity(`تم حذف المصروف "${expense.itemName}"`);
         saveState();
@@ -2574,14 +2754,14 @@ service cloud.firestore {
         showToast('تمت إضافة العضو');
       }
 
-      function renameMember(id) {
+      async function renameMember(id) {
         if (!canEdit()) {
           showToast('هذا الحساب لا يملك صلاحية التعديل');
           return;
         }
         const member = state.members.find(item => item.id === id);
         if (!member) return;
-        const newName = prompt('أدخل الاسم الجديد', member.name);
+        const newName = await promptModal('تعديل اسم العضو', 'الاسم', member.name);
         if (newName && newName.trim()) {
           const oldName = member.name;
           member.name = newName.trim();
@@ -2592,14 +2772,15 @@ service cloud.firestore {
         }
       }
 
-      function deleteMember(id) {
+      async function deleteMember(id) {
         if (!canEdit()) {
           showToast('هذا الحساب لا يملك صلاحية التعديل');
           return;
         }
         const member = state.members.find(item => item.id === id);
         if (!member) return;
-        if (!confirm(`هل تريد حذف ${member.name}؟`)) return;
+        const confirmed = await confirmModal('حذف العضو', `هل تريد حذف "${member.name}"؟ بياناته السابقة في المصاريف هتفضل محفوظة.`, { confirmText: 'حذف' });
+        if (!confirmed) return;
         member.active = false;
         saveState();
         render();
@@ -2725,6 +2906,7 @@ service cloud.firestore {
       if (els.createProjectFromProfileBtn) els.createProjectFromProfileBtn.addEventListener('click', createProject);
       if (els.profileTopBtn) els.profileTopBtn.addEventListener('click', () => showSection('profile'));
       if (els.profileSidebarBtn) els.profileSidebarBtn.addEventListener('click', () => showSection('profile'));
+      if (els.mobileProfileBtn) els.mobileProfileBtn.addEventListener('click', () => showSection('profile'));
       if (els.authModal) els.authModal.addEventListener('click', (event) => {
         if (event.target.id === 'authModal') closeAuthModal();
       });
