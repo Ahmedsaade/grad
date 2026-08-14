@@ -338,6 +338,102 @@
         letter-spacing: -0.01em;
       }
 
+      /* ===== Profile hero ===== */
+      .profile-hero {
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        background: linear-gradient(135deg, rgba(var(--panel-rgb), 0.5), rgba(var(--panel-rgb), 0.3));
+        backdrop-filter: blur(10px);
+      }
+      .profile-hero-cover {
+        height: 96px;
+        background: linear-gradient(135deg, #5a8eff 0%, #3366dd 55%, #8facff 100%);
+        position: relative;
+      }
+      .profile-hero-body {
+        display: flex;
+        align-items: flex-end;
+        gap: var(--space-4);
+        padding: 0 var(--space-6) var(--space-5);
+        margin-top: -40px;
+        flex-wrap: wrap;
+      }
+      .profile-avatar-wrap {
+        position: relative;
+        width: 88px;
+        height: 88px;
+        flex-shrink: 0;
+      }
+      .profile-avatar-img {
+        width: 88px;
+        height: 88px;
+        border-radius: 50%;
+        object-fit: cover;
+        background: var(--surface-2);
+        border: 4px solid var(--surface);
+        display: block;
+      }
+      .profile-avatar-edit-btn {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        border: 2px solid var(--surface);
+        background: var(--primary);
+        color: #fff;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: var(--shadow-sm);
+        transition: transform 0.15s ease, background 0.15s ease;
+      }
+      .profile-avatar-edit-btn:hover {
+        background: var(--primary-strong);
+        transform: scale(1.06);
+      }
+      .profile-hero-info {
+        flex: 1;
+        min-width: 180px;
+        padding-bottom: 2px;
+      }
+      .profile-hero-name-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .profile-hero-name {
+        font-weight: 800;
+        font-size: 1.25rem;
+      }
+      .profile-verified-badge {
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: var(--success);
+        background: rgba(52, 211, 153, 0.12);
+        border: 1px solid rgba(52, 211, 153, 0.3);
+        border-radius: 999px;
+        padding: 2px 9px;
+      }
+      .profile-joined-text {
+        font-size: 0.78rem;
+        color: var(--muted);
+        margin-top: 4px;
+      }
+      .profile-hero-body .btn {
+        margin-bottom: 2px;
+      }
+      @media (max-width: 640px) {
+        .profile-hero-body { align-items: center; text-align: center; flex-direction: column; margin-top: -32px; }
+        .profile-hero-info { text-align: center; }
+        .profile-hero-name-row { justify-content: center; }
+      }
+
       .dashboard-grid {
         display: grid;
         grid-template-columns: 1.3fr 1fr;
@@ -412,6 +508,75 @@
       .balance-pos { color: #34d399; }
       .balance-neg { color: #ff9898; }
       .balance-zero { color: var(--muted); }
+
+      /* ===== Member actions dropdown ===== */
+      .member-menu {
+        position: relative;
+      }
+      .member-menu-btn {
+        width: 34px;
+        height: 34px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        background: transparent;
+        color: var(--text-secondary);
+        cursor: pointer;
+        font-size: 1.1rem;
+        line-height: 1;
+        transition: all 0.15s ease;
+      }
+      .member-menu-btn:hover {
+        background: rgba(90, 142, 255, 0.1);
+        color: var(--text);
+        border-color: rgba(90, 142, 255, 0.3);
+      }
+      .member-menu-dropdown {
+        position: absolute;
+        top: calc(100% + 6px);
+        left: 0;
+        min-width: 170px;
+        background: var(--card);
+        border: 1px solid var(--border-strong);
+        border-radius: var(--radius-sm);
+        box-shadow: var(--shadow-lg);
+        padding: 6px;
+        display: none;
+        flex-direction: column;
+        gap: 2px;
+        z-index: 50;
+      }
+      .member-menu-dropdown.open {
+        display: flex;
+      }
+      .member-menu-dropdown button {
+        width: 100%;
+        text-align: right;
+        padding: 9px 10px;
+        border: none;
+        border-radius: var(--radius-sm);
+        background: transparent;
+        color: var(--text);
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: background 0.15s ease;
+      }
+      .member-menu-dropdown button:hover {
+        background: rgba(90, 142, 255, 0.1);
+      }
+      .member-menu-dropdown button:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+        background: transparent;
+      }
+      .member-menu-dropdown button.danger {
+        color: var(--danger);
+      }
+      .member-menu-dropdown button.danger:hover {
+        background: rgba(255, 107, 107, 0.12);
+      }
 
       .member-settings-row {
         display: flex;
@@ -876,126 +1041,15 @@
         .mobile-profile-btn.visible { display: flex; }
         .main { padding-bottom: 100px; }
 
-        /* dashboard order on mobile: money summary first, then activity/category, static info last */
+        /* dashboard order on mobile: money summary first, then activity, members last */
         .dashboard-grid { display: flex; flex-direction: column; gap: var(--space-4); }
         .dashboard-col { display: contents; }
-        #categoryPanel { order: 1; }
-        #activityPanel { order: 2; }
-        #membersPanel { order: 3; }
-        #descriptionPanel { order: 4; }
+        #activityPanel { order: 1; }
+        #membersPanel { order: 2; }
       }
 
       @media (max-width: 760px) {
-        .main { padding: var(--space-4); padding-bottom: 100px; }
-        .stats-grid { grid-template-columns: 1fr; }
-        #statName { order: 4; }
-        .form-grid { grid-template-columns: 1fr; }
-        .toolbar { flex-direction: column; align-items: flex-start; }
-        .filters { width: 100%; }
-        .filters input, .filters select { min-width: 0; flex: 1; }
-        .panel { padding: var(--space-4); }
-        .login-shell { grid-template-columns: 1fr; }
-        .login-aside { padding: var(--space-6); }
-        .login-aside-features { display: none; }
-
-        /* topbar: compact, icon-first — settings/profile already live in bottom nav, so drop the duplicates */
-        .topbar { padding: var(--space-3) var(--space-4); gap: var(--space-2); }
-        .topbar h2 { font-size: 1.05rem; }
-        #topSubtitle { display: none; }
-        #ownerLabel { display: none; }
-        .actions-secondary { gap: 6px; }
-        .auth-card-user-info { display: none; }
-        .auth-card-user { padding: 6px; }
-        .actions-primary { display: none; }
-        #settingsBtn { display: none; }
-        .permission-badge { font-size: 0.72rem; padding: 5px 8px; }
-
-        /* bigger tap targets everywhere */
-        .btn, input, select, textarea { min-height: 44px; font-size: 16px; }
-        .btn-icon { min-width: 44px; }
-        .nav-btn, .project-item-main, .btn-mini { min-height: 40px; }
-        .btn-mini { width: 40px; height: 40px; }
-        .members-grid { grid-template-columns: 1fr; }
-
-        /* member settings rows: stack info above full-width action buttons */
-        .member-settings-row { flex-direction: column; align-items: stretch; }
-        .member-settings-actions { width: 100%; }
-        .member-settings-actions .btn { flex: 1; min-width: 0; }
-
-        /* expenses table -> stacked cards */
-        table, thead, tbody, th, tr, td { display: block; width: 100%; }
-        thead { display: none; }
-        #expensesTable tr {
-          border: 1px solid var(--border);
-          border-radius: var(--radius-md);
-          margin-bottom: var(--space-3);
-          padding: var(--space-3) var(--space-4);
-          background: var(--surface-2);
-        }
-        #expensesTable td {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          gap: 10px;
-          border-bottom: 1px dashed var(--border);
-          padding: 8px 0;
-          text-align: left;
-        }
-        #expensesTable td:last-child { border-bottom: none; }
-        #expensesTable td::before {
-          content: attr(data-label);
-          color: var(--muted);
-          font-size: 0.78rem;
-          font-weight: 700;
-          flex-shrink: 0;
-        }
-        #expensesTable td.actions-col { flex-direction: column; align-items: stretch; }
-        #expensesTable td.actions-col::before { margin-bottom: 6px; }
-        #expensesTable td.actions-col .btn { width: 100%; margin-bottom: 6px; }
-        #expensesTable td.actions-col .btn:last-child { margin-bottom: 0; }
-
-        /* settlement/transfer form: full-width action + tidy selects on small screens */
-        #recordSettlementBtn { width: 100%; }
-        #settlementFrom, #settlementTo { max-width: 100%; }
-      }
-
-      @media (max-width: 640px) {
-        .main { padding: var(--space-3); padding-bottom: 100px; }
-        .login-box { padding: var(--space-6); }
-        .actions-col { flex-wrap: wrap; gap: 6px; }
-        .modal-actions { flex-direction: column-reverse; }
-        .modal-actions .btn { width: 100%; }
-      }
-
-      @media (max-width: 520px) {
-        .login-box h1 { font-size: 1.5rem; }
-        .brand { font-size: 1.1rem; }
-        .topbar { padding: var(--space-3); }
-      }
-
-      /* full-screen bottom-sheet modals on small screens */
-      @media (max-width: 640px) {
-        .modal-backdrop { align-items: flex-end; padding: 0; }
-        .modal {
-          width: 100%;
-          max-height: 88vh;
-          overflow-y: auto;
-          border-radius: 20px 20px 0 0;
-          padding: var(--space-5);
-          animation: sheetIn 0.26s cubic-bezier(0.16, 1, 0.3, 1) both;
-        }
-        .modal-actions { position: sticky; bottom: 0; background: var(--surface); padding-top: var(--space-3); margin-top: var(--space-4); }
-      }
-      @keyframes sheetIn {
-        from { opacity: 0; transform: translateY(40px); }
-        to { opacity: 1; transform: translateY(0); }
-      }
-
-      /* =========================================================
-         MOBILE COMPACT REDESIGN — visual-only, no markup changes
-         Dense, premium, SaaS-style dashboard for small screens
-         ========================================================= */
-      @media (max-width: 760px) {
+        /* ===== Mobile theme tokens ===== */
         :root {
           --bg: #070b14;
           --surface: #0b1120;
@@ -1016,57 +1070,131 @@
         }
         body { font-family: 'Cairo', -apple-system, BlinkMacSystemFont, sans-serif; }
 
-        .main { padding: var(--space-3) var(--space-3) 92px; gap: var(--space-3); }
+        /* ===== Page shell ===== */
+        .main { padding: 14px 14px 96px; gap: 14px; }
+        .form-grid { grid-template-columns: 1fr; }
+        .login-shell { grid-template-columns: 1fr; }
+        .login-aside { padding: var(--space-6); }
+        .login-aside-features { display: none; }
 
-        /* ---- Topbar: single tight row ---- */
-        .topbar { padding: 10px 12px; border-radius: var(--radius-md); gap: var(--space-2); }
-        .topbar h2 { font-size: 0.98rem; font-weight: 800; }
+        /* ===== Topbar: two clean rows, title alone on top ===== */
+        .topbar {
+          flex-direction: column;
+          align-items: stretch;
+          padding: 12px 14px;
+          border-radius: var(--radius-md);
+          gap: 10px;
+        }
+        .topbar-title { width: 100%; text-align: right; }
+        .topbar h2 { font-size: 1.02rem; font-weight: 800; }
+        #topSubtitle { display: none; }
+        #ownerLabel { display: none; }
+        .actions { width: 100%; flex-direction: column; align-items: stretch; gap: 8px; }
+        .actions-secondary {
+          width: 100%;
+          justify-content: flex-start;
+          flex-wrap: wrap;
+          border-right: none;
+          padding-right: 0;
+          gap: 8px;
+        }
+        .auth-card-user-info { display: none; }
+        .auth-card-user { padding: 6px; }
+        .actions-primary { display: none; }
+        #settingsBtn { display: none; }
+        .permission-badge { font-size: 0.7rem; padding: 5px 9px; }
 
-        /* ---- Stat cards: dense grid, no oversized boxes ---- */
+        /* ===== Stat cards ===== */
         .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
         .card {
-          padding: 12px 12px;
+          padding: 12px;
           gap: 3px;
           border-radius: var(--radius-md);
           border: 1px solid var(--border);
           box-shadow: none;
           background: linear-gradient(160deg, rgba(var(--panel-rgb), 0.55), rgba(var(--panel-rgb), 0.28));
+          text-align: right;
         }
-        .card .label { font-size: 0.66rem; letter-spacing: 0.03em; }
-        .card .value { font-size: 1.18rem; font-weight: 800; line-height: 1.15; }
+        .card .label { font-size: 0.7rem; letter-spacing: 0.02em; }
+        .card .value { font-size: 1.28rem; font-weight: 800; line-height: 1.2; }
         #statName { order: 4; }
-        #statName .value { font-size: 0.95rem; }
+        #statName .value { font-size: 1rem; }
 
-        /* ---- Panels: tighter padding, subtle borders ---- */
+        /* ===== Panels ===== */
         .panel { padding: 14px; border-radius: var(--radius-md); box-shadow: none; }
         .panel-header { margin-bottom: 10px; }
         .panel-header h3 { font-size: 0.94rem; font-weight: 700; }
         .content-section > .panel + .panel,
-        .content-section > .dashboard-grid { margin-top: var(--space-3); }
-        .dashboard-grid, .dashboard-col { gap: var(--space-3) !important; }
+        .content-section > .dashboard-grid { margin-top: 14px; }
+        .dashboard-grid, .dashboard-col { gap: 14px !important; }
 
-        /* ---- Category breakdown: compact rows ---- */
-        .category-breakdown { gap: 8px; }
-        .category-row-top { font-size: 0.78rem; }
-        .category-bar-track { height: 6px; }
-
-        /* ---- Activity feed: tighter ---- */
+        /* ===== Activity feed ===== */
         .activity-item { padding: 8px 0; font-size: 0.8rem; gap: 8px; }
         .activity-dot { width: 6px; height: 6px; margin-top: 5px; }
         .activity-time { font-size: 0.7rem; }
 
-        /* ---- Members grid ---- */
-        .members-grid { gap: 8px; }
+        /* ===== Members grid ===== */
+        .members-grid { grid-template-columns: 1fr; gap: 8px; }
         .member-card { padding: 10px 12px; border-radius: var(--radius-sm); }
         .member-card strong { font-size: 0.86rem; margin-bottom: 3px; }
         .member-card .label { font-size: 0.72rem; }
         .member-card .balance-pos, .member-card .balance-neg, .member-card .balance-zero { font-size: 0.8rem; }
 
-        /* ---- Buttons: slightly smaller, still tappable ---- */
-        .btn { padding: 9px 14px; font-size: 0.84rem; min-height: 40px; border-radius: var(--radius-sm); }
-        .permission-badge { font-size: 0.68rem; padding: 4px 8px; }
+        /* member settings rows: stack info above full-width action buttons */
+        .member-settings-row { flex-direction: column; align-items: stretch; }
+        .member-settings-actions { width: 100%; }
+        .member-settings-actions .btn { flex: 1; min-width: 0; }
 
-        /* ---- Bottom navigation: slim & modern ---- */
+        /* ===== Buttons & inputs: big tap targets ===== */
+        .btn { padding: 9px 14px; font-size: 0.86rem; min-height: 44px; border-radius: var(--radius-sm); }
+        .btn-icon { min-width: 44px; }
+        input, select, textarea { min-height: 44px; font-size: 16px; }
+        .nav-btn, .project-item-main, .btn-mini { min-height: 40px; }
+        .btn-mini { width: 40px; height: 40px; }
+
+        /* ===== Toolbar / filters ===== */
+        .toolbar { flex-direction: column; align-items: flex-start; gap: 8px; }
+        .filters { width: 100%; }
+        .filters input, .filters select { min-width: 0; flex: 1; min-height: 42px; font-size: 0.88rem; }
+
+        /* ===== Expenses table -> stacked cards ===== */
+        table, thead, tbody, th, tr, td { display: block; width: 100%; }
+        thead { display: none; }
+        #expensesTable tr {
+          border: 1px solid var(--border);
+          border-radius: var(--radius-sm);
+          margin-bottom: 8px;
+          padding: 10px 12px;
+          background: var(--surface-2);
+        }
+        #expensesTable td {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 10px;
+          border-bottom: 1px dashed var(--border);
+          padding: 7px 0;
+          font-size: 0.84rem;
+          text-align: right;
+        }
+        #expensesTable td:last-child { border-bottom: none; }
+        #expensesTable td::before {
+          content: attr(data-label);
+          color: var(--muted);
+          font-size: 0.74rem;
+          font-weight: 700;
+          flex-shrink: 0;
+        }
+        #expensesTable td.actions-col { flex-direction: column; align-items: stretch; }
+        #expensesTable td.actions-col::before { margin-bottom: 6px; }
+        #expensesTable td.actions-col .btn { width: 100%; margin-bottom: 6px; }
+        #expensesTable td.actions-col .btn:last-child { margin-bottom: 0; }
+
+        /* ===== Settlement form ===== */
+        #recordSettlementBtn { width: 100%; }
+        #settlementFrom, #settlementTo { max-width: 100%; }
+
+        /* ===== Bottom navigation ===== */
         .mobile-nav {
           height: 60px;
           padding: 4px 6px calc(4px + env(safe-area-inset-bottom, 0px));
@@ -1086,7 +1214,7 @@
         .mobile-nav button svg { width: 15px; height: 15px; }
         .mobile-nav button.active { background: rgba(90, 142, 255, 0.12); }
 
-        /* ---- Floating action button: smaller & subtler ---- */
+        /* ===== Floating action button ===== */
         .mobile-fab {
           width: 46px;
           height: 46px;
@@ -1096,20 +1224,47 @@
           box-shadow: 0 6px 16px rgba(90, 142, 255, 0.32);
         }
         .mobile-fab:active { transform: scale(0.92); }
-
         .mobile-profile-btn { width: 36px; height: 36px; font-size: 0.95rem; }
 
-        /* ---- Expense list cards: tighter ---- */
-        #expensesTable tr { border-radius: var(--radius-sm); margin-bottom: 8px; padding: 10px 12px; }
-        #expensesTable td { padding: 6px 0; font-size: 0.84rem; }
-        #expensesTable td::before { font-size: 0.7rem; }
-
-        /* ---- Toolbar / filters ---- */
-        .toolbar { gap: 8px; }
-        .filters input, .filters select { min-height: 40px; font-size: 0.85rem; }
-
-        /* ---- Modals: tighter bottom-sheet padding ---- */
+        /* ===== Modals: bottom sheet, tight padding ===== */
         .modal { padding: var(--space-4); }
+      }
+
+      @media (max-width: 640px) {
+        .main { padding: 12px 12px 96px; }
+        .login-box { padding: var(--space-6); }
+        .actions-col { flex-wrap: wrap; gap: 6px; }
+        .modal-actions { flex-direction: column-reverse; }
+        .modal-actions .btn { width: 100%; }
+      }
+
+      @media (max-width: 380px) {
+        .stats-grid { grid-template-columns: 1fr; }
+        #statName { order: 0; }
+      }
+
+      @media (max-width: 520px) {
+        .login-box h1 { font-size: 1.5rem; }
+        .brand { font-size: 1.1rem; }
+        .topbar { padding: 12px; }
+      }
+
+      /* full-screen bottom-sheet modals on small screens */
+      @media (max-width: 640px) {
+        .modal-backdrop { align-items: flex-end; padding: 0; }
+        .modal {
+          width: 100%;
+          max-height: 88vh;
+          overflow-y: auto;
+          border-radius: 20px 20px 0 0;
+          padding: var(--space-5);
+          animation: sheetIn 0.26s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+        .modal-actions { position: sticky; bottom: 0; background: var(--surface); padding-top: var(--space-3); margin-top: var(--space-4); }
+      }
+      @keyframes sheetIn {
+        from { opacity: 0; transform: translateY(40px); }
+        to { opacity: 1; transform: translateY(0); }
       }
     </style>
   </head>
@@ -1217,7 +1372,7 @@
         <section class="content-section active" id="dashboard">
           <div class="stats-grid">
             <div class="card" id="statTotal">
-              <div class="label">إجمالي المصاريف</div>
+              <div class="label">إجمالي مصاريفي</div>
               <div class="value" id="totalExpenses">0</div>
             </div>
             <div class="card" id="statShare">
@@ -1242,25 +1397,13 @@
                 </div>
                 <div class="members-grid" id="membersList"></div>
               </div>
-              <div class="panel" id="descriptionPanel">
-                <div class="panel-header">
-                  <h3>وصف المشروع</h3>
-                </div>
-                <p id="projectDescriptionCard" style="line-height:1.7; color: var(--muted); margin:0;">-</p>
-              </div>
             </div>
             <div class="dashboard-col" id="dashboardColSecondary">
-              <div class="panel" id="categoryPanel">
-                <div class="panel-header">
-                  <h3>المصاريف حسب الفئة</h3>
-                </div>
-                <div class="category-breakdown" id="categoryBreakdown"></div>
-              </div>
               <div class="panel" id="activityPanel">
                 <div class="panel-header">
                   <h3>سجل النشاط</h3>
                 </div>
-                <div id="activityList"></div>
+                <button class="btn btn-secondary" id="openActivityLogBtn" style="width:100%;">عرض سجل النشاط</button>
               </div>
             </div>
           </div>
@@ -1337,17 +1480,58 @@
         </section>
 
         <section class="content-section" id="profile">
+          <div class="profile-hero">
+            <div class="profile-hero-cover"></div>
+            <div class="profile-hero-body">
+              <div class="profile-avatar-wrap">
+                <img id="profileAvatarPreview" src="" alt="" class="profile-avatar-img" />
+                <button type="button" class="profile-avatar-edit-btn" id="profileAvatarEditBtn" title="تغيير الصورة">📷</button>
+                <input type="file" id="profileAvatarInput" accept="image/*" hidden />
+              </div>
+              <div class="profile-hero-info">
+                <div class="profile-hero-name-row">
+                  <div class="profile-hero-name" id="profileNamePreview">-</div>
+                  <span class="profile-verified-badge" id="profileVerifiedBadge" style="display:none;" title="تم تأكيد البريد">✔ موثّق</span>
+                </div>
+                <div class="helper-text" id="profileEmailPreview">-</div>
+                <div class="profile-joined-text" id="profileJoinedText"></div>
+              </div>
+              <button class="btn btn-secondary" id="editProfileBtn">✏️ تعديل البيانات</button>
+              <button class="btn btn-secondary" id="logoutBtnProfile">🚪 تسجيل الخروج</button>
+            </div>
+          </div>
+
+          <div class="stats-grid">
+            <div class="card">
+              <div class="label">عدد المشاريع</div>
+              <div class="value" id="profileStatProjects">0</div>
+            </div>
+            <div class="card">
+              <div class="label">مشاريع أنا مالكها</div>
+              <div class="value" id="profileStatOwned">0</div>
+            </div>
+            <div class="card">
+              <div class="label">إجمالي المصاريف المسجلة</div>
+              <div class="value" id="profileStatExpenses">0</div>
+            </div>
+            <div class="card">
+              <div class="label">عضو منذ</div>
+              <div class="value" id="profileStatJoined">-</div>
+            </div>
+          </div>
+
           <div class="panel">
             <div class="panel-header">
-              <h3>الملف الشخصي</h3>
+              <h3>مشاريعي</h3>
+              <button class="btn btn-secondary" id="createProjectFromProfileBtn">+ مشروع جديد</button>
             </div>
-            <div style="display:flex; align-items:center; gap:16px; margin-bottom:20px;">
-              <img id="profileAvatarPreview" src="" alt="" style="width:64px; height:64px; border-radius:50%; object-fit:cover; background:var(--surface-2); border:2px solid var(--border-strong);" />
-              <div>
-                <div style="font-weight:800; font-size:1.05rem;" id="profileNamePreview">-</div>
-                <div class="helper-text" id="profileEmailPreview">-</div>
-              </div>
-            </div>
+            <div id="userProjectsList"></div>
+          </div>
+        </section>
+
+        <div class="modal-backdrop" id="profileEditModal">
+          <div class="modal">
+            <h3 style="margin-top:0;">تعديل البيانات</h3>
             <div class="form-grid">
               <div class="field">
                 <label>الاسم الظاهر</label>
@@ -1358,30 +1542,22 @@
                 <input id="profileEmail" disabled />
               </div>
               <div class="field full">
-                <label>رابط صورة الملف الشخصي</label>
+                <label>رابط صورة الملف الشخصي (اختياري إذا لم ترفع صورة)</label>
                 <input id="profilePhotoUrl" placeholder="https://..." />
               </div>
-              <div class="field full">
-                <button class="btn btn-primary" id="saveProfileBtn">حفظ البيانات</button>
-              </div>
-              <div class="field full">
-                <button class="btn btn-secondary" id="logoutBtnProfile">🚪 تسجيل الخروج</button>
-              </div>
+            </div>
+            <div class="modal-actions">
+              <button class="btn btn-secondary" id="profileEditCancelBtn">إلغاء</button>
+              <button class="btn btn-primary" id="saveProfileBtn">حفظ البيانات</button>
             </div>
           </div>
-          <div class="panel">
-            <div class="panel-header">
-              <h3>مشاريعي</h3>
-              <button class="btn btn-secondary" id="createProjectFromProfileBtn">+ مشروع جديد</button>
-            </div>
-            <div id="userProjectsList"></div>
-          </div>
-        </section>
+        </div>
 
         <section class="content-section" id="settings">
           <div class="sidebar-nav" style="flex-direction:row; margin-bottom:14px; background:rgba(15,26,48,0.4); border:1px solid var(--border); border-radius:var(--radius-md); padding:4px; gap:4px;">
             <button class="nav-btn active" data-settings-tab="project" style="flex:1; justify-content:center;" onclick="showSettingsTab('project')">📋 بيانات المشروع</button>
             <button class="nav-btn" data-settings-tab="members" style="flex:1; justify-content:center;" onclick="showSettingsTab('members')">👥 الأعضاء</button>
+            <button class="nav-btn" data-settings-tab="categories" style="flex:1; justify-content:center;" onclick="showSettingsTab('categories')">🏷️ الفئات</button>
           </div>
 
           <div class="panel settings-tab-panel" id="settingsTabProject">
@@ -1427,6 +1603,24 @@
               </div>
             </div>
             <div id="memberSettingsList"></div>
+          </div>
+
+          <div class="panel settings-tab-panel" id="settingsTabCategories" style="display:none;">
+            <div class="panel-header">
+              <h3>إدارة فئات المصاريف</h3>
+              <div class="helper-text">أضف أو عدّل أو احذف الفئات اللي هتستخدمها في تصنيف المصاريف</div>
+            </div>
+            <div class="form-grid" style="margin-bottom:12px;">
+              <div class="field">
+                <label>اسم الفئة الجديدة</label>
+                <input id="newCategoryName" placeholder="مثال: صيانة" />
+              </div>
+              <div class="field">
+                <label>&nbsp;</label>
+                <button class="btn btn-primary" id="addCategoryBtn">+ إضافة فئة</button>
+              </div>
+            </div>
+            <div id="categorySettingsList"></div>
           </div>
         </section>
       </main>
@@ -1474,10 +1668,32 @@
             <label>ملاحظات</label>
             <textarea id="expenseNotes" placeholder="مثال: تم الشراء من المتجر"></textarea>
           </div>
+          <div class="field full">
+            <label>طريقة التقسيم</label>
+            <select id="expenseSplitType">
+              <option value="equal">متساوي على كل أعضاء المشروع (بما فيهم اللي هينضموا بعدين)</option>
+              <option value="custom">تقسيم مخصص بالنسبة</option>
+            </select>
+          </div>
+          <div class="field full" id="expenseSplitCustomWrap" style="display:none;">
+            <label>نسبة كل عضو (المجموع لازم يبقى 100%)</label>
+            <div id="expenseSplitCustomList" style="display:flex;flex-direction:column;gap:8px;"></div>
+            <div class="label" id="expenseSplitCustomTotal" style="margin-top:6px;"></div>
+          </div>
         </div>
         <div class="modal-actions">
           <button class="btn btn-secondary" onclick="closeExpenseModal()">إلغاء</button>
           <button class="btn btn-primary" id="saveExpenseBtn">حفظ المصروف</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-backdrop" id="activityLogModal">
+      <div class="modal">
+        <h3 style="margin-top:0;">سجل النشاط الكامل</h3>
+        <div id="activityLogFullList" style="max-height:60vh;overflow-y:auto;"></div>
+        <div class="modal-actions">
+          <button class="btn btn-secondary" onclick="closeActivityLogModal()">إغلاق</button>
         </div>
       </div>
     </div>
@@ -1621,6 +1837,7 @@ service cloud.firestore {
             { id: crypto.randomUUID(), name: 'Ali', active: true, createdAt: new Date().toISOString() },
             { id: crypto.randomUUID(), name: 'Omar', active: true, createdAt: new Date().toISOString() }
           ],
+          categories: [...DEFAULT_CATEGORIES],
           expenses: [],
           settlements: [],
           activityLog: []
@@ -1661,6 +1878,9 @@ service cloud.firestore {
         settlementHistoryList: document.getElementById('settlementHistoryList'),
         projectNameInput: document.getElementById('projectNameInput'),
         memberSettingsList: document.getElementById('memberSettingsList'),
+        categorySettingsList: document.getElementById('categorySettingsList'),
+        newCategoryName: document.getElementById('newCategoryName'),
+        addCategoryBtn: document.getElementById('addCategoryBtn'),
         topSubtitle: document.getElementById('topSubtitle'),
         searchInput: document.getElementById('searchInput'),
         filterMember: document.getElementById('filterMember'),
@@ -1675,14 +1895,19 @@ service cloud.firestore {
         expenseCategory: document.getElementById('expenseCategory'),
         expenseDate: document.getElementById('expenseDate'),
         expenseNotes: document.getElementById('expenseNotes'),
+        expenseSplitType: document.getElementById('expenseSplitType'),
+        expenseSplitCustomWrap: document.getElementById('expenseSplitCustomWrap'),
+        expenseSplitCustomList: document.getElementById('expenseSplitCustomList'),
+        expenseSplitCustomTotal: document.getElementById('expenseSplitCustomTotal'),
         saveExpenseBtn: document.getElementById('saveExpenseBtn'),
         saveSettingsBtn: document.getElementById('saveSettingsBtn'),
         newMemberEmail: document.getElementById('newMemberEmail'),
         newMemberCanEdit: document.getElementById('newMemberCanEdit'),
-        projectDescriptionCard: document.getElementById('projectDescriptionCard'),
         projectDescriptionInput: document.getElementById('projectDescriptionInput'),
         activityList: document.getElementById('activityList'),
-        categoryBreakdown: document.getElementById('categoryBreakdown'),
+        openActivityLogBtn: document.getElementById('openActivityLogBtn'),
+        activityLogModal: document.getElementById('activityLogModal'),
+        activityLogFullList: document.getElementById('activityLogFullList'),
         toast: document.getElementById('toast'),
         newMemberName: document.getElementById('newMemberName'),
         addMemberBtn: document.getElementById('addMemberBtn'),
@@ -1697,13 +1922,24 @@ service cloud.firestore {
         profileEmail: document.getElementById('profileEmail'),
         profilePhotoUrl: document.getElementById('profilePhotoUrl'),
         saveProfileBtn: document.getElementById('saveProfileBtn'),
+        editProfileBtn: document.getElementById('editProfileBtn'),
+        profileEditModal: document.getElementById('profileEditModal'),
+        profileEditCancelBtn: document.getElementById('profileEditCancelBtn'),
         userProjectsList: document.getElementById('userProjectsList'),
         createProjectFromProfileBtn: document.getElementById('createProjectFromProfileBtn'),
         profileTopBtn: document.getElementById('profileTopBtn'),
         profileSidebarBtn: document.getElementById('profileSidebarBtn'),
         profileAvatarPreview: document.getElementById('profileAvatarPreview'),
+        profileAvatarEditBtn: document.getElementById('profileAvatarEditBtn'),
+        profileAvatarInput: document.getElementById('profileAvatarInput'),
         profileNamePreview: document.getElementById('profileNamePreview'),
         profileEmailPreview: document.getElementById('profileEmailPreview'),
+        profileVerifiedBadge: document.getElementById('profileVerifiedBadge'),
+        profileJoinedText: document.getElementById('profileJoinedText'),
+        profileStatProjects: document.getElementById('profileStatProjects'),
+        profileStatOwned: document.getElementById('profileStatOwned'),
+        profileStatExpenses: document.getElementById('profileStatExpenses'),
+        profileStatJoined: document.getElementById('profileStatJoined'),
         logoutBtn: document.getElementById('logoutBtn'),
         logoutBtnSidebar: document.getElementById('logoutBtnSidebar'),
         logoutBtnProfile: document.getElementById('logoutBtnProfile'),
@@ -1745,11 +1981,15 @@ service cloud.firestore {
         const expenses = Array.isArray(base.expenses) ? base.expenses : [];
         const settlements = Array.isArray(base.settlements) ? base.settlements : [];
         const activityLog = Array.isArray(base.activityLog) ? base.activityLog : [];
+        const rawCategories = Array.isArray(base.categories) ? base.categories.filter(cat => typeof cat === 'string' && cat.trim()).map(cat => cat.trim()) : [];
+        const dedupedCategories = [...new Set(rawCategories.length ? rawCategories : DEFAULT_CATEGORIES)];
+        if (!dedupedCategories.includes('أخرى')) dedupedCategories.push('أخرى');
 
         return {
           projectName: typeof base.projectName === 'string' && base.projectName.trim() ? base.projectName : defaultState.projectName,
           projectDescription: typeof base.projectDescription === 'string' ? base.projectDescription : defaultState.projectDescription,
           currency: typeof base.currency === 'string' && base.currency.trim() ? base.currency : defaultState.currency,
+          categories: dedupedCategories,
           members: members.map((member, index) => ({
             id: member?.id || crypto.randomUUID(),
             name: member?.name || `Member ${index + 1}`,
@@ -1758,16 +1998,35 @@ service cloud.firestore {
             active: member?.active !== false,
             createdAt: member?.createdAt || new Date().toISOString()
           })),
-          expenses: expenses.map((expense) => ({
-            id: expense?.id || crypto.randomUUID(),
-            itemName: expense?.itemName || 'مصروف',
-            amount: Number(expense?.amount) || 0,
-            paidBy: expense?.paidBy || members[0]?.id || '',
-            category: typeof expense?.category === 'string' && expense.category ? expense.category : 'أخرى',
-            date: expense?.date || new Date().toISOString().slice(0, 10),
-            notes: expense?.notes || '',
-            createdAt: expense?.createdAt || new Date().toISOString()
-          })),
+          expenses: expenses.map((expense) => {
+            const activeIds = members.filter(m => m?.active !== false).map(m => m.id);
+            let splitType = expense?.splitType === 'custom' ? 'custom' : 'equal';
+            let splitCustom = null;
+            if (splitType === 'custom' && expense?.splitCustom && typeof expense.splitCustom === 'object') {
+              const entries = Object.entries(expense.splitCustom).filter(([id]) => activeIds.includes(id));
+              const total = entries.reduce((sum, [, percent]) => sum + (Number(percent) || 0), 0);
+              // Custom split only counts if it actually references real members and roughly totals 100%.
+              if (entries.length && Math.abs(total - 100) < 0.5) {
+                splitCustom = Object.fromEntries(entries.map(([id, percent]) => [id, Number(percent) || 0]));
+              } else {
+                splitType = 'equal';
+              }
+            } else {
+              splitType = 'equal';
+            }
+            return {
+              id: expense?.id || crypto.randomUUID(),
+              itemName: expense?.itemName || 'مصروف',
+              amount: Number(expense?.amount) || 0,
+              paidBy: expense?.paidBy || members[0]?.id || '',
+              category: typeof expense?.category === 'string' && expense.category && dedupedCategories.includes(expense.category) ? expense.category : 'أخرى',
+              date: expense?.date || new Date().toISOString().slice(0, 10),
+              notes: expense?.notes || '',
+              splitType,
+              splitCustom,
+              createdAt: expense?.createdAt || new Date().toISOString()
+            };
+          }),
           settlements: settlements.map((settlement) => ({
             id: settlement?.id || crypto.randomUUID(),
             from: settlement?.from || members[0]?.id || '',
@@ -1775,6 +2034,8 @@ service cloud.firestore {
             amount: Number(settlement?.amount) || 0,
             date: settlement?.date || new Date().toISOString().slice(0, 10),
             note: settlement?.note || '',
+            status: settlement?.status === 'pending' || settlement?.status === 'rejected' ? settlement.status : 'confirmed',
+            createdBy: settlement?.createdBy || '',
             createdAt: settlement?.createdAt || new Date().toISOString()
           })),
           activityLog: activityLog.slice(-30).map(entry => ({
@@ -1798,7 +2059,7 @@ service cloud.firestore {
       function saveState({ syncRemote = true } = {}) {
         state = normalizeState(state);
         localStorage.setItem(getStorageKey(), JSON.stringify(state));
-        if (syncRemote && isFirebaseReady && canEdit() && currentProjectId) {
+        if (syncRemote && isFirebaseReady && isProjectParticipant() && currentProjectId) {
           syncToFirebase();
         }
       }
@@ -1815,6 +2076,20 @@ service cloud.firestore {
         if (currentProjectOwnerId && currentUser.uid === currentProjectOwnerId) return true;
         const member = state.members.find(item => item.active !== false && normalizeEmail(item.email) === normalizeEmail(currentUser.email));
         return !!member && member.canEdit;
+      }
+
+      // Returns the member record linked to the currently logged-in account (owner has no member record).
+      function getCurrentMember() {
+        if (!currentUser) return null;
+        return state.members.find(item => item.active !== false && normalizeEmail(item.email) === normalizeEmail(currentUser.email)) || null;
+      }
+
+      // True for the owner or any active member (with or without edit permission) — used to allow
+      // members without edit rights to still sync actions that are scoped to themselves (e.g. reporting a settlement).
+      function isProjectParticipant() {
+        if (!currentUser) return false;
+        if (currentProjectOwnerId && currentUser.uid === currentProjectOwnerId) return true;
+        return !!getCurrentMember();
       }
 
       function canDeleteProject() {
@@ -2229,20 +2504,41 @@ service cloud.firestore {
         return state.members.filter(member => member.active !== false);
       }
 
+      function getCategories() {
+        return Array.isArray(state.categories) && state.categories.length ? state.categories : [...DEFAULT_CATEGORIES];
+      }
+
       function calculateMetrics() {
         const activeMembers = getActiveMembers();
         const totalExpenses = state.expenses.reduce((sum, expense) => sum + Number(expense.amount || 0), 0);
-        const sharePerMember = activeMembers.length ? totalExpenses / activeMembers.length : 0;
         const paidByMember = Object.fromEntries(activeMembers.map(member => [member.id, 0]));
+        const owedByMember = Object.fromEntries(activeMembers.map(member => [member.id, 0]));
+
+        // Expenses left on the default "equal" split are pooled together and divided across
+        // *whichever* members are active right now — so new members joining later automatically
+        // share in old equal-split expenses too, exactly like before.
+        let equalPoolTotal = 0;
 
         state.expenses.forEach(expense => {
           if (paidByMember[expense.paidBy] !== undefined) {
             paidByMember[expense.paidBy] += Number(expense.amount || 0);
           }
+          if (expense.splitType === 'custom' && expense.splitCustom && Object.keys(expense.splitCustom).length) {
+            const amount = Number(expense.amount || 0);
+            Object.entries(expense.splitCustom).forEach(([memberId, percent]) => {
+              if (owedByMember[memberId] !== undefined) {
+                owedByMember[memberId] += amount * (Number(percent) || 0) / 100;
+              }
+            });
+          } else {
+            equalPoolTotal += Number(expense.amount || 0);
+          }
         });
 
+        const sharePerMember = activeMembers.length ? equalPoolTotal / activeMembers.length : 0;
+
         const settledByMember = Object.fromEntries(activeMembers.map(member => [member.id, 0]));
-        (state.settlements || []).forEach(settlement => {
+        (state.settlements || []).filter(settlement => (settlement.status || 'confirmed') === 'confirmed').forEach(settlement => {
           if (settledByMember[settlement.from] !== undefined) {
             settledByMember[settlement.from] += Number(settlement.amount || 0);
           }
@@ -2251,13 +2547,16 @@ service cloud.firestore {
           }
         });
 
-        const balances = activeMembers.map(member => ({
-          ...member,
-          paid: paidByMember[member.id] || 0,
-          share: sharePerMember,
-          settled: settledByMember[member.id] || 0,
-          balance: (paidByMember[member.id] || 0) - sharePerMember + (settledByMember[member.id] || 0)
-        }));
+        const balances = activeMembers.map(member => {
+          const memberShare = sharePerMember + (owedByMember[member.id] || 0);
+          return {
+            ...member,
+            paid: paidByMember[member.id] || 0,
+            share: memberShare,
+            settled: settledByMember[member.id] || 0,
+            balance: (paidByMember[member.id] || 0) - memberShare + (settledByMember[member.id] || 0)
+          };
+        });
 
         return { totalExpenses, sharePerMember, balances };
       }
@@ -2573,14 +2872,84 @@ service cloud.firestore {
         });
       }
 
+      let pendingAvatarDataUrl = null;
+
+      function formatJoinDate(dateLike) {
+        if (!dateLike) return '-';
+        const date = new Date(dateLike);
+        if (Number.isNaN(date.getTime())) return '-';
+        return date.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long' });
+      }
+
+      function resizeImageToDataUrl(file, maxSize = 200, quality = 0.75) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onerror = () => reject(new Error('read failed'));
+          reader.onload = () => {
+            const img = new Image();
+            img.onerror = () => reject(new Error('image load failed'));
+            img.onload = () => {
+              let { width, height } = img;
+              if (width > height) {
+                if (width > maxSize) { height = Math.round(height * (maxSize / width)); width = maxSize; }
+              } else if (height > maxSize) {
+                width = Math.round(width * (maxSize / height));
+                height = maxSize;
+              }
+              const canvas = document.createElement('canvas');
+              canvas.width = width;
+              canvas.height = height;
+              const ctx = canvas.getContext('2d');
+              ctx.drawImage(img, 0, 0, width, height);
+              resolve(canvas.toDataURL('image/jpeg', quality));
+            };
+            img.src = reader.result;
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+
+      async function handleAvatarFileSelected(event) {
+        const file = event.target.files && event.target.files[0];
+        if (!file) return;
+        if (!file.type.startsWith('image/')) {
+          showToast('اختر ملف صورة صالح');
+          return;
+        }
+        try {
+          const dataUrl = await resizeImageToDataUrl(file);
+          pendingAvatarDataUrl = dataUrl;
+          els.profileAvatarPreview.src = dataUrl;
+          showToast('تم اختيار الصورة، اضغط "حفظ البيانات" لتأكيدها');
+        } catch (error) {
+          console.error('avatar resize failed', error);
+          showToast('تعذر معالجة الصورة، جرب صورة أخرى');
+        }
+      }
+
       function renderProfile() {
         const user = currentUser;
         els.profileName.value = user?.displayName || '';
         els.profileEmail.value = user?.email || '';
         els.profilePhotoUrl.value = user?.photoURL || '';
-        els.profileAvatarPreview.src = user?.photoURL || '';
+        els.profileAvatarPreview.src = pendingAvatarDataUrl || user?.photoURL || '';
         els.profileNamePreview.textContent = user?.displayName || user?.email || 'زائر';
         els.profileEmailPreview.textContent = user?.email || 'سجل الدخول لتعديل ملفك الشخصي';
+
+        if (els.profileVerifiedBadge) {
+          els.profileVerifiedBadge.style.display = user?.emailVerified ? 'inline-flex' : 'none';
+        }
+        if (els.profileJoinedText) {
+          const created = user?.metadata?.creationTime;
+          els.profileJoinedText.textContent = created ? `عضو منذ ${formatJoinDate(created)}` : '';
+        }
+
+        const ownedCount = projectDocs.filter(project => project.ownerId === user?.uid).length;
+        const totalExpensesCount = projectDocs.reduce((sum, project) => sum + ((project?.state?.expenses || []).length), 0);
+        if (els.profileStatProjects) els.profileStatProjects.textContent = projectDocs.length;
+        if (els.profileStatOwned) els.profileStatOwned.textContent = ownedCount;
+        if (els.profileStatExpenses) els.profileStatExpenses.textContent = totalExpensesCount;
+        if (els.profileStatJoined) els.profileStatJoined.textContent = formatJoinDate(user?.metadata?.creationTime);
 
         if (!projectDocs.length) {
           els.userProjectsList.innerHTML = '<div class="empty">ليس لديك مشروعات حالياً.</div>';
@@ -2617,27 +2986,33 @@ service cloud.firestore {
         }
 
         const displayName = els.profileName.value.trim();
-        const photoURL = els.profilePhotoUrl.value.trim();
+        const photoURLInput = els.profilePhotoUrl.value.trim();
+        const photoURL = pendingAvatarDataUrl || photoURLInput;
 
         try {
           await updateProfile(currentUser, { displayName: displayName || currentUser.displayName, photoURL: photoURL || currentUser.photoURL || '' });
+          pendingAvatarDataUrl = null;
           els.userAvatar.src = currentUser.photoURL || '';
           els.userAvatarSidebar.src = currentUser.photoURL || '';
           els.userName.textContent = currentUser.displayName || currentUser.email || 'User';
           els.userNameSidebar.textContent = currentUser.displayName || currentUser.email || 'User';
+          if (els.mobileProfileAvatar) els.mobileProfileAvatar.src = currentUser.photoURL || '';
           showToast('تم حفظ الملف الشخصي بنجاح');
           renderProfile();
+          closeProfileEditModal();
         } catch (error) {
           console.error('saveProfile failed', error);
-          showToast('فشل حفظ الملف الشخصي');
+          showToast('فشل حفظ الملف الشخصي، الصورة قد تكون كبيرة الحجم');
         }
       }
 
       function showSettingsTab(tab) {
         const projectPanel = document.getElementById('settingsTabProject');
         const membersPanel = document.getElementById('settingsTabMembers');
+        const categoriesPanel = document.getElementById('settingsTabCategories');
         if (projectPanel) projectPanel.style.display = tab === 'project' ? 'block' : 'none';
         if (membersPanel) membersPanel.style.display = tab === 'members' ? 'block' : 'none';
+        if (categoriesPanel) categoriesPanel.style.display = tab === 'categories' ? 'block' : 'none';
         document.querySelectorAll('[data-settings-tab]').forEach(btn => {
           btn.classList.toggle('active', btn.dataset.settingsTab === tab);
         });
@@ -2675,12 +3050,15 @@ service cloud.firestore {
 
         els.projectNameCard.textContent = currentProjectId ? state.projectName : 'لا يوجد مشروع محدد';
         els.memberCount.textContent = activeMembers.length;
-        els.totalExpenses.textContent = formatCurrency(metrics.totalExpenses);
+        const myMember = getCurrentMember();
+        const myBalance = myMember ? metrics.balances.find(item => item.id === myMember.id) : null;
+        els.totalExpenses.textContent = formatCurrency(myBalance ? myBalance.paid : 0);
         els.sharePerMember.textContent = formatCurrency(metrics.sharePerMember);
-        els.projectDescriptionCard.textContent = state.projectDescription || 'لا يوجد وصف للمشروع بعد.';
         els.ownerLabel.textContent = currentProjectOwnerName ? `مالك المشروع: ${currentProjectOwnerName}` : 'مالك المشروع: -';
         els.projectNameInput.value = state.projectName;
         els.projectDescriptionInput.value = state.projectDescription || '';
+        els.projectNameInput.disabled = !canEdit();
+        els.projectDescriptionInput.disabled = !canEdit();
         const editStateText = currentProjectId ? (canEdit() ? 'يمكنك التعديل' : 'عرض فقط') : 'اختر مشروعًا أو أنشئ مشروعًا جديدًا';
         els.topSubtitle.textContent = `${activeMembers.length} أعضاء • ${state.expenses.length} مصروف • ${editStateText}`;
 
@@ -2691,8 +3069,8 @@ service cloud.firestore {
         renderSettlementHistory();
         populateSettlementOptions(metrics.balances);
         renderSettingsMembers();
+        renderSettingsCategories();
         renderActivityLog();
-        renderCategoryBreakdown();
         populatePaidByOptions();
         populateCategoryOptions();
         renderProfile();
@@ -2773,7 +3151,7 @@ service cloud.firestore {
 
         els.expensesTable.innerHTML = filtered.map(expense => `
           <tr>
-            <td data-label="الاسم">${expense.itemName}</td>
+            <td data-label="الاسم">${escapeHtml(expense.itemName)}${expense.splitType === 'custom' ? ' <span class="label" style="opacity:0.75;">(تقسيم مخصص)</span>' : ''}</td>
             <td data-label="السعر">${formatCurrency(expense.amount)}</td>
             <td data-label="الفئة">${expense.category || 'أخرى'}</td>
             <td data-label="المدفوع من">${getMemberName(expense.paidBy)}</td>
@@ -2816,7 +3194,17 @@ service cloud.firestore {
         ).join('');
         const prevFrom = els.settlementFrom.value;
         const prevTo = els.settlementTo.value;
-        els.settlementFrom.innerHTML = buildOptions(prevFrom);
+        const editable = canEdit();
+        const currentMember = getCurrentMember();
+        if (!editable && currentMember) {
+          // Members without edit rights can only report a transfer they themselves sent.
+          els.settlementFrom.innerHTML = buildOptions(currentMember.id);
+          els.settlementFrom.value = currentMember.id;
+          els.settlementFrom.disabled = true;
+        } else {
+          els.settlementFrom.innerHTML = buildOptions(prevFrom);
+          els.settlementFrom.disabled = false;
+        }
         els.settlementTo.innerHTML = buildOptions(prevTo);
         if (!els.settlementDate.value) {
           els.settlementDate.value = new Date().toISOString().slice(0, 10);
@@ -2831,28 +3219,48 @@ service cloud.firestore {
           return;
         }
         const editable = canEdit();
-        els.settlementHistoryList.innerHTML = settlements.map(settlement => `
+        const statusLabel = { pending: 'في انتظار تأكيد المالك', rejected: 'مرفوض', confirmed: 'مؤكد' };
+        els.settlementHistoryList.innerHTML = settlements.map(settlement => {
+          const status = settlement.status || 'confirmed';
+          const actions = status === 'pending' && editable
+            ? `<button class="btn btn-primary" onclick="confirmSettlement('${settlement.id}')">تأكيد</button>
+               <button class="btn btn-danger" onclick="rejectSettlement('${settlement.id}')">رفض</button>`
+            : `<button class="btn btn-danger" onclick="deleteSettlement('${settlement.id}')" ${editable ? '' : 'disabled'}>حذف</button>`;
+          return `
           <div class="member-card member-settings-row">
             <div class="member-settings-info">
               <strong>${escapeHtml(getMemberName(settlement.from))} → ${escapeHtml(getMemberName(settlement.to))}</strong>
-              <div class="label">${formatCurrency(settlement.amount)} • ${escapeHtml(settlement.date)}</div>
+              <div class="label">${formatCurrency(settlement.amount)} • ${escapeHtml(settlement.date)} • ${statusLabel[status] || statusLabel.confirmed}</div>
             </div>
             <div class="actions member-settings-actions">
-              <button class="btn btn-danger" onclick="deleteSettlement('${settlement.id}')" ${editable ? '' : 'disabled'}>حذف</button>
+              ${actions}
             </div>
           </div>
-        `).join('');
+        `;
+        }).join('');
       }
 
       function recordSettlement() {
-        if (!canEdit()) {
-          showToast('هذا الحساب لا يملك صلاحية التعديل');
-          return;
-        }
+        const editable = canEdit();
+        const currentMember = getCurrentMember();
         const from = els.settlementFrom.value;
         const to = els.settlementTo.value;
         const amount = Number(els.settlementAmount.value);
         const date = els.settlementDate.value || new Date().toISOString().slice(0, 10);
+
+        if (!editable) {
+          // A member without edit rights can only report a transfer that *they themselves* sent,
+          // and it goes in as "pending" until the owner confirms it.
+          if (!currentMember) {
+            showToast('هذا الحساب لا يملك صلاحية التعديل');
+            return;
+          }
+          if (from !== currentMember.id) {
+            showToast('تقدر تسجل بس تحويل انت اللي بعتّه');
+            return;
+          }
+        }
+
         if (!from || !to) {
           showToast('اختر الأعضاء أولاً');
           return;
@@ -2866,12 +3274,27 @@ service cloud.firestore {
           return;
         }
         state = normalizeState(state);
-        state.settlements.push({ id: crypto.randomUUID(), from, to, amount, date, note: '', createdAt: new Date().toISOString() });
-        logActivity(`تم تسجيل تحويل ${formatCurrency(amount)} من "${getMemberName(from)}" إلى "${getMemberName(to)}"`);
+        const status = editable ? 'confirmed' : 'pending';
+        state.settlements.push({
+          id: crypto.randomUUID(),
+          from,
+          to,
+          amount,
+          date,
+          note: '',
+          status,
+          createdBy: currentMember ? currentMember.id : (editable ? 'owner' : ''),
+          createdAt: new Date().toISOString()
+        });
+        if (status === 'pending') {
+          logActivity(`"${getMemberName(from)}" أبلغ بتحويل ${formatCurrency(amount)} إلى "${getMemberName(to)}" - في انتظار تأكيد المالك`);
+        } else {
+          logActivity(`تم تسجيل تحويل ${formatCurrency(amount)} من "${getMemberName(from)}" إلى "${getMemberName(to)}"`);
+        }
         els.settlementAmount.value = '';
         saveState();
         render();
-        showToast('تم تسجيل التحويل');
+        showToast(status === 'pending' ? 'تم إرسال التحويل لتأكيد المالك' : 'تم تسجيل التحويل');
       }
 
       function deleteSettlement(id) {
@@ -2889,25 +3312,84 @@ service cloud.firestore {
       }
       window.deleteSettlement = deleteSettlement;
 
-      function renderActivityLog() {
-        if (!state.activityLog || !state.activityLog.length) {
-          els.activityList.innerHTML = '<div class="empty">لا توجد نشاطات بعد.</div>';
+      // Owner-only: confirm a settlement a member reported themselves. Once confirmed it counts toward balances.
+      function confirmSettlement(id) {
+        if (!canEdit()) {
+          showToast('هذا الحساب لا يملك صلاحية التعديل');
           return;
         }
-        els.activityList.innerHTML = state.activityLog.slice(0, 6).map(entry => `
+        const settlement = state.settlements.find(item => item.id === id);
+        if (!settlement) return;
+        settlement.status = 'confirmed';
+        logActivity(`تم تأكيد تحويل ${formatCurrency(settlement.amount)} من "${getMemberName(settlement.from)}" إلى "${getMemberName(settlement.to)}"`);
+        saveState();
+        render();
+        showToast('تم تأكيد التحويل');
+      }
+      window.confirmSettlement = confirmSettlement;
+
+      // Owner-only: reject a settlement a member reported themselves (e.g. it never actually happened).
+      function rejectSettlement(id) {
+        if (!canEdit()) {
+          showToast('هذا الحساب لا يملك صلاحية التعديل');
+          return;
+        }
+        const settlement = state.settlements.find(item => item.id === id);
+        if (!settlement) return;
+        settlement.status = 'rejected';
+        logActivity(`تم رفض تحويل ${formatCurrency(settlement.amount)} من "${getMemberName(settlement.from)}" إلى "${getMemberName(settlement.to)}"`);
+        saveState();
+        render();
+        showToast('تم رفض التحويل');
+      }
+      window.rejectSettlement = rejectSettlement;
+
+      function renderActivityLog() {
+        // Inline preview list no longer rendered on the dashboard; the button opens the full log modal instead.
+        if (els.activityLogModal && els.activityLogModal.classList.contains('open')) {
+          renderActivityLogModal();
+        }
+      }
+
+      function activityLogHtml(entries) {
+        if (!entries.length) {
+          return '<div class="empty">لا توجد نشاطات بعد.</div>';
+        }
+        return entries.map(entry => `
           <div class="activity-item">
             <div class="activity-dot"></div>
             <div class="activity-item-body">
-              <div>${entry.message}</div>
+              <div>${escapeHtml(entry.message)}</div>
               <div class="activity-time">${new Date(entry.createdAt).toLocaleString('ar-EG')}</div>
             </div>
           </div>
         `).join('');
       }
 
+      function renderActivityLogModal() {
+        const entries = state.activityLog || [];
+        els.activityLogFullList.innerHTML = activityLogHtml(entries);
+      }
+
+      function openActivityLogModal() {
+        renderActivityLogModal();
+        els.activityLogModal.classList.add('open');
+      }
+
+      function closeActivityLogModal() {
+        els.activityLogModal.classList.remove('open');
+      }
+      window.closeActivityLogModal = closeActivityLogModal;
+
+      if (els.openActivityLogBtn) els.openActivityLogBtn.addEventListener('click', openActivityLogModal);
+      if (els.activityLogModal) els.activityLogModal.addEventListener('click', event => {
+        if (event.target.id === 'activityLogModal') closeActivityLogModal();
+      });
+
       function populateCategoryOptions() {
-        els.expenseCategory.innerHTML = DEFAULT_CATEGORIES.map(cat => `<option value="${cat}">${cat}</option>`).join('');
-        els.filterCategory.innerHTML = '<option value="">كل الفئات</option>' + DEFAULT_CATEGORIES.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+        const categories = getCategories();
+        els.expenseCategory.innerHTML = categories.map(cat => `<option value="${escapeHtml(cat)}">${escapeHtml(cat)}</option>`).join('');
+        els.filterCategory.innerHTML = '<option value="">كل الفئات</option>' + categories.map(cat => `<option value="${escapeHtml(cat)}">${escapeHtml(cat)}</option>`).join('');
       }
 
       function duplicateExpense(id) {
@@ -2964,15 +3446,118 @@ service cloud.firestore {
               <div class="label">${member.canEdit ? 'له صلاحية تعديل' : 'عرض فقط'}</div>
               <div class="label">تمت الإضافة في ${new Date(member.createdAt).toLocaleDateString('en-GB')}</div>
             </div>
-            <div class="actions member-settings-actions">
-              <button class="btn btn-secondary" onclick="toggleMemberPermission('${member.id}')" ${editable ? '' : 'disabled'}>${member.canEdit ? 'إلغاء صلاحية' : 'منح صلاحية'}</button>
-              <button class="btn btn-secondary" onclick="renameMember('${member.id}')" ${editable ? '' : 'disabled'}>تعديل الاسم</button>
-              <button class="btn btn-secondary" onclick="editMemberEmail('${member.id}')" ${editable ? '' : 'disabled'}>تعديل البريد</button>
-              <button class="btn btn-danger" onclick="deleteMember('${member.id}')" ${editable ? '' : 'disabled'}>حذف</button>
+            <div class="actions member-settings-actions member-menu" data-member-menu="${member.id}">
+              <button class="member-menu-btn" type="button" onclick="toggleMemberMenu(event, '${member.id}')" aria-label="خيارات العضو">⋮</button>
+              <div class="member-menu-dropdown" id="memberMenu-${member.id}">
+                <button onclick="toggleMemberPermission('${member.id}'); closeAllMemberMenus();" ${editable ? '' : 'disabled'}>${member.canEdit ? 'إلغاء صلاحية' : 'منح صلاحية'}</button>
+                <button onclick="renameMember('${member.id}'); closeAllMemberMenus();" ${editable ? '' : 'disabled'}>تعديل الاسم</button>
+                <button onclick="editMemberEmail('${member.id}'); closeAllMemberMenus();" ${editable ? '' : 'disabled'}>تعديل البريد</button>
+                <button class="danger" onclick="deleteMember('${member.id}'); closeAllMemberMenus();" ${editable ? '' : 'disabled'}>حذف</button>
+              </div>
             </div>
           </div>
         `).join('');
       }
+
+      function renderSettingsCategories() {
+        const categories = getCategories();
+        const editable = canEdit();
+        if (!els.categorySettingsList) return;
+        if (!categories.length) {
+          els.categorySettingsList.innerHTML = '<div class="empty">لا توجد فئات بعد.</div>';
+          return;
+        }
+        els.categorySettingsList.innerHTML = categories.map(cat => {
+          const usageCount = state.expenses.filter(expense => expense.category === cat).length;
+          const isDefault = cat === 'أخرى';
+          return `
+          <div class="member-card member-settings-row">
+            <div class="member-settings-info">
+              <strong>${escapeHtml(cat)}</strong>
+              <div class="label">${usageCount ? `مستخدمة في ${usageCount} مصروف` : 'غير مستخدمة حاليًا'}</div>
+              ${isDefault ? '<div class="label">الفئة الافتراضية، لا يمكن حذفها</div>' : ''}
+            </div>
+            <div class="actions member-settings-actions">
+              <button class="btn btn-secondary" onclick="renameCategory('${escapeHtml(cat)}')" ${editable ? '' : 'disabled'}>تعديل</button>
+              <button class="btn btn-danger" onclick="deleteCategory('${escapeHtml(cat)}')" ${editable && !isDefault ? '' : 'disabled'}>حذف</button>
+            </div>
+          </div>
+        `;
+        }).join('');
+      }
+
+      async function addCategory() {
+        if (!canEdit()) {
+          showToast('هذا الحساب لا يملك صلاحية التعديل');
+          return;
+        }
+        const name = (els.newCategoryName.value || '').trim();
+        if (!name) {
+          showToast('اكتب اسم الفئة أولاً');
+          return;
+        }
+        const categories = getCategories();
+        if (categories.some(cat => cat.toLowerCase() === name.toLowerCase())) {
+          showToast('الفئة موجودة بالفعل');
+          return;
+        }
+        state.categories = [...categories, name];
+        els.newCategoryName.value = '';
+        logActivity(`تم إضافة فئة جديدة "${name}"`);
+        saveState();
+        render();
+        showToast('تم إضافة الفئة');
+      }
+
+      async function renameCategory(oldName) {
+        if (!canEdit()) {
+          showToast('هذا الحساب لا يملك صلاحية التعديل');
+          return;
+        }
+        const categories = getCategories();
+        const newName = await promptModal('تعديل الفئة', 'اسم الفئة الجديد', oldName);
+        if (!newName || newName === oldName) return;
+        if (categories.some(cat => cat.toLowerCase() === newName.toLowerCase() && cat !== oldName)) {
+          showToast('يوجد فئة بنفس الاسم بالفعل');
+          return;
+        }
+        state.categories = categories.map(cat => (cat === oldName ? newName : cat));
+        state.expenses.forEach(expense => {
+          if (expense.category === oldName) expense.category = newName;
+        });
+        logActivity(`تم تعديل اسم الفئة من "${oldName}" إلى "${newName}"`);
+        saveState();
+        render();
+        showToast('تم تعديل الفئة');
+      }
+
+      async function deleteCategory(name) {
+        if (!canEdit()) {
+          showToast('هذا الحساب لا يملك صلاحية التعديل');
+          return;
+        }
+        if (name === 'أخرى') {
+          showToast('لا يمكن حذف الفئة الافتراضية');
+          return;
+        }
+        const usageCount = state.expenses.filter(expense => expense.category === name).length;
+        const message = usageCount
+          ? `هل تريد حذف فئة "${name}"؟ سيتم نقل ${usageCount} مصروف إلى فئة "أخرى".`
+          : `هل تريد حذف فئة "${name}"؟`;
+        const confirmed = await confirmModal('حذف الفئة', message, { confirmText: 'حذف' });
+        if (!confirmed) return;
+        state.categories = getCategories().filter(cat => cat !== name);
+        state.expenses.forEach(expense => {
+          if (expense.category === name) expense.category = 'أخرى';
+        });
+        logActivity(`تم حذف فئة "${name}"`);
+        saveState();
+        render();
+        showToast('تم حذف الفئة');
+      }
+
+      window.renameCategory = renameCategory;
+      window.deleteCategory = deleteCategory;
 
       function populatePaidByOptions() {
         const members = getActiveMembers();
@@ -2982,6 +3567,58 @@ service cloud.firestore {
 
       function getMemberName(id) {
         return state.members.find(member => member.id === id)?.name || 'Unknown';
+      }
+
+      function renderExpenseSplitInputs(customValues) {
+        const activeMembers = getActiveMembers();
+        const values = customValues || {};
+        const evenShare = activeMembers.length ? (100 / activeMembers.length).toFixed(2) : '0';
+        els.expenseSplitCustomList.innerHTML = activeMembers.map(member => `
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="flex:1;">${escapeHtml(member.name)}</span>
+            <input type="number" min="0" max="100" step="0.01" class="expense-split-input" data-member-id="${member.id}"
+              value="${values[member.id] !== undefined ? values[member.id] : evenShare}" style="width:90px;" />
+            <span style="opacity:0.7;">%</span>
+          </div>
+        `).join('');
+        updateExpenseSplitTotal();
+        els.expenseSplitCustomList.querySelectorAll('.expense-split-input').forEach(input => {
+          input.addEventListener('input', updateExpenseSplitTotal);
+        });
+      }
+
+      function updateExpenseSplitTotal() {
+        const inputs = els.expenseSplitCustomList.querySelectorAll('.expense-split-input');
+        let total = 0;
+        inputs.forEach(input => { total += Number(input.value) || 0; });
+        const rounded = Math.round(total * 100) / 100;
+        els.expenseSplitCustomTotal.textContent = `الإجمالي: ${rounded}%${Math.abs(rounded - 100) < 0.5 ? ' ✓' : ' — لازم يبقى 100%'}`;
+        els.expenseSplitCustomTotal.style.color = Math.abs(rounded - 100) < 0.5 ? 'var(--success)' : 'var(--danger)';
+      }
+
+      function getExpenseSplitCustomValues() {
+        const inputs = els.expenseSplitCustomList.querySelectorAll('.expense-split-input');
+        const result = {};
+        inputs.forEach(input => {
+          result[input.dataset.memberId] = Number(input.value) || 0;
+        });
+        return result;
+      }
+
+      if (els.expenseSplitType) {
+        els.expenseSplitType.addEventListener('change', () => {
+          const isCustom = els.expenseSplitType.value === 'custom';
+          els.expenseSplitCustomWrap.style.display = isCustom ? 'block' : 'none';
+          if (isCustom) renderExpenseSplitInputs();
+        });
+      }
+
+      function openProfileEditModal() {
+        els.profileEditModal.classList.add('open');
+      }
+
+      function closeProfileEditModal() {
+        els.profileEditModal.classList.remove('open');
       }
 
       function openExpenseModal() {
@@ -2994,9 +3631,11 @@ service cloud.firestore {
         els.expenseItem.value = '';
         els.expenseAmount.value = '';
         els.expenseNotes.value = '';
-        els.expenseCategory.value = DEFAULT_CATEGORIES[0];
+        els.expenseCategory.value = getCategories()[0];
         els.expenseDate.value = new Date().toISOString().slice(0, 10);
         els.saveExpenseBtn.textContent = 'حفظ المصروف';
+        els.expenseSplitType.value = 'equal';
+        els.expenseSplitCustomWrap.style.display = 'none';
         els.expenseModal.classList.add('open');
       }
 
@@ -3027,7 +3666,20 @@ service cloud.firestore {
           return;
         }
 
-        const expense = { id: editingExpenseId || crypto.randomUUID(), itemName, amount, paidBy, category, date, notes, createdAt: new Date().toISOString() };
+        let splitType = 'equal';
+        let splitCustom = null;
+        if (els.expenseSplitType.value === 'custom') {
+          const values = getExpenseSplitCustomValues();
+          const total = Object.values(values).reduce((sum, v) => sum + v, 0);
+          if (Math.abs(total - 100) > 0.5) {
+            showToast('مجموع النسب لازم يكون 100%');
+            return;
+          }
+          splitType = 'custom';
+          splitCustom = values;
+        }
+
+        const expense = { id: editingExpenseId || crypto.randomUUID(), itemName, amount, paidBy, category, date, notes, splitType, splitCustom, createdAt: new Date().toISOString() };
         if (editingExpenseId) {
           state.expenses = state.expenses.map(item => item.id === editingExpenseId ? expense : item);
           logActivity(`تم تعديل المصروف "${itemName}" بنجاح`);
@@ -3058,6 +3710,14 @@ service cloud.firestore {
         els.expenseDate.value = expense.date;
         els.expenseNotes.value = expense.notes || '';
         els.saveExpenseBtn.textContent = 'تحديث المصروف';
+        if (expense.splitType === 'custom' && expense.splitCustom) {
+          els.expenseSplitType.value = 'custom';
+          els.expenseSplitCustomWrap.style.display = 'block';
+          renderExpenseSplitInputs(expense.splitCustom);
+        } else {
+          els.expenseSplitType.value = 'equal';
+          els.expenseSplitCustomWrap.style.display = 'none';
+        }
         els.expenseModal.classList.add('open');
       }
 
@@ -3159,6 +3819,23 @@ service cloud.firestore {
         showToast('تم حذف العضو مع الاحتفاظ بالبيانات السابقة');
       }
 
+      function closeAllMemberMenus() {
+        document.querySelectorAll('.member-menu-dropdown.open').forEach(el => el.classList.remove('open'));
+      }
+
+      function toggleMemberMenu(event, id) {
+        event.stopPropagation();
+        const dropdown = document.getElementById(`memberMenu-${id}`);
+        if (!dropdown) return;
+        const isOpen = dropdown.classList.contains('open');
+        closeAllMemberMenus();
+        if (!isOpen) dropdown.classList.add('open');
+      }
+
+      document.addEventListener('click', (event) => {
+        if (!event.target.closest('.member-menu')) closeAllMemberMenus();
+      });
+
       function toggleMemberPermission(id) {
         if (!canEdit()) {
           showToast('هذا الحساب لا يملك صلاحية التعديل');
@@ -3206,6 +3883,7 @@ service cloud.firestore {
       if (els.saveSettingsBtn) els.saveSettingsBtn.addEventListener('click', saveProjectSettings);
       if (els.recordSettlementBtn) els.recordSettlementBtn.addEventListener('click', recordSettlement);
       if (els.addMemberBtn) els.addMemberBtn.addEventListener('click', addMember);
+      if (els.addCategoryBtn) els.addCategoryBtn.addEventListener('click', addCategory);
       if (els.addExpenseBtn) els.addExpenseBtn.addEventListener('click', () => {
         if (!canEdit()) {
           showToast('هذا الحساب لا يملك صلاحية التعديل');
@@ -3274,6 +3952,15 @@ service cloud.firestore {
       if (els.createAccountBtn) els.createAccountBtn.addEventListener('click', () => openAuthModal('signup'));
       if (els.downloadPdfBtn) els.downloadPdfBtn.addEventListener('click', downloadProjectPdf);
       if (els.saveProfileBtn) els.saveProfileBtn.addEventListener('click', saveProfile);
+      if (els.editProfileBtn) els.editProfileBtn.addEventListener('click', openProfileEditModal);
+      if (els.profileEditCancelBtn) els.profileEditCancelBtn.addEventListener('click', closeProfileEditModal);
+      if (els.profileEditModal) els.profileEditModal.addEventListener('click', (event) => {
+        if (event.target.id === 'profileEditModal') closeProfileEditModal();
+      });
+      if (els.profileAvatarEditBtn && els.profileAvatarInput) {
+        els.profileAvatarEditBtn.addEventListener('click', () => els.profileAvatarInput.click());
+      }
+      if (els.profileAvatarInput) els.profileAvatarInput.addEventListener('change', handleAvatarFileSelected);
       if (els.createProjectBtn) els.createProjectBtn.addEventListener('click', createProject);
       if (els.createProjectFromProfileBtn) els.createProjectFromProfileBtn.addEventListener('click', createProject);
       if (els.profileTopBtn) els.profileTopBtn.addEventListener('click', () => showSection('profile'));
@@ -3287,6 +3974,8 @@ service cloud.firestore {
         if (event.key === 'Escape') {
           closeExpenseModal();
           closeAuthModal();
+          closeActivityLogModal();
+          closeProfileEditModal();
         }
       });
 
@@ -3299,6 +3988,8 @@ service cloud.firestore {
       window.renameMember = renameMember;
       window.editMemberEmail = editMemberEmail;
       window.deleteMember = deleteMember;
+      window.toggleMemberMenu = toggleMemberMenu;
+      window.closeAllMemberMenus = closeAllMemberMenus;
 
       document.addEventListener('DOMContentLoaded', () => {
         diagnoseAuthIssue();
