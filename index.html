@@ -1347,7 +1347,7 @@
       </aside>
 
       <main class="main">
-        <div class="topbar">
+        <div class="topbar" id="mainTopbar">
           <div class="topbar-title">
             <h2>إدارة مصاريف المشروع</h2>
             <div id="topSubtitle">تتبع مصاريف الفريق بسهولة</div>
@@ -1372,7 +1372,7 @@
         <section class="content-section active" id="dashboard">
           <div class="stats-grid">
             <div class="card" id="statTotal">
-              <div class="label">إجمالي مصاريفي</div>
+              <div class="label">إجمالي مصاريف المشروع</div>
               <div class="value" id="totalExpenses">0</div>
             </div>
             <div class="card" id="statShare">
@@ -2323,7 +2323,7 @@ service cloud.firestore {
         const docContainer = document.createElement('div');
         docContainer.setAttribute('dir', 'rtl');
         docContainer.setAttribute('lang', 'ar');
-        docContainer.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:794px;background:#ffffff;color:#1a1f2b;font-family:"Cairo","Segoe UI",Tahoma,Arial,sans-serif;line-height:1.7;';
+        docContainer.style.cssText = 'position:absolute;top:0;left:-99999px;width:794px;background:#ffffff;color:#1a1f2b;font-family:"Cairo","Segoe UI",Tahoma,Arial,sans-serif;line-height:1.7;';
         docContainer.innerHTML = `
           <div style="padding:36px 40px 28px;background:linear-gradient(135deg,#3366dd,#5a8eff);color:#fff;">
             <div style="font-size:13px;letter-spacing:0.06em;opacity:0.85;margin-bottom:6px;">تقرير مصاريف المشروع &middot; Hesabna</div>
@@ -2409,6 +2409,40 @@ service cloud.firestore {
                     <span style="font-size:12.5px;font-weight:700;color:#3366dd;">${formatCurrencyPdf(tx.amount)}</span>
                   </div>`).join('')}
               </div>` : `<div style="font-size:12.5px;color:#8a90a3;">لا توجد تسويات مطلوبة حالياً، كل الأرصدة متوازنة.</div>`}
+
+            <h2 style="font-size:15px;margin:26px 0 12px;color:#1a1f2b;border-bottom:2px solid #3366dd;padding-bottom:6px;display:inline-block;">سجل التسويات</h2>
+            <table style="width:100%;border-collapse:collapse;margin-bottom:26px;">
+              <thead>
+                <tr style="background:#eef2ff;">
+                  <th style="padding:9px 10px;text-align:right;font-size:12px;color:#3b3f4c;border-bottom:1px solid #dde3f0;">من</th>
+                  <th style="padding:9px 10px;text-align:right;font-size:12px;color:#3b3f4c;border-bottom:1px solid #dde3f0;">إلى</th>
+                  <th style="padding:9px 10px;text-align:right;font-size:12px;color:#3b3f4c;border-bottom:1px solid #dde3f0;">المبلغ</th>
+                  <th style="padding:9px 10px;text-align:right;font-size:12px;color:#3b3f4c;border-bottom:1px solid #dde3f0;">التاريخ</th>
+                  <th style="padding:9px 10px;text-align:right;font-size:12px;color:#3b3f4c;border-bottom:1px solid #dde3f0;">الحالة</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${(state.settlements || []).map((settlement2, i) => `
+                  <tr style="background:${i % 2 ? '#fafbff' : '#ffffff'};">
+                    <td style="padding:9px 10px;font-size:12px;border-bottom:1px solid #eef1f7;">${escapeHtml(getMemberName(settlement2.from))}</td>
+                    <td style="padding:9px 10px;font-size:12px;border-bottom:1px solid #eef1f7;">${escapeHtml(getMemberName(settlement2.to))}</td>
+                    <td style="padding:9px 10px;font-size:12px;border-bottom:1px solid #eef1f7;font-weight:600;">${formatCurrencyPdf(settlement2.amount)}</td>
+                    <td style="padding:9px 10px;font-size:12px;border-bottom:1px solid #eef1f7;color:#6b7280;">${escapeHtml(settlement2.date)}</td>
+                    <td style="padding:9px 10px;font-size:12px;border-bottom:1px solid #eef1f7;color:#6b7280;">${settlement2.status === 'confirmed' ? 'مؤكدة' : settlement2.status === 'pending' ? 'قيد الانتظار' : 'مرفوضة'}</td>
+                  </tr>
+                `).join('') || `<tr><td colspan="5" style="padding:14px 10px;font-size:12.5px;color:#8a90a3;">لا توجد تسويات مسجلة بعد.</td></tr>`}
+              </tbody>
+            </table>
+
+            <h2 style="font-size:15px;margin:0 0 12px;color:#1a1f2b;border-bottom:2px solid #3366dd;padding-bottom:6px;display:inline-block;">سجل النشاطات</h2>
+            <div>
+              ${(state.activityLog || []).length ? (state.activityLog || []).map((entry, i) => `
+                <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:8px 12px;margin-bottom:6px;background:${i % 2 ? '#fafbff' : '#ffffff'};border:1px solid #eef1f7;border-radius:8px;">
+                  <span style="font-size:12px;flex:1;">${escapeHtml(entry.message)}</span>
+                  <span style="font-size:11px;color:#9aa1b3;white-space:nowrap;">${escapeHtml(new Date(entry.createdAt).toLocaleString('ar-EG', { dateStyle: 'medium', timeStyle: 'short' }))}</span>
+                </div>
+              `).join('') : `<div style="font-size:12.5px;color:#8a90a3;">لا يوجد نشاط مسجل بعد.</div>`}
+            </div>
           </div>
 
           <div style="padding:16px 40px;border-top:1px solid #eef1f7;display:flex;justify-content:space-between;font-size:11px;color:#9aa1b3;">
@@ -2428,7 +2462,20 @@ service cloud.firestore {
               console.warn('Cairo font load failed, falling back', fontError);
             }
           }
-          const canvas = await html2canvas(docContainer, { scale: 2, backgroundColor: '#ffffff', useCORS: true, letterRendering: true });
+          const canvas = await html2canvas(docContainer, {
+            scale: 2,
+            backgroundColor: '#ffffff',
+            useCORS: true,
+            letterRendering: true,
+            width: 794,
+            height: docContainer.scrollHeight,
+            windowWidth: 794,
+            windowHeight: docContainer.scrollHeight,
+            x: 0,
+            y: 0,
+            scrollX: 0,
+            scrollY: 0
+          });
           const pdf = new jspdf.jsPDF({ orientation: 'portrait', unit: 'pt', format: 'a4' });
           const pageWidth = pdf.internal.pageSize.getWidth();
           const pageHeight = pdf.internal.pageSize.getHeight();
@@ -3026,6 +3073,8 @@ service cloud.firestore {
           const isTarget = panel.id === section;
           panel.classList.toggle('active', isTarget);
         });
+        const topbar = document.getElementById('mainTopbar');
+        if (topbar) topbar.style.display = section === 'profile' ? 'none' : '';
         if (section === 'profile') {
           renderProfile();
         }
@@ -3052,7 +3101,7 @@ service cloud.firestore {
         els.memberCount.textContent = activeMembers.length;
         const myMember = getCurrentMember();
         const myBalance = myMember ? metrics.balances.find(item => item.id === myMember.id) : null;
-        els.totalExpenses.textContent = formatCurrency(myBalance ? myBalance.paid : 0);
+        els.totalExpenses.textContent = formatCurrency(metrics.totalExpenses);
         els.sharePerMember.textContent = formatCurrency(metrics.sharePerMember);
         els.ownerLabel.textContent = currentProjectOwnerName ? `مالك المشروع: ${currentProjectOwnerName}` : 'مالك المشروع: -';
         els.projectNameInput.value = state.projectName;
