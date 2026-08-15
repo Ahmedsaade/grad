@@ -1441,6 +1441,7 @@
         </section>
 
         <section class="content-section" id="settle">
+
           <div class="panel">
             <h3 style="margin-top:0;">التسوية المقترحة</h3>
             <p class="label" style="margin-top:-6px;">دي التحويلات اللي محتاجة تحصل عشان الكل يبقى متعادل.</p>
@@ -1450,31 +1451,28 @@
           <div class="panel" style="margin-top:16px;">
             <h3 style="margin-top:0;">تسجيل تحويل</h3>
             <p class="label" style="margin-top:-6px;">لما حد يحوّل فلوس فعليًا لحد تاني، سجّل التحويل هنا عشان الأرصدة تتحدث.</p>
-            <div class="form-grid">
-              <div class="field">
-                <label>هيدفع مين (من)</label>
-                <select id="settlementFrom"></select>
-              </div>
-              <div class="field">
-                <label>هيدفع لمين (إلى)</label>
-                <select id="settlementTo"></select>
-              </div>
-              <div class="field">
-                <label>هيدفع كام</label>
-                <input id="settlementAmount" type="number" min="0" step="0.01" placeholder="0.00" />
-              </div>
-              <div class="field">
-                <label>التاريخ</label>
-                <input id="settlementDate" type="date" />
-              </div>
-            </div>
-            <div style="margin-top:10px;">
-              <button class="btn btn-primary" id="recordSettlementBtn">تسجيل التحويل</button>
-            </div>
+            <button class="btn btn-primary" id="openRecordSettlementBtn">+ تسجيل تحويل جديد</button>
           </div>
 
           <div class="panel" style="margin-top:16px;">
             <h3 style="margin-top:0;">سجل التحويلات</h3>
+            <div class="form-grid" style="margin-bottom:12px;">
+              <div class="field">
+                <label>فلترة بالحالة</label>
+                <select id="settlementStatusFilter">
+                  <option value="">كل الحالات</option>
+                  <option value="confirmed">مؤكدة</option>
+                  <option value="pending">قيد الانتظار</option>
+                  <option value="rejected">مرفوضة</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>فلترة بالعضو</label>
+                <select id="settlementMemberFilter">
+                  <option value="">كل الأعضاء</option>
+                </select>
+              </div>
+            </div>
             <div id="settlementHistoryList"></div>
           </div>
         </section>
@@ -1742,6 +1740,39 @@
       </div>
     </div>
 
+    <div class="modal-backdrop" id="recordSettlementModal">
+      <div class="modal">
+        <h3 style="margin-top:0;">تسجيل تحويل</h3>
+        <p class="label" style="margin-top:-6px;">لما حد يحوّل فلوس فعليًا لحد تاني، سجّل التحويل هنا عشان الأرصدة تتحدث.</p>
+        <div class="form-grid">
+          <div class="field">
+            <label>هيدفع مين (من)</label>
+            <select id="settlementFrom"></select>
+          </div>
+          <div class="field">
+            <label>هيدفع لمين (إلى)</label>
+            <select id="settlementTo"></select>
+          </div>
+          <div class="field">
+            <label>هيدفع كام</label>
+            <input id="settlementAmount" type="number" min="0" step="0.01" placeholder="0.00" />
+          </div>
+          <div class="field">
+            <label>التاريخ</label>
+            <input id="settlementDate" type="date" />
+          </div>
+          <div class="field" style="grid-column:1/-1;">
+            <label>ملاحظة (اختياري)</label>
+            <input id="settlementNote" placeholder="مثال: تحويل عن طريق انستاباي" />
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-secondary" id="recordSettlementCancelBtn">إلغاء</button>
+          <button class="btn btn-primary" id="recordSettlementBtn">تسجيل التحويل</button>
+        </div>
+      </div>
+    </div>
+
     <div class="toast" id="toast"></div>
 
     <script type="module">
@@ -1756,22 +1787,61 @@ service cloud.firestore {
         );
 
       allow create: if request.auth != null
-        && request.resource.data.ownerId == request.auth.uid;
+        && request.resource.data.ownerId == request.auth.uid
+        && request.resource.data.sharedWithEmails is list
+        && request.resource.data.editableEmails is list;
 
       allow update: if request.auth != null
         && (
-          resource.data.ownerId == request.auth.uid ||
-          request.auth.token.email.lower() in resource.data.sharedWithEmails
+          resource.data.ownerId == request.auth.uid
+          ||
+          (
+            request.auth.token.email.lower() in resource.data.editableEmails
+            && request.resource.data.ownerId == resource.data.ownerId
+            && request.resource.data.sharedWithEmails == resource.data.sharedWithEmails
+            && request.resource.data.editableEmails == resource.data.editableEmails
+          )
         );
 
       allow delete: if request.auth != null
         && resource.data.ownerId == request.auth.uid;
+
+      match /settlements/{settlementId} {
+        function projectData() {
+          return get(/databases/$(database)/documents/projects/$(projectId)).data;
+        }
+        function isOwner() {
+          return request.auth != null && projectData().ownerId == request.auth.uid;
+        }
+        function isEditor() {
+          return request.auth != null && request.auth.token.email.lower() in projectData().editableEmails;
+        }
+        function isMember() {
+          return request.auth != null && request.auth.token.email.lower() in projectData().sharedWithEmails;
+        }
+
+        allow read: if isOwner() || isMember();
+
+        allow create: if isOwner() || isEditor() || (
+          isMember()
+          && request.resource.data.status == 'pending'
+          && request.resource.data.reportedByEmail == request.auth.token.email.lower()
+        );
+
+        allow update: if (isOwner() || isEditor())
+          && request.resource.data.from == resource.data.from
+          && request.resource.data.to == resource.data.to
+          && request.resource.data.amount == resource.data.amount
+          && request.resource.data.reportedByEmail == resource.data.reportedByEmail;
+
+        allow delete: if isOwner() || isEditor();
+      }
     }
   }
 }`;
       import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js';
       import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, onAuthStateChanged, signOut, updateProfile, GoogleAuthProvider, signInWithPopup } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js';
-      import { getFirestore, collection, query, where, doc, setDoc, deleteDoc, onSnapshot, serverTimestamp, or } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js';
+      import { getFirestore, collection, query, where, doc, setDoc, updateDoc, deleteDoc, onSnapshot, serverTimestamp, or } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js';
 
       const firebaseConfig = {
         apiKey: 'AIzaSyAjDRJSIhRRxDZ7U3iSaz9PV7R4wqNdaEA',
@@ -1855,6 +1925,8 @@ service cloud.firestore {
       let projectDocs = [];
       let projectListUnsubscribe = null;
       let projectDocUnsubscribe = null;
+      let settlementsUnsubscribe = null;
+      let remoteSettlementsCache = [];
       const provider = new GoogleAuthProvider();
 
       const els = {
@@ -1869,7 +1941,13 @@ service cloud.firestore {
         settlementTo: document.getElementById('settlementTo'),
         settlementAmount: document.getElementById('settlementAmount'),
         settlementDate: document.getElementById('settlementDate'),
+        settlementNote: document.getElementById('settlementNote'),
         recordSettlementBtn: document.getElementById('recordSettlementBtn'),
+        openRecordSettlementBtn: document.getElementById('openRecordSettlementBtn'),
+        recordSettlementCancelBtn: document.getElementById('recordSettlementCancelBtn'),
+        recordSettlementModal: document.getElementById('recordSettlementModal'),
+        settlementStatusFilter: document.getElementById('settlementStatusFilter'),
+        settlementMemberFilter: document.getElementById('settlementMemberFilter'),
         themeToggleBtn: document.getElementById('themeToggleBtn'),
         themeToggleIcon: document.getElementById('themeToggleIcon'),
         themeToggleLabel: document.getElementById('themeToggleLabel'),
@@ -1975,6 +2053,24 @@ service cloud.firestore {
       if (els.themeToggleBtn) els.themeToggleBtn.addEventListener('click', toggleTheme);
       if (els.themeToggleTopBtn) els.themeToggleTopBtn.addEventListener('click', toggleTheme);
 
+      // Normalizes a raw settlement list against the current members (shared by normalizeState and
+      // by the live settlements subcollection listener, since settlements now sync independently).
+      function normalizeSettlementList(list, members) {
+        const safeMembers = Array.isArray(members) && members.length ? members : (state?.members || []);
+        return (Array.isArray(list) ? list : []).map((settlement) => ({
+          id: settlement?.id || crypto.randomUUID(),
+          from: settlement?.from || safeMembers[0]?.id || '',
+          to: settlement?.to || safeMembers[0]?.id || '',
+          amount: Number(settlement?.amount) || 0,
+          date: settlement?.date || new Date().toISOString().slice(0, 10),
+          note: settlement?.note || '',
+          status: settlement?.status === 'pending' || settlement?.status === 'rejected' ? settlement.status : 'confirmed',
+          createdBy: settlement?.createdBy || '',
+          reportedByEmail: settlement?.reportedByEmail || '',
+          createdAt: settlement?.createdAt || new Date().toISOString()
+        }));
+      }
+
       function normalizeState(inputState) {
         const base = inputState && typeof inputState === 'object' ? inputState : {};
         const members = Array.isArray(base.members) ? base.members : [];
@@ -2027,17 +2123,7 @@ service cloud.firestore {
               createdAt: expense?.createdAt || new Date().toISOString()
             };
           }),
-          settlements: settlements.map((settlement) => ({
-            id: settlement?.id || crypto.randomUUID(),
-            from: settlement?.from || members[0]?.id || '',
-            to: settlement?.to || members[0]?.id || '',
-            amount: Number(settlement?.amount) || 0,
-            date: settlement?.date || new Date().toISOString().slice(0, 10),
-            note: settlement?.note || '',
-            status: settlement?.status === 'pending' || settlement?.status === 'rejected' ? settlement.status : 'confirmed',
-            createdBy: settlement?.createdBy || '',
-            createdAt: settlement?.createdAt || new Date().toISOString()
-          })),
+          settlements: normalizeSettlementList(settlements, members),
           activityLog: activityLog.slice(-30).map(entry => ({
             id: entry?.id || crypto.randomUUID(),
             message: entry?.message || '',
@@ -2103,7 +2189,15 @@ service cloud.firestore {
           const sharedWithEmails = state.members
             .map(member => normalizeEmail(member.email))
             .filter(email => email);
-          await setDoc(projectRef, { state, sharedWithEmails, updatedAt: serverTimestamp() }, { merge: true });
+          const editableEmails = state.members
+            .filter(member => member.active !== false && member.canEdit !== false)
+            .map(member => normalizeEmail(member.email))
+            .filter(email => email);
+          // Settlements live in their own subcollection (with their own security rules) so a
+          // view-only member can report a pending transfer without needing write access to the
+          // rest of the project data. Strip them out before syncing the shared project blob.
+          const { settlements, ...stateForSync } = state;
+          await setDoc(projectRef, { state: stateForSync, sharedWithEmails, editableEmails, updatedAt: serverTimestamp() }, { merge: true });
         } catch (error) {
           console.error('Firebase save failed', error);
           showToast('تم الحفظ محليًا فقط بسبب مشكلة في Firebase');
@@ -2163,7 +2257,9 @@ service cloud.firestore {
 
       function subscribeToProject(projectId) {
         if (projectDocUnsubscribe) projectDocUnsubscribe();
+        if (settlementsUnsubscribe) settlementsUnsubscribe();
         currentProjectId = projectId;
+        remoteSettlementsCache = [];
         const projectRef = doc(db, 'projects', projectId);
         projectDocUnsubscribe = onSnapshot(projectRef, (snapshot) => {
           if (snapshot.exists()) {
@@ -2172,6 +2268,8 @@ service cloud.firestore {
             currentProjectOwnerName = remoteData.ownerName || remoteData.ownerEmail || '';
             if (remoteData && remoteData.state) {
               state = normalizeState(remoteData.state);
+              // Settlements sync via their own subcollection listener below, not the project blob.
+              state.settlements = normalizeSettlementList(remoteSettlementsCache, state.members);
               localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
             }
             render();
@@ -2181,6 +2279,15 @@ service cloud.firestore {
         }, (error) => {
           console.error('Firestore project error', error);
           showToast('خطأ في تحميل المشروع');
+        });
+        const settlementsRef = collection(db, 'projects', projectId, 'settlements');
+        settlementsUnsubscribe = onSnapshot(settlementsRef, (snapshot) => {
+          remoteSettlementsCache = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
+          state.settlements = normalizeSettlementList(remoteSettlementsCache, state.members);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+          render();
+        }, (error) => {
+          console.error('Firestore settlements error', error);
         });
       }
 
@@ -2204,6 +2311,7 @@ service cloud.firestore {
           ownerId: currentUser.uid,
           ownerEmail: currentUser.email || '',
           sharedWithEmails: ownerEmail ? [ownerEmail] : [],
+          editableEmails: ownerEmail ? [ownerEmail] : [],
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
           state: {
@@ -2266,6 +2374,10 @@ service cloud.firestore {
           if (projectDocUnsubscribe) {
             projectDocUnsubscribe();
             projectDocUnsubscribe = null;
+          }
+          if (settlementsUnsubscribe) {
+            settlementsUnsubscribe();
+            settlementsUnsubscribe = null;
           }
         }
         try {
@@ -2619,7 +2731,7 @@ service cloud.firestore {
           const debtor = debtors[j];
           const amount = Math.min(creditor.balance, Math.abs(debtor.balance));
           if (amount > 0.0001) {
-            transfers.push({ from: debtor.name, to: creditor.name, amount });
+            transfers.push({ from: debtor.name, to: creditor.name, fromId: debtor.id, toId: creditor.id, amount });
             creditor.balance -= amount;
             debtor.balance += amount;
           }
@@ -2855,6 +2967,7 @@ service cloud.firestore {
         if (!user) {
           if (projectListUnsubscribe) projectListUnsubscribe();
           if (projectDocUnsubscribe) projectDocUnsubscribe();
+          if (settlementsUnsubscribe) settlementsUnsubscribe();
           currentProjectId = null;
           currentProjectOwnerId = null;
           projectDocs = [];
@@ -3115,6 +3228,7 @@ service cloud.firestore {
         renderMembers(metrics.balances);
         renderExpenses();
         renderSettlement(metrics.balances);
+        populateSettlementFilterOptions();
         renderSettlementHistory();
         populateSettlementOptions(metrics.balances);
         renderSettingsMembers();
@@ -3217,17 +3331,52 @@ service cloud.firestore {
 
       function renderSettlement(balances) {
         const transfers = computeSettlement(balances.map(item => ({ ...item, balance: item.balance })));
+        const editable = canEdit();
         if (!transfers.length) {
           els.settlementList.innerHTML = '<div class="empty">لا توجد تسويات مطلوبة حالياً، كل الأرصدة متوازنة.</div>';
           return;
         }
         els.settlementList.innerHTML = transfers.map(tx => `
-          <div class="member-card" style="margin-bottom:8px;">
-            <strong>${escapeHtml(tx.from)} → ${escapeHtml(tx.to)}</strong>
-            <div class="label">المبلغ: ${formatCurrency(tx.amount)}</div>
+          <div class="member-card member-settings-row" style="margin-bottom:8px;">
+            <div class="member-settings-info">
+              <strong>${escapeHtml(tx.from)} → ${escapeHtml(tx.to)}</strong>
+              <div class="label">المبلغ: ${formatCurrency(tx.amount)}</div>
+            </div>
+            <div class="actions member-settings-actions">
+              <button class="btn btn-primary" onclick="quickSettle('${escapeHtml(tx.fromId)}','${escapeHtml(tx.toId)}',${tx.amount})" ${editable ? '' : 'disabled'}>تسديد الآن</button>
+            </div>
           </div>
         `).join('');
       }
+
+      // Pre-fills and submits the transfer form directly from a suggested settlement, so the owner
+      // can confirm a payoff in one click instead of retyping the same from/to/amount manually.
+      function quickSettle(fromId, toId, amount) {
+        if (!canEdit()) {
+          showToast('هذا الحساب لا يملك صلاحية التعديل');
+          return;
+        }
+        els.settlementFrom.disabled = false;
+        els.settlementFrom.value = fromId;
+        els.settlementTo.value = toId;
+        els.settlementAmount.value = amount.toFixed(2);
+        if (!els.settlementDate.value) els.settlementDate.value = new Date().toISOString().slice(0, 10);
+        recordSettlement();
+      }
+      window.quickSettle = quickSettle;
+
+      function openRecordSettlementModal() {
+        if (!isProjectParticipant()) {
+          showToast('لازم تكون عضو في المشروع عشان تسجل تحويل');
+          return;
+        }
+        if (els.recordSettlementModal) els.recordSettlementModal.classList.add('open');
+      }
+      function closeRecordSettlementModal() {
+        if (els.recordSettlementModal) els.recordSettlementModal.classList.remove('open');
+      }
+      window.openRecordSettlementModal = openRecordSettlementModal;
+      window.closeRecordSettlementModal = closeRecordSettlementModal;
 
       // Orders members so people owed money (creditors) appear first, then balanced, then debtors.
       function populateSettlementOptions(balances) {
@@ -3262,9 +3411,17 @@ service cloud.firestore {
 
       function renderSettlementHistory() {
         if (!els.settlementHistoryList) return;
-        const settlements = [...(state.settlements || [])].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        let settlements = [...(state.settlements || [])].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        const statusFilter = els.settlementStatusFilter ? els.settlementStatusFilter.value : '';
+        const memberFilter = els.settlementMemberFilter ? els.settlementMemberFilter.value : '';
+        if (statusFilter) {
+          settlements = settlements.filter(item => (item.status || 'confirmed') === statusFilter);
+        }
+        if (memberFilter) {
+          settlements = settlements.filter(item => item.from === memberFilter || item.to === memberFilter);
+        }
         if (!settlements.length) {
-          els.settlementHistoryList.innerHTML = '<div class="empty">لا توجد تحويلات مسجلة بعد.</div>';
+          els.settlementHistoryList.innerHTML = '<div class="empty">لا توجد تحويلات مطابقة.</div>';
           return;
         }
         const editable = canEdit();
@@ -3280,6 +3437,7 @@ service cloud.firestore {
             <div class="member-settings-info">
               <strong>${escapeHtml(getMemberName(settlement.from))} → ${escapeHtml(getMemberName(settlement.to))}</strong>
               <div class="label">${formatCurrency(settlement.amount)} • ${escapeHtml(settlement.date)} • ${statusLabel[status] || statusLabel.confirmed}</div>
+              ${settlement.note ? `<div class="label">📝 ${escapeHtml(settlement.note)}</div>` : ''}
             </div>
             <div class="actions member-settings-actions">
               ${actions}
@@ -3289,17 +3447,32 @@ service cloud.firestore {
         }).join('');
       }
 
-      function recordSettlement() {
+      function populateSettlementFilterOptions() {
+        if (!els.settlementMemberFilter) return;
+        const prev = els.settlementMemberFilter.value;
+        els.settlementMemberFilter.innerHTML = '<option value="">كل الأعضاء</option>' +
+          state.members.map(member => `<option value="${member.id}">${escapeHtml(member.name)}</option>`).join('');
+        els.settlementMemberFilter.value = prev;
+      }
+
+      // True when the current project is a live Firestore project and the settlements
+      // subcollection (not the local state array) is the source of truth to write to.
+      function isRemoteProject() {
+        return isFirebaseReady && !!currentProjectId && isProjectParticipant();
+      }
+
+      async function recordSettlement() {
         const editable = canEdit();
         const currentMember = getCurrentMember();
         const from = els.settlementFrom.value;
         const to = els.settlementTo.value;
         const amount = Number(els.settlementAmount.value);
         const date = els.settlementDate.value || new Date().toISOString().slice(0, 10);
+        const note = (els.settlementNote && els.settlementNote.value || '').trim();
 
         if (!editable) {
           // A member without edit rights can only report a transfer that *they themselves* sent,
-          // and it goes in as "pending" until the owner confirms it.
+          // and it goes in as "pending" until someone with edit rights confirms it.
           if (!currentMember) {
             showToast('هذا الحساب لا يملك صلاحية التعديل');
             return;
@@ -3322,37 +3495,67 @@ service cloud.firestore {
           showToast('أدخل مبلغًا صحيحًا');
           return;
         }
-        state = normalizeState(state);
+
         const status = editable ? 'confirmed' : 'pending';
-        state.settlements.push({
-          id: crypto.randomUUID(),
+        const settlementPayload = {
           from,
           to,
           amount,
           date,
-          note: '',
+          note,
           status,
           createdBy: currentMember ? currentMember.id : (editable ? 'owner' : ''),
+          reportedByEmail: currentUser ? normalizeEmail(currentUser.email) : '',
           createdAt: new Date().toISOString()
-        });
+        };
+
+        if (isRemoteProject()) {
+          // Written straight to the settlements subcollection so Firestore's own rules — not just
+          // this UI — enforce that a non-editor can only create a pending record about themselves.
+          const settlementId = crypto.randomUUID();
+          try {
+            await setDoc(doc(db, 'projects', currentProjectId, 'settlements', settlementId), settlementPayload);
+          } catch (error) {
+            console.error('Failed to record settlement', error);
+            showToast('تعذر تسجيل التحويل، حاول مرة أخرى');
+            return;
+          }
+          // Optimistic local update so the UI reflects it instantly; the live listener will reconcile.
+          state.settlements.push({ id: settlementId, ...settlementPayload });
+        } else {
+          state = normalizeState(state);
+          state.settlements.push({ id: crypto.randomUUID(), ...settlementPayload });
+        }
+
         if (status === 'pending') {
-          logActivity(`"${getMemberName(from)}" أبلغ بتحويل ${formatCurrency(amount)} إلى "${getMemberName(to)}" - في انتظار تأكيد المالك`);
+          logActivity(`"${getMemberName(from)}" أبلغ بتحويل ${formatCurrency(amount)} إلى "${getMemberName(to)}" - في انتظار التأكيد`);
         } else {
           logActivity(`تم تسجيل تحويل ${formatCurrency(amount)} من "${getMemberName(from)}" إلى "${getMemberName(to)}"`);
         }
         els.settlementAmount.value = '';
+        if (els.settlementNote) els.settlementNote.value = '';
+        closeRecordSettlementModal();
         saveState();
         render();
-        showToast(status === 'pending' ? 'تم إرسال التحويل لتأكيد المالك' : 'تم تسجيل التحويل');
+        showToast(status === 'pending' ? 'تم إرسال التحويل لتأكيد صاحب الصلاحية' : 'تم تسجيل التحويل');
       }
 
-      function deleteSettlement(id) {
+      async function deleteSettlement(id) {
         if (!canEdit()) {
           showToast('هذا الحساب لا يملك صلاحية التعديل');
           return;
         }
         const settlement = state.settlements.find(item => item.id === id);
         if (!settlement) return;
+        if (isRemoteProject()) {
+          try {
+            await deleteDoc(doc(db, 'projects', currentProjectId, 'settlements', id));
+          } catch (error) {
+            console.error('Failed to delete settlement', error);
+            showToast('تعذر حذف التحويل');
+            return;
+          }
+        }
         state.settlements = state.settlements.filter(item => item.id !== id);
         logActivity(`تم حذف تحويل ${formatCurrency(settlement.amount)} من "${getMemberName(settlement.from)}" إلى "${getMemberName(settlement.to)}"`);
         saveState();
@@ -3361,14 +3564,23 @@ service cloud.firestore {
       }
       window.deleteSettlement = deleteSettlement;
 
-      // Owner-only: confirm a settlement a member reported themselves. Once confirmed it counts toward balances.
-      function confirmSettlement(id) {
+      // Only an owner/editor can confirm a settlement a member reported themselves. Once confirmed it counts toward balances.
+      async function confirmSettlement(id) {
         if (!canEdit()) {
           showToast('هذا الحساب لا يملك صلاحية التعديل');
           return;
         }
         const settlement = state.settlements.find(item => item.id === id);
         if (!settlement) return;
+        if (isRemoteProject()) {
+          try {
+            await updateDoc(doc(db, 'projects', currentProjectId, 'settlements', id), { status: 'confirmed' });
+          } catch (error) {
+            console.error('Failed to confirm settlement', error);
+            showToast('تعذر تأكيد التحويل');
+            return;
+          }
+        }
         settlement.status = 'confirmed';
         logActivity(`تم تأكيد تحويل ${formatCurrency(settlement.amount)} من "${getMemberName(settlement.from)}" إلى "${getMemberName(settlement.to)}"`);
         saveState();
@@ -3377,14 +3589,23 @@ service cloud.firestore {
       }
       window.confirmSettlement = confirmSettlement;
 
-      // Owner-only: reject a settlement a member reported themselves (e.g. it never actually happened).
-      function rejectSettlement(id) {
+      // Only an owner/editor can reject a settlement a member reported themselves (e.g. it never actually happened).
+      async function rejectSettlement(id) {
         if (!canEdit()) {
           showToast('هذا الحساب لا يملك صلاحية التعديل');
           return;
         }
         const settlement = state.settlements.find(item => item.id === id);
         if (!settlement) return;
+        if (isRemoteProject()) {
+          try {
+            await updateDoc(doc(db, 'projects', currentProjectId, 'settlements', id), { status: 'rejected' });
+          } catch (error) {
+            console.error('Failed to reject settlement', error);
+            showToast('تعذر رفض التحويل');
+            return;
+          }
+        }
         settlement.status = 'rejected';
         logActivity(`تم رفض تحويل ${formatCurrency(settlement.amount)} من "${getMemberName(settlement.from)}" إلى "${getMemberName(settlement.to)}"`);
         saveState();
@@ -3931,6 +4152,15 @@ service cloud.firestore {
       if (els.saveExpenseBtn) els.saveExpenseBtn.addEventListener('click', saveExpense);
       if (els.saveSettingsBtn) els.saveSettingsBtn.addEventListener('click', saveProjectSettings);
       if (els.recordSettlementBtn) els.recordSettlementBtn.addEventListener('click', recordSettlement);
+      if (els.openRecordSettlementBtn) els.openRecordSettlementBtn.addEventListener('click', openRecordSettlementModal);
+      if (els.recordSettlementCancelBtn) els.recordSettlementCancelBtn.addEventListener('click', closeRecordSettlementModal);
+      if (els.recordSettlementModal) {
+        els.recordSettlementModal.addEventListener('click', (event) => {
+          if (event.target === els.recordSettlementModal) closeRecordSettlementModal();
+        });
+      }
+      if (els.settlementStatusFilter) els.settlementStatusFilter.addEventListener('change', renderSettlementHistory);
+      if (els.settlementMemberFilter) els.settlementMemberFilter.addEventListener('change', renderSettlementHistory);
       if (els.addMemberBtn) els.addMemberBtn.addEventListener('click', addMember);
       if (els.addCategoryBtn) els.addCategoryBtn.addEventListener('click', addCategory);
       if (els.addExpenseBtn) els.addExpenseBtn.addEventListener('click', () => {
