@@ -327,20 +327,26 @@
         justify-content: space-between;
         align-items: center;
         gap: var(--space-4);
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
       }
 
-      .topbar-title { min-width: 0; }
+      .topbar-title { min-width: 0; flex-shrink: 1; overflow: hidden; }
       .topbar h2 {
         margin: 0;
         font-size: 1.3rem;
         font-weight: 800;
         letter-spacing: -0.01em;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
       #topSubtitle {
         margin-top: 4px;
         font-size: 0.85rem;
         color: var(--text-secondary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       .actions {
@@ -349,6 +355,7 @@
         gap: var(--space-2);
         align-items: center;
         justify-content: flex-end;
+        flex-shrink: 0;
       }
       .actions-primary { display: flex; gap: var(--space-2); align-items: center; }
       .actions-secondary { display: flex; gap: var(--space-2); align-items: center; padding-right: var(--space-3); border-right: 1px solid var(--border); }
@@ -2087,7 +2094,7 @@
         <div class="login-aside">
           <div class="brand" style="color:#fff; font-size:1.6rem; gap: 12px;">
             <span class="login-aside-logo-mark"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
-            <span>Hesabna<small style="color:rgba(238,243,255,0.7); display:block; -webkit-text-fill-color:rgba(238,243,255,0.7);">حاسبني</small></span>
+            <span>Hesabna<small style="color:rgba(238,243,255,0.7); display:block; -webkit-text-fill-color:rgba(238,243,255,0.7);">حسابنا</small></span>
           </div>
           <p class="login-aside-tagline">نظّم مصاريف مشروع التخرج مع فريقك، واعرف مين له ومين عليه في ثانية.</p>
           <ul class="login-aside-features">
@@ -2147,7 +2154,7 @@
       <aside class="sidebar">
         <div class="brand">
           Hesabna
-          <small>حاسبني</small>
+          <small>حسابنا</small>
         </div>
         <div class="panel sidebar-panel">
           <div style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
@@ -3400,7 +3407,7 @@ service cloud.firestore {
           </div>
 
           <div style="padding:28px 40px;">
-            <h2 style="font-size:15px;margin:0 0 12px;color:#1a1f2b;border-bottom:2px solid #3366dd;padding-bottom:6px;display:inline-block;">أرصدة الأعضاء</h2>
+            <h2 class="pdf-block" style="font-size:15px;margin:0 0 12px;color:#1a1f2b;border-bottom:2px solid #3366dd;padding-bottom:6px;display:inline-block;">أرصدة الأعضاء</h2>
             <table style="width:100%;border-collapse:collapse;margin-bottom:26px;">
               <thead>
                 <tr style="background:#eef2ff;">
@@ -3412,7 +3419,7 @@ service cloud.firestore {
               </thead>
               <tbody>
                 ${metrics.balances.map((member, i) => `
-                  <tr style="background:${i % 2 ? '#fafbff' : '#ffffff'};">
+                  <tr class="pdf-block" style="background:${i % 2 ? '#fafbff' : '#ffffff'};">
                     <td style="padding:9px 10px;font-size:12.5px;border-bottom:1px solid #eef1f7;">${escapeHtml(member.name)}</td>
                     <td style="padding:9px 10px;font-size:12.5px;border-bottom:1px solid #eef1f7;">${formatCurrencyPdf(member.paid)}</td>
                     <td style="padding:9px 10px;font-size:12.5px;border-bottom:1px solid #eef1f7;">${formatCurrencyPdf(member.share)}</td>
@@ -3422,12 +3429,12 @@ service cloud.firestore {
               </tbody>
             </table>
 
-            <h2 style="font-size:15px;margin:0 0 12px;color:#1a1f2b;border-bottom:2px solid #3366dd;padding-bottom:6px;display:inline-block;">المصاريف حسب الفئة</h2>
+            <h2 class="pdf-block" style="font-size:15px;margin:0 0 12px;color:#1a1f2b;border-bottom:2px solid #3366dd;padding-bottom:6px;display:inline-block;">المصاريف حسب الفئة</h2>
             <div style="margin-bottom:26px;">
               ${categoryRows.length ? categoryRows.map(([cat, amount]) => {
                 const pct = Math.round((amount / categoryGrandTotal) * 100);
                 return `
-                  <div style="margin-bottom:10px;">
+                  <div class="pdf-block" style="margin-bottom:10px;">
                     <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px;">
                       <span style="font-weight:600;">${escapeHtml(cat)}</span>
                       <span style="color:#6b7280;">${formatCurrencyPdf(amount)} &middot; ${pct}%</span>
@@ -3439,7 +3446,7 @@ service cloud.firestore {
               }).join('') : `<div style="font-size:12.5px;color:#8a90a3;">لا توجد مصاريف بعد.</div>`}
             </div>
 
-            <h2 style="font-size:15px;margin:0 0 12px;color:#1a1f2b;border-bottom:2px solid #3366dd;padding-bottom:6px;display:inline-block;">سجل المصاريف</h2>
+            <h2 class="pdf-block" style="font-size:15px;margin:0 0 12px;color:#1a1f2b;border-bottom:2px solid #3366dd;padding-bottom:6px;display:inline-block;">سجل المصاريف</h2>
             <table style="width:100%;border-collapse:collapse;margin-bottom:26px;">
               <thead>
                 <tr style="background:#eef2ff;">
@@ -3452,8 +3459,8 @@ service cloud.firestore {
               </thead>
               <tbody>
                 ${state.expenses.map((expense, i) => `
-                  <tr style="background:${i % 2 ? '#fafbff' : '#ffffff'};">
-                    <td style="padding:9px 10px;font-size:12px;border-bottom:1px solid #eef1f7;">${escapeHtml(expense.itemName)}</td>
+                  <tr class="pdf-block" style="background:${i % 2 ? '#fafbff' : '#ffffff'};">
+                    <td style="padding:9px 10px;font-size:12px;border-bottom:1px solid #eef1f7;overflow-wrap:anywhere;">${escapeHtml(expense.itemName)}</td>
                     <td style="padding:9px 10px;font-size:12px;border-bottom:1px solid #eef1f7;font-weight:600;">${formatCurrencyPdf(expense.amount)}</td>
                     <td style="padding:9px 10px;font-size:12px;border-bottom:1px solid #eef1f7;color:#6b7280;">${escapeHtml(expense.category || 'أخرى')}</td>
                     <td style="padding:9px 10px;font-size:12px;border-bottom:1px solid #eef1f7;">${escapeHtml(getMemberName(expense.paidBy))}</td>
@@ -3463,17 +3470,17 @@ service cloud.firestore {
               </tbody>
             </table>
 
-            <h2 style="font-size:15px;margin:0 0 12px;color:#1a1f2b;border-bottom:2px solid #3366dd;padding-bottom:6px;display:inline-block;">التسوية المقترحة</h2>
+            <h2 class="pdf-block" style="font-size:15px;margin:0 0 12px;color:#1a1f2b;border-bottom:2px solid #3366dd;padding-bottom:6px;display:inline-block;">التسوية المقترحة</h2>
             ${settlement.length ? `
               <div>
                 ${settlement.map(tx => `
-                  <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;margin-bottom:8px;background:#fafbff;border:1px solid #eef1f7;border-radius:8px;">
-                    <span style="font-size:12.5px;font-weight:600;">${escapeHtml(tx.from)} &larr; ${escapeHtml(tx.to)}</span>
+                  <div class="pdf-block" style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;margin-bottom:8px;background:#fafbff;border:1px solid #eef1f7;border-radius:8px;">
+                    <span style="font-size:12.5px;font-weight:600;">${escapeHtml(tx.from)} &rarr; ${escapeHtml(tx.to)}</span>
                     <span style="font-size:12.5px;font-weight:700;color:#3366dd;">${formatCurrencyPdf(tx.amount)}</span>
                   </div>`).join('')}
               </div>` : `<div style="font-size:12.5px;color:#8a90a3;">لا توجد تسويات مطلوبة حالياً، كل الأرصدة متوازنة.</div>`}
 
-            <h2 style="font-size:15px;margin:26px 0 12px;color:#1a1f2b;border-bottom:2px solid #3366dd;padding-bottom:6px;display:inline-block;">سجل التسويات</h2>
+            <h2 class="pdf-block" style="font-size:15px;margin:26px 0 12px;color:#1a1f2b;border-bottom:2px solid #3366dd;padding-bottom:6px;display:inline-block;">سجل التسويات</h2>
             <table style="width:100%;border-collapse:collapse;margin-bottom:26px;">
               <thead>
                 <tr style="background:#eef2ff;">
@@ -3486,7 +3493,7 @@ service cloud.firestore {
               </thead>
               <tbody>
                 ${(state.settlements || []).map((settlement2, i) => `
-                  <tr style="background:${i % 2 ? '#fafbff' : '#ffffff'};">
+                  <tr class="pdf-block" style="background:${i % 2 ? '#fafbff' : '#ffffff'};">
                     <td style="padding:9px 10px;font-size:12px;border-bottom:1px solid #eef1f7;">${escapeHtml(getMemberName(settlement2.from))}</td>
                     <td style="padding:9px 10px;font-size:12px;border-bottom:1px solid #eef1f7;">${escapeHtml(getMemberName(settlement2.to))}</td>
                     <td style="padding:9px 10px;font-size:12px;border-bottom:1px solid #eef1f7;font-weight:600;">${formatCurrencyPdf(settlement2.amount)}</td>
@@ -3497,11 +3504,11 @@ service cloud.firestore {
               </tbody>
             </table>
 
-            <h2 style="font-size:15px;margin:0 0 12px;color:#1a1f2b;border-bottom:2px solid #3366dd;padding-bottom:6px;display:inline-block;">سجل النشاطات</h2>
+            <h2 class="pdf-block" style="font-size:15px;margin:0 0 12px;color:#1a1f2b;border-bottom:2px solid #3366dd;padding-bottom:6px;display:inline-block;">سجل النشاطات</h2>
             <div>
               ${(state.activityLog || []).length ? (state.activityLog || []).map((entry, i) => `
-                <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:8px 12px;margin-bottom:6px;background:${i % 2 ? '#fafbff' : '#ffffff'};border:1px solid #eef1f7;border-radius:8px;">
-                  <span style="font-size:12px;flex:1;">${escapeHtml(entry.message)}</span>
+                <div class="pdf-block" style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:8px 12px;margin-bottom:6px;background:${i % 2 ? '#fafbff' : '#ffffff'};border:1px solid #eef1f7;border-radius:8px;">
+                  <span style="font-size:12px;flex:1;overflow-wrap:anywhere;">${escapeHtml(entry.message)}</span>
                   <span style="font-size:11px;color:#9aa1b3;white-space:nowrap;">${escapeHtml(new Date(entry.createdAt).toLocaleString('ar-EG', { dateStyle: 'medium', timeStyle: 'short' }))}</span>
                 </div>
               `).join('') : `<div style="font-size:12.5px;color:#8a90a3;">لا يوجد نشاط مسجل بعد.</div>`}
@@ -3539,6 +3546,19 @@ service cloud.firestore {
             scrollX: 0,
             scrollY: 0
           });
+
+          // Collect the top/bottom edge of every row/card/heading (marked with the
+          // .pdf-block class above) in canvas-pixel space, so page breaks can snap to
+          // a safe gap between them instead of slicing straight through a table row,
+          // a settlement card, or leaving a section heading stranded alone at the
+          // bottom of a page.
+          const containerRect = docContainer.getBoundingClientRect();
+          const scaleFactor = canvas.width / docContainer.offsetWidth;
+          const safeBoundaries = Array.from(docContainer.querySelectorAll('.pdf-block')).flatMap(el => {
+            const r = el.getBoundingClientRect();
+            return [(r.top - containerRect.top) * scaleFactor, (r.bottom - containerRect.top) * scaleFactor];
+          }).sort((a, b) => a - b);
+
           const pdf = new jspdf.jsPDF({ orientation: 'portrait', unit: 'pt', format: 'a4' });
           const pageWidth = pdf.internal.pageSize.getWidth();
           const pageHeight = pdf.internal.pageSize.getHeight();
@@ -3546,11 +3566,20 @@ service cloud.firestore {
           const imgHeight = (canvas.height * imgWidth) / canvas.width;
           const pxPerPdfPt = canvas.height / imgHeight;
           const pageHeightPx = pageHeight * pxPerPdfPt;
+          const footerReservePx = 26 * pxPerPdfPt; // room for the page-number footer added below
 
           let renderedHeight = 0;
           let pageIndex = 0;
           while (renderedHeight < canvas.height) {
-            const sliceHeight = Math.min(pageHeightPx, canvas.height - renderedHeight);
+            const idealEnd = Math.min(canvas.height, renderedHeight + pageHeightPx - footerReservePx);
+            // Prefer the closest safe boundary that still leaves a reasonably full page
+            // (at least 55% of a page) — otherwise just cut at the ideal point, so a
+            // single oversized block can't stall pagination or leave near-empty pages.
+            const minFill = renderedHeight + pageHeightPx * 0.55;
+            const snapped = safeBoundaries.filter(b => b > minFill && b <= idealEnd).pop();
+            const sliceEnd = snapped || idealEnd;
+            const sliceHeight = Math.max(1, Math.min(sliceEnd - renderedHeight, canvas.height - renderedHeight));
+
             const pageCanvas = document.createElement('canvas');
             pageCanvas.width = canvas.width;
             pageCanvas.height = sliceHeight;
@@ -3563,6 +3592,15 @@ service cloud.firestore {
             pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, (sliceHeight * imgWidth) / canvas.width);
             renderedHeight += sliceHeight;
             pageIndex += 1;
+          }
+
+          // Page numbers, added once the total page count is known.
+          const totalPages = pdf.internal.getNumberOfPages();
+          for (let p = 1; p <= totalPages; p += 1) {
+            pdf.setPage(p);
+            pdf.setFontSize(9);
+            pdf.setTextColor(150, 155, 170);
+            pdf.text(`${p} / ${totalPages}`, pageWidth / 2, pageHeight - 14, { align: 'center' });
           }
 
           pdf.save(`${state.projectName || 'project-report'}.pdf`);
@@ -5534,7 +5572,7 @@ service cloud.firestore {
       if (els.resetPasswordBtn) els.resetPasswordBtn.addEventListener('click', () => { resetPassword(); closeLoginMoreMenu(); });
       if (els.googleSignInBtn) els.googleSignInBtn.addEventListener('click', withLoading(els.googleSignInBtn, signInWithGoogle));
       if (els.createAccountBtn) els.createAccountBtn.addEventListener('click', () => { openAuthModal('signup'); closeLoginMoreMenu(); });
-      if (els.downloadPdfBtn) els.downloadPdfBtn.addEventListener('click', downloadProjectPdf);
+      if (els.downloadPdfBtn) els.downloadPdfBtn.addEventListener('click', withLoading(els.downloadPdfBtn, downloadProjectPdf));
       if (els.saveProfileBtn) els.saveProfileBtn.addEventListener('click', withLoading(els.saveProfileBtn, saveProfile));
       if (els.editProfileBtn) els.editProfileBtn.addEventListener('click', openProfileEditModal);
       if (els.profileEditCancelBtn) els.profileEditCancelBtn.addEventListener('click', closeProfileEditModal);
