@@ -107,6 +107,9 @@
         --primary: #3366dd;
         --primary-strong: #274db3;
         --primary-light: #5a8eff;
+        --success: #0f9d69;
+        --danger: #d64545;
+        --warning: #b8860b;
         --border: rgba(16, 24, 55, 0.12);
         --border-strong: rgba(16, 24, 55, 0.22);
         --bg-gradient: linear-gradient(135deg, #eef2fb 0%, #f7f9fd 50%, #eef4ff 100%);
@@ -311,6 +314,27 @@
       }
       .btn:hover { transform: translateY(-2px); }
       .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+      .btn.btn-loading { position: relative; color: transparent !important; pointer-events: none; }
+      .btn.btn-loading svg { visibility: hidden; }
+      .btn.btn-loading::after {
+        content: '';
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        border: 2px solid rgba(255, 255, 255, 0.4);
+        border-top-color: #fff;
+        animation: btnSpin 0.7s linear infinite;
+      }
+      .btn-secondary.btn-loading::after,
+      .btn-danger.btn-loading::after {
+        border: 2px solid rgba(90, 142, 255, 0.25);
+        border-top-color: var(--primary);
+      }
+      @keyframes btnSpin { to { transform: rotate(360deg); } }
+      @media (prefers-reduced-motion: reduce) {
+        .btn.btn-loading::after { animation: none; }
+      }
 
       .btn-primary {
         background: linear-gradient(135deg, var(--primary), var(--primary-strong));
@@ -378,7 +402,24 @@
         display: flex;
         flex-direction: column;
         gap: 8px;
+        position: relative;
+        overflow: hidden;
       }
+      .card-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 4px;
+        flex-shrink: 0;
+      }
+      .card-icon svg { display: block; }
+      #statTotal .card-icon { background: rgba(90, 142, 255, 0.12); color: var(--primary-light); }
+      #statShare .card-icon { background: rgba(52, 211, 153, 0.12); color: #6ee7b7; }
+      #statMembers .card-icon { background: rgba(255, 217, 61, 0.12); color: #ffd93d; }
+      #statName .card-icon { background: rgba(255, 138, 101, 0.12); color: #ffab91; }
       .card .label { 
         font-size: 0.82rem; 
         color: var(--muted); 
@@ -390,6 +431,18 @@
         font-size: 1.8rem; 
         font-weight: 800;
         letter-spacing: -0.01em;
+      }
+      @media (hover: hover) {
+        .card { transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease; }
+        .card:hover { transform: translateY(-2px); border-color: rgba(90, 142, 255, 0.3); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); }
+      }
+      .card.stat-flash { animation: statFlash 0.6s ease; }
+      @keyframes statFlash {
+        0% { background-color: rgba(90, 142, 255, 0.18); }
+        100% { background-color: transparent; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .card.stat-flash { animation: none; }
       }
 
       /* ===== Profile hero ===== */
@@ -528,6 +581,39 @@
         from { opacity: 0; transform: translateY(10px); }
         to { opacity: 1; transform: translateY(0); }
       }
+      @keyframes listItemIn {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .settings-tab-fade { animation: sectionIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) both; }
+      @media (prefers-reduced-motion: reduce) {
+        .settings-tab-fade { animation: none; }
+      }
+      .member-card, .project-item, .category-row, .activity-item, #expensesTable tr {
+        animation: listItemIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+      }
+      .stats-grid .card { animation: listItemIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) both; }
+      .stats-grid .card:nth-child(1) { animation-delay: 0.02s; }
+      .stats-grid .card:nth-child(2) { animation-delay: 0.06s; }
+      .stats-grid .card:nth-child(3) { animation-delay: 0.1s; }
+      .stats-grid .card:nth-child(4) { animation-delay: 0.14s; }
+      .member-card:nth-child(1), .project-item:nth-child(1), .category-row:nth-child(1), .activity-item:nth-child(1), #expensesTable tr:nth-child(1) { animation-delay: 0.02s; }
+      .member-card:nth-child(2), .project-item:nth-child(2), .category-row:nth-child(2), .activity-item:nth-child(2), #expensesTable tr:nth-child(2) { animation-delay: 0.06s; }
+      .member-card:nth-child(3), .project-item:nth-child(3), .category-row:nth-child(3), .activity-item:nth-child(3), #expensesTable tr:nth-child(3) { animation-delay: 0.1s; }
+      .member-card:nth-child(4), .project-item:nth-child(4), .category-row:nth-child(4), .activity-item:nth-child(4), #expensesTable tr:nth-child(4) { animation-delay: 0.14s; }
+      .member-card:nth-child(5), .project-item:nth-child(5), .category-row:nth-child(5), .activity-item:nth-child(5), #expensesTable tr:nth-child(5) { animation-delay: 0.18s; }
+      .member-card:nth-child(n+6), .project-item:nth-child(n+6), .category-row:nth-child(n+6), .activity-item:nth-child(n+6), #expensesTable tr:nth-child(n+6) { animation-delay: 0.2s; }
+      @keyframes rowOut {
+        to { opacity: 0; transform: scale(0.96) translateY(-6px); }
+      }
+      .row-exit { animation: rowOut 0.22s ease forwards; pointer-events: none; }
+      @media (prefers-reduced-motion: reduce) {
+        .row-exit { animation: none; opacity: 0; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .member-card, .project-item, .category-row, .activity-item, #expensesTable tr, .stats-grid .card { animation: none; }
+        .filters-advanced { transition: none; }
+      }
       @media (prefers-reduced-motion: reduce) {
         .content-section.active { animation: none; }
       }
@@ -610,6 +696,14 @@
       }
       .member-menu-dropdown.open {
         display: flex;
+        animation: dropdownIn 0.16s cubic-bezier(0.16, 1, 0.3, 1) both;
+      }
+      @keyframes dropdownIn {
+        from { opacity: 0; transform: translateY(-4px) scale(0.96); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .member-menu-dropdown.open { animation: none; }
       }
       .member-menu-dropdown button {
         width: 100%;
@@ -722,6 +816,33 @@
       .settings-badge.usage { background: rgba(90, 142, 255, 0.1); color: var(--primary-light); border-color: rgba(90, 142, 255, 0.25); }
       .settings-badge.default { background: rgba(255, 217, 61, 0.1); color: #ffd93d; border-color: rgba(255, 217, 61, 0.25); }
 
+      /* ===== Danger zone ===== */
+      .danger-zone {
+        margin-top: 28px;
+        padding: 16px;
+        border: 1px solid rgba(255, 107, 107, 0.3);
+        border-radius: var(--radius-md);
+        background: rgba(255, 107, 107, 0.05);
+      }
+      .danger-zone-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #ff6b6b;
+        font-weight: 700;
+        font-size: 0.92rem;
+        margin-bottom: 8px;
+      }
+
+      .add-entity-card {
+        padding: 16px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        background: rgba(90, 142, 255, 0.04);
+        margin-bottom: 16px;
+      }
+      .add-entity-card .form-grid { margin-bottom: 0; }
+
       /* ===== Category breakdown (new) ===== */
       .category-breakdown { display: flex; flex-direction: column; gap: var(--space-3); }
       .category-row { display: flex; flex-direction: column; gap: 4px; }
@@ -738,6 +859,11 @@
         height: 100%;
         border-radius: 999px;
         background: linear-gradient(90deg, var(--primary), var(--primary-light));
+        width: 0;
+        transition: width 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .category-bar-fill { transition: none; }
       }
 
       /* ===== Activity feed (new) ===== */
@@ -816,6 +942,24 @@
         box-shadow: 0 0 0 3px rgba(90, 142, 255, 0.1);
       }
       textarea { min-height: 96px; resize: vertical; }
+      input.field-invalid, select.field-invalid, textarea.field-invalid {
+        border-color: #ff6b6b;
+        background: rgba(255, 107, 107, 0.06);
+        animation: fieldShake 0.35s ease;
+      }
+      input.field-invalid:focus, select.field-invalid:focus, textarea.field-invalid:focus {
+        box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.15);
+      }
+      @keyframes fieldShake {
+        0%, 100% { transform: translateX(0); }
+        20% { transform: translateX(-4px); }
+        40% { transform: translateX(4px); }
+        60% { transform: translateX(-3px); }
+        80% { transform: translateX(3px); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        input.field-invalid, select.field-invalid, textarea.field-invalid { animation: none; }
+      }
 
       .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
       .field { display: flex; flex-direction: column; gap: 6px; }
@@ -853,6 +997,19 @@
         from { opacity: 0; transform: translateY(8px) scale(0.98); }
         to { opacity: 1; transform: translateY(0) scale(1); }
       }
+      .modal-backdrop.modal-closing { animation: backdropOut 0.18s ease both; }
+      .modal-backdrop.modal-closing .modal { animation: modalOut 0.18s cubic-bezier(0.4, 0, 1, 1) both; }
+      @keyframes backdropOut {
+        from { opacity: 1; }
+        to { opacity: 0; }
+      }
+      @keyframes modalOut {
+        from { opacity: 1; transform: translateY(0) scale(1); }
+        to { opacity: 0; transform: translateY(6px) scale(0.97); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .modal-backdrop.modal-closing, .modal-backdrop.modal-closing .modal { animation: none; }
+      }
       .modal-actions { display: flex; justify-content: flex-end; gap: var(--space-3); margin-top: var(--space-5); }
       .modal-header {
         display: flex;
@@ -887,23 +1044,29 @@
         inset: 0;
         z-index: 80;
         background: var(--bg-gradient);
-        overflow: hidden;
+        overflow-y: auto;
+        overflow-x: hidden;
       }
-      .login-screen::before, .login-screen::after {
+      .login-bg-decor {
+        position: fixed;
+        inset: 0;
+        overflow: hidden;
+        pointer-events: none;
+        z-index: 0;
+      }
+      .login-bg-decor::before, .login-bg-decor::after {
         content: "";
         position: absolute;
         border-radius: 50%;
         filter: blur(80px);
         opacity: 0.35;
-        pointer-events: none;
-        z-index: 0;
       }
-      .login-screen::before {
+      .login-bg-decor::before {
         width: 420px; height: 420px;
         background: #5a8eff;
         top: -120px; right: -100px;
       }
-      .login-screen::after {
+      .login-bg-decor::after {
         width: 360px; height: 360px;
         background: #8facff;
         bottom: -140px; left: -100px;
@@ -995,6 +1158,7 @@
       .login-box .field { margin-bottom: var(--space-3); }
       .field-icon-wrap { position: relative; }
       .field-icon-wrap input { padding-right: 42px; }
+      .field-icon-wrap.has-toggle input { padding-left: 40px; }
       .field-icon-wrap .field-icon {
         position: absolute;
         right: 14px;
@@ -1004,6 +1168,25 @@
         display: flex;
         pointer-events: none;
       }
+      .field-toggle-btn {
+        position: absolute;
+        left: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        border: none;
+        border-radius: var(--radius-sm);
+        background: transparent;
+        color: var(--muted);
+        cursor: pointer;
+        transition: color 0.15s ease, background 0.15s ease;
+      }
+      .field-toggle-btn:hover { color: var(--text); background: rgba(90, 142, 255, 0.08); }
+      .field-toggle-btn svg { display: block; }
       .login-divider { display: flex; align-items: center; gap: 12px; margin: var(--space-4) 0; color: var(--muted); font-size: 0.8rem; }
       .login-divider::before, .login-divider::after { content: ""; flex: 1; height: 1px; background: var(--border-strong); }
       .btn-google {
@@ -1085,12 +1268,28 @@
       .empty {
         text-align: center;
         color: var(--text-secondary);
-        padding: var(--space-6) var(--space-3);
+        padding: var(--space-6) var(--space-4);
         border: 1px dashed var(--border-strong);
         border-radius: var(--radius-md);
         background: rgba(90, 142, 255, 0.04);
         font-size: 0.92rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
       }
+      .empty-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(90, 142, 255, 0.1);
+        color: var(--primary-light);
+        flex-shrink: 0;
+      }
+      .empty-text { max-width: 320px; line-height: 1.6; }
 
       .toast {
         position: fixed; 
@@ -1099,19 +1298,64 @@
         transform: translateX(-50%) translateY(0);
         background: linear-gradient(135deg, rgba(var(--surface-rgb), 0.95), rgba(var(--panel-rgb), 0.8));
         border: 1px solid var(--border);
+        border-right: 3px solid var(--primary);
         color: var(--text); 
-        padding: 14px 22px; 
-        border-radius: 999px;
-        display: none; 
+        padding: 13px 20px; 
+        border-radius: var(--radius-md);
+        display: none;
+        align-items: center;
+        gap: 10px;
         z-index: 70; 
-        font-weight: 600; 
+        font-weight: 600;
+        font-size: 0.88rem;
+        max-width: min(92vw, 380px);
         box-shadow: 0 12px 32px rgba(var(--shadow-rgb), 0.3);
       }
-      .toast.show { display: block; animation: toastIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) both; }
+      .toast.show { display: flex; animation: toastIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) both; }
+      .toast.hide { animation: toastOut 0.22s ease both; }
+      @keyframes toastOut {
+        from { opacity: 1; transform: translateX(-50%) translateY(0); }
+        to { opacity: 0; transform: translateX(-50%) translateY(8px); }
+      }
+      .toast.success { border-right-color: #34d399; }
+      .toast.error { border-right-color: #ff6b6b; }
+      .toast-icon { flex-shrink: 0; display: flex; }
+      .toast.success .toast-icon { color: #34d399; }
+      .toast.error .toast-icon { color: #ff6b6b; }
+      .toast.default .toast-icon { color: var(--primary-light); }
+      .toast-action {
+        flex-shrink: 0;
+        margin-inline-start: auto;
+        background: none;
+        border: none;
+        color: var(--primary-light);
+        font-weight: 700;
+        font-size: 0.85rem;
+        cursor: pointer;
+        padding: 4px 8px;
+        border-radius: 6px;
+      }
+      .toast-action:hover { background: rgba(90, 142, 255, 0.12); }
       @keyframes toastIn {
         from { opacity: 0; transform: translateX(-50%) translateY(10px); }
         to { opacity: 1; transform: translateX(-50%) translateY(0); }
       }
+
+      /* ===== Accessibility: focus-visible ===== */
+      a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, [tabindex]:focus-visible {
+        outline: 2px solid var(--primary);
+        outline-offset: 2px;
+        border-radius: 4px;
+      }
+
+      /* ===== Custom scrollbar ===== */
+      ::-webkit-scrollbar { width: 10px; height: 10px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 999px; border: 2px solid transparent; background-clip: padding-box; }
+      ::-webkit-scrollbar-thumb:hover { background: var(--muted); background-clip: padding-box; }
+      * { scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent; }
+
+      ::selection { background: rgba(90, 142, 255, 0.35); color: var(--text); }
 
       .mobile-nav {
         display: none; 
@@ -1332,46 +1576,62 @@
       }
 
       @media (max-width: 760px) {
-        /* ===== Mobile theme tokens ===== */
+        /* ===== Mobile theme tokens — softer depth, punchier accents ===== */
         :root {
-          --bg: #070b14;
+          --bg: #060910;
           --surface: #0b1120;
-          --surface-2: #101a2e;
+          --surface-2: #111b30;
           --card: #0d1526;
-          --border: rgba(120, 140, 190, 0.14);
-          --border-strong: rgba(120, 140, 190, 0.24);
-          --bg-gradient: linear-gradient(160deg, #060a13 0%, #0a0f1e 55%, #0c1526 100%);
-          --radius-lg: 14px;
-          --radius-md: 10px;
-          --radius-sm: 8px;
+          --border: rgba(130, 150, 200, 0.13);
+          --border-strong: rgba(130, 150, 200, 0.26);
+          --bg-gradient: radial-gradient(120% 60% at 50% 0%, #0e1830 0%, #070b14 55%, #05070d 100%);
+          --radius-lg: 20px;
+          --radius-md: 14px;
+          --radius-sm: 11px;
         }
         [data-theme="light"] {
-          --bg: #f3f5fa;
+          --bg: #f2f4fa;
           --surface: #ffffff;
-          --surface-2: #eef1f7;
+          --surface-2: #eef1f8;
           --card: #ffffff;
+          --bg-gradient: radial-gradient(120% 60% at 50% 0%, #eef3ff 0%, #f4f6fb 55%, #f4f6fb 100%);
         }
-        body { font-family: 'Cairo', -apple-system, BlinkMacSystemFont, sans-serif; }
+        body { font-family: 'Cairo', -apple-system, BlinkMacSystemFont, sans-serif; -webkit-font-smoothing: antialiased; }
 
         /* ===== Page shell ===== */
-        .main { padding: calc(14px + env(safe-area-inset-top, 0px)) 14px 96px; gap: 14px; }
-        .card, .member-card, #expensesTable tr { transition: background 0.15s ease, transform 0.1s ease; }
-        .card:active, .member-card:active, #expensesTable tr:active { transform: scale(0.985); }
+        .main {
+          padding: calc(12px + env(safe-area-inset-top, 0px)) 14px 108px;
+          gap: 16px;
+        }
+        .card, .member-card, .project-item, #expensesTable tr {
+          transition: background 0.15s ease, transform 0.12s cubic-bezier(0.2, 0, 0.2, 1), box-shadow 0.15s ease;
+        }
+        .card:active, .member-card:active, #expensesTable tr:active, .project-item:active { transform: scale(0.98); }
         .form-grid { grid-template-columns: 1fr; }
         .login-shell { grid-template-columns: 1fr; }
         .login-aside { padding: var(--space-6); }
         .login-aside-features { display: none; }
 
-        /* ===== Topbar: two clean rows, title alone on top ===== */
+        /* ===== Topbar: compact sticky glass header ===== */
         .topbar {
           flex-direction: column;
           align-items: stretch;
-          padding: 12px 14px;
-          border-radius: var(--radius-md);
+          position: sticky;
+          top: calc(-1 * (12px + env(safe-area-inset-top, 0px)));
+          z-index: 20;
+          margin: calc(-12px - env(safe-area-inset-top, 0px)) -14px 0;
+          padding: calc(14px + env(safe-area-inset-top, 0px)) 16px 12px;
+          border-radius: 0 0 18px 18px;
           gap: 10px;
+          background: linear-gradient(180deg, rgba(var(--surface-rgb), 0.92), rgba(var(--surface-rgb), 0.78));
+          backdrop-filter: blur(18px) saturate(1.4);
+          -webkit-backdrop-filter: blur(18px) saturate(1.4);
+          border: none;
+          border-bottom: 1px solid var(--border);
+          box-shadow: 0 8px 24px rgba(var(--shadow-rgb), 0.14);
         }
         .topbar-title { width: 100%; text-align: right; }
-        .topbar h2 { font-size: 1.02rem; font-weight: 800; }
+        .topbar h2 { font-size: 1.08rem; font-weight: 800; letter-spacing: -0.01em; }
         #topSubtitle { display: none; }
         #ownerLabel { display: none; }
         .actions { width: 100%; flex-direction: column; align-items: stretch; gap: 8px; }
@@ -1387,78 +1647,118 @@
         .auth-card-user { padding: 6px; }
         .actions-primary { display: none; }
         #settingsBtn { display: none; }
-        .permission-badge { font-size: 0.7rem; padding: 5px 9px; }
+        .permission-badge { font-size: 0.7rem; padding: 5px 10px; border-radius: 999px; }
 
-        /* ===== Stat cards ===== */
-        .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+        /* ===== Stat cards: crisper hierarchy, gentle glass ===== */
+        .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
         .card {
-          padding: 12px;
-          gap: 3px;
+          padding: 14px;
+          gap: 4px;
           border-radius: var(--radius-md);
           border: 1px solid var(--border);
-          box-shadow: none;
-          background: linear-gradient(160deg, rgba(var(--panel-rgb), 0.55), rgba(var(--panel-rgb), 0.28));
+          box-shadow: 0 3px 14px rgba(var(--shadow-rgb), 0.16);
+          background: linear-gradient(160deg, rgba(var(--panel-rgb), 0.65), rgba(var(--panel-rgb), 0.32));
           text-align: right;
+          position: relative;
+          overflow: hidden;
         }
-        .card .label { font-size: 0.7rem; letter-spacing: 0.02em; }
-        .card .value { font-size: 1.28rem; font-weight: 800; line-height: 1.2; }
+        .card::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          border-radius: inherit;
+          background: linear-gradient(160deg, rgba(255, 255, 255, 0.05), transparent 40%);
+          pointer-events: none;
+        }
+        .card .label { font-size: 0.7rem; letter-spacing: 0.02em; color: var(--muted); }
+        .card .value { font-size: 1.32rem; font-weight: 800; line-height: 1.2; letter-spacing: -0.01em; }
+        .card-icon { width: 30px; height: 30px; border-radius: 9px; margin-bottom: 3px; }
+        .card-icon svg { width: 15px; height: 15px; }
         #statName { order: 4; }
         #statName .value { font-size: 1rem; }
 
         /* ===== Panels ===== */
-        .panel { padding: 14px; border-radius: var(--radius-md); box-shadow: none; }
-        .panel-header { margin-bottom: 10px; }
-        .panel-header h3 { font-size: 0.94rem; font-weight: 700; }
-        .panel { padding: 16px; }
+        .panel {
+          padding: 16px;
+          border-radius: var(--radius-lg);
+          box-shadow: 0 2px 14px rgba(var(--shadow-rgb), 0.1);
+          border: 1px solid var(--border);
+        }
+        .panel-header { margin-bottom: 12px; }
+        .panel-header h3 { font-size: 0.96rem; font-weight: 800; }
         .panel-header #createProjectFromProfileBtn { padding: 8px 12px; font-size: 0.8rem; }
         .content-section > .panel + .panel,
         .content-section > .dashboard-grid { margin-top: 14px; }
         .dashboard-grid, .dashboard-col { gap: 14px !important; }
 
         /* ===== Activity feed ===== */
-        .activity-item { padding: 8px 0; font-size: 0.8rem; gap: 8px; }
+        .activity-item { padding: 9px 0; font-size: 0.81rem; gap: 9px; }
         .activity-dot { width: 6px; height: 6px; margin-top: 5px; }
         .activity-time { font-size: 0.7rem; }
 
         /* ===== Members grid ===== */
-        .members-grid { grid-template-columns: 1fr; gap: 8px; }
-        .member-card { padding: 10px 12px; border-radius: var(--radius-sm); }
-        .member-card strong { font-size: 0.86rem; margin-bottom: 3px; }
+        .members-grid { grid-template-columns: 1fr; gap: 9px; }
+        .member-card {
+          padding: 12px 14px;
+          border-radius: var(--radius-md);
+          border: 1px solid var(--border);
+          box-shadow: 0 2px 10px rgba(var(--shadow-rgb), 0.08);
+        }
+        .member-card strong { font-size: 0.88rem; margin-bottom: 3px; }
         .member-card .label { font-size: 0.72rem; }
-        .member-card .balance-pos, .member-card .balance-neg, .member-card .balance-zero { font-size: 0.8rem; }
+        .member-card .balance-pos, .member-card .balance-neg, .member-card .balance-zero { font-size: 0.82rem; font-weight: 700; }
 
         /* member settings rows: stack info above full-width action buttons */
         .member-settings-row { flex-direction: column; align-items: stretch; }
         .member-settings-actions { width: 100%; }
         .member-settings-actions .btn { flex: 1; min-width: 0; }
 
-        /* ===== Buttons & inputs: big tap targets ===== */
-        .btn { padding: 9px 14px; font-size: 0.86rem; min-height: 44px; border-radius: var(--radius-sm); }
-        .btn-icon { min-width: 44px; border-radius: 50%; padding: 0; }
-        .actions-secondary .btn-icon { background: rgba(var(--panel-rgb), 0.7); }
-        input, select, textarea { min-height: 44px; font-size: 16px; }
-        .nav-btn, .project-item-main, .btn-mini { min-height: 40px; }
+        /* ===== Buttons & inputs: big, thumb-friendly tap targets ===== */
+        .btn { padding: 10px 16px; font-size: 0.87rem; min-height: 46px; border-radius: var(--radius-sm); font-weight: 700; }
+        .btn-primary { box-shadow: 0 6px 16px rgba(90, 142, 255, 0.32); }
+        .btn-icon { min-width: 46px; border-radius: 50%; padding: 0; }
+        .actions-secondary .btn-icon { background: rgba(var(--panel-rgb), 0.7); border: 1px solid var(--border); }
+        input, select, textarea {
+          min-height: 46px;
+          font-size: 16px;
+          border-radius: var(--radius-sm);
+        }
+        .nav-btn, .project-item-main, .btn-mini { min-height: 42px; }
         .btn-mini { width: 40px; height: 40px; }
         .helper-text, .card .label, .member-card .label { color: var(--text-secondary); }
 
         /* ===== Toolbar / filters ===== */
         .toolbar { flex-direction: column; align-items: flex-start; gap: 8px; }
         .filters { width: 100%; }
-        .filters input, .filters select { min-width: 0; flex: 1; min-height: 42px; font-size: 0.88rem; }
+        .filters input, .filters select { min-width: 0; flex: 1; min-height: 44px; font-size: 16px; }
         .filters-toggle-row { display: flex; }
         .filters-toggle-btn { display: flex; }
-        .filters-advanced { display: none; }
-        .filters-advanced.open { display: flex; }
+        .filters-advanced {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          max-height: 0;
+          opacity: 0;
+          overflow: hidden;
+          transition: max-height 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease, margin-top 0.28s ease;
+          margin-top: 0;
+        }
+        .filters-advanced.open { max-height: 300px; opacity: 1; margin-top: 8px; }
 
-        /* ===== Expenses table -> stacked cards ===== */
+        /* ===== Expenses -> stacked receipt-style cards ===== */
         table, thead, tbody, th, tr, td { display: block; width: 100%; }
         thead { display: none; }
+        #expensesTable { display: flex; flex-direction: column; gap: 10px; }
         #expensesTable tr {
+          display: flex;
+          flex-direction: column;
           border: 1px solid var(--border);
-          border-radius: var(--radius-sm);
-          margin-bottom: 8px;
-          padding: 10px 12px;
-          background: var(--surface-2);
+          border-radius: var(--radius-md);
+          margin-bottom: 0;
+          padding: 0;
+          overflow: hidden;
+          background: linear-gradient(160deg, rgba(var(--panel-rgb), 0.55), rgba(var(--panel-rgb), 0.28));
+          box-shadow: 0 2px 10px rgba(var(--shadow-rgb), 0.08);
         }
         #expensesTable td {
           display: flex;
@@ -1466,7 +1766,7 @@
           align-items: center;
           gap: 10px;
           border-bottom: 1px dashed var(--border);
-          padding: 7px 0;
+          padding: 8px 14px;
           font-size: 0.84rem;
           text-align: right;
         }
@@ -1474,30 +1774,27 @@
         #expensesTable td::before {
           content: attr(data-label);
           color: var(--muted);
-          font-size: 0.74rem;
+          font-size: 0.73rem;
           font-weight: 700;
           flex-shrink: 0;
         }
-        #expensesTable td.actions-col { flex-direction: column; align-items: stretch; }
-        #expensesTable td.actions-col::before { margin-bottom: 6px; }
+        #expensesTable td.actions-col { flex-direction: column; align-items: stretch; padding-top: 10px; padding-bottom: 12px; }
+        #expensesTable td.actions-col::before { margin-bottom: 8px; }
         #expensesTable td.actions-col .btn { width: 100%; margin-bottom: 6px; }
         #expensesTable td.actions-col .btn:last-child { margin-bottom: 0; }
-        #expensesTable tr { padding: 0; overflow: hidden; }
         #expensesTable .expense-name-cell {
           order: -2;
-          font-weight: 700;
-          font-size: 0.92rem;
-          background: linear-gradient(135deg, rgba(90, 142, 255, 0.08), transparent);
-          margin: 0 -12px;
-          padding: 10px 12px 8px !important;
+          font-weight: 800;
+          font-size: 0.95rem;
+          background: linear-gradient(135deg, rgba(90, 142, 255, 0.12), transparent);
+          margin: 0;
+          padding: 12px 14px 9px !important;
           border-bottom: 1px solid var(--border) !important;
         }
-        #expensesTable { display: block; }
-        #expensesTable tr { display: flex; flex-direction: column; }
         #expensesTable .expense-amount-cell {
           order: -1;
           font-weight: 800;
-          font-size: 0.95rem;
+          font-size: 0.98rem;
           color: var(--primary-light);
         }
 
@@ -1515,56 +1812,78 @@
           background: var(--surface-2);
           color: var(--text);
           font-size: 0.82rem;
-          font-weight: 600;
+          font-weight: 700;
         }
         .filters-toggle-btn.has-active { border-color: var(--primary); color: var(--primary-light); background: rgba(90, 142, 255, 0.1); }
-        .filters-advanced { display: none; flex-direction: column; gap: 8px; width: 100%; margin-top: 8px; }
-        .filters-advanced.open { display: flex; }
 
         /* ===== Settlement form ===== */
         #recordSettlementBtn { width: 100%; }
         #settlementFrom, #settlementTo { max-width: 100%; }
 
-        /* ===== Bottom navigation ===== */
+        /* ===== Bottom navigation: floating glass pill bar ===== */
         .mobile-nav {
-          height: 60px;
-          padding: 4px 6px calc(4px + env(safe-area-inset-bottom, 0px));
-          backdrop-filter: blur(16px);
-          background: linear-gradient(180deg, rgba(var(--surface-rgb), 0.85), rgba(var(--surface-rgb), 0.97));
-          border-top: 1px solid var(--border);
+          position: fixed;
+          left: 12px;
+          right: 12px;
+          bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+          height: 62px;
+          padding: 6px;
+          gap: 2px;
+          border-radius: 20px;
+          backdrop-filter: blur(20px) saturate(1.5);
+          -webkit-backdrop-filter: blur(20px) saturate(1.5);
+          background: linear-gradient(180deg, rgba(var(--surface-rgb), 0.88), rgba(var(--surface-rgb), 0.96));
+          border: 1px solid var(--border);
+          box-shadow: 0 12px 32px rgba(var(--shadow-rgb), 0.35);
+          z-index: 50;
         }
         .mobile-nav button {
-          min-height: 40px;
+          min-height: 100%;
           gap: 2px;
-          font-size: 0.62rem;
-          border-radius: var(--radius-sm);
-          transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+          font-size: 0.6rem;
+          font-weight: 700;
+          border-radius: 14px;
+          transition: background 0.18s ease, color 0.18s ease, transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
-        .mobile-nav button:active { transform: scale(0.93); }
+        .mobile-nav button:active { transform: scale(0.9); }
         .mobile-nav-icon { display: flex; align-items: center; justify-content: center; }
-        .mobile-nav button svg { width: 19px; height: 19px; opacity: 0.85; transition: opacity 0.15s ease, transform 0.15s ease; }
-        .mobile-nav button.active { background: rgba(90, 142, 255, 0.12); }
-        .mobile-nav button.active svg { opacity: 1; transform: scale(1.06); }
+        .mobile-nav button svg { width: 19px; height: 19px; opacity: 0.65; transition: opacity 0.18s ease, transform 0.18s ease; }
+        .mobile-nav button span:last-child { opacity: 0.75; transition: opacity 0.18s ease; }
+        .mobile-nav button.active {
+          background: linear-gradient(135deg, rgba(90, 142, 255, 0.18), rgba(90, 142, 255, 0.08));
+          color: var(--nav-active-color, var(--primary-light));
+        }
+        .mobile-nav button.active svg { opacity: 1; transform: translateY(-1px) scale(1.08); }
+        .mobile-nav button.active span:last-child { opacity: 1; }
         .mobile-nav button span:last-child { font-size: 0.62rem; }
 
         /* ===== Floating action button ===== */
         .mobile-fab {
-          width: 46px;
-          height: 46px;
-          bottom: calc(74px + env(safe-area-inset-bottom, 0px));
-          left: 14px;
-          font-size: 1.25rem;
-          box-shadow: 0 6px 16px rgba(90, 142, 255, 0.32);
+          width: 50px;
+          height: 50px;
+          bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+          left: 16px;
+          font-size: 1.3rem;
+          box-shadow: 0 10px 24px rgba(90, 142, 255, 0.4), 0 2px 6px rgba(90, 142, 255, 0.3);
+          border: 1px solid rgba(255, 255, 255, 0.18);
         }
-        .mobile-fab:active { transform: scale(0.92); }
-        .mobile-profile-btn { width: 36px; height: 36px; font-size: 0.95rem; }
+        .mobile-fab:active { transform: scale(0.9); }
+        .mobile-profile-btn {
+          width: 38px;
+          height: 38px;
+          font-size: 0.95rem;
+          box-shadow: 0 6px 16px rgba(var(--shadow-rgb), 0.28);
+        }
+        .toast { bottom: calc(94px + env(safe-area-inset-bottom, 0px)); }
 
         /* ===== Modals: bottom sheet, tight padding ===== */
         .modal { padding: var(--space-4); }
       }
 
       @media (max-width: 640px) {
-        .main { padding: 12px 12px 96px; }
+        .main { padding: 12px 12px 108px; }
+        .login-screen { padding: max(var(--space-4), env(safe-area-inset-top, 0px)) var(--space-4) max(var(--space-4), env(safe-area-inset-bottom, 0px)); align-items: flex-start; }
+        .login-shell { margin: auto 0; }
         .login-box { padding: var(--space-6); }
         .actions-col { flex-wrap: wrap; gap: 6px; }
         .modal-actions { flex-direction: column-reverse; }
@@ -1574,12 +1893,15 @@
       @media (max-width: 380px) {
         .stats-grid { grid-template-columns: 1fr; }
         #statName { order: 0; }
+        .mobile-nav button span:last-child { display: none; }
+        .mobile-nav button { gap: 0; }
+        .mobile-nav button svg { width: 20px; height: 20px; }
       }
 
       @media (max-width: 520px) {
         .login-box h1 { font-size: 1.5rem; }
         .brand { font-size: 1.1rem; }
-        .topbar { padding: 12px; }
+        .topbar { padding-left: 14px; padding-right: 14px; }
       }
 
       /* full-screen bottom-sheet modals on small screens */
@@ -1589,11 +1911,12 @@
           width: 100%;
           max-height: 88vh;
           overflow-y: auto;
-          border-radius: 20px 20px 0 0;
+          border-radius: 22px 22px 0 0;
           padding: var(--space-5);
           padding-top: 22px;
           position: relative;
-          animation: sheetIn 0.26s cubic-bezier(0.16, 1, 0.3, 1) both;
+          box-shadow: 0 -12px 40px rgba(var(--shadow-rgb), 0.4);
+          animation: sheetIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
         }
         .modal::before {
           content: "";
@@ -1601,7 +1924,7 @@
           top: 10px;
           left: 50%;
           transform: translateX(-50%);
-          width: 36px;
+          width: 38px;
           height: 4px;
           border-radius: 999px;
           background: var(--border-strong);
@@ -1625,6 +1948,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <div class="login-screen" id="loginScreen">
+      <div class="login-bg-decor" aria-hidden="true"></div>
       <div class="login-shell">
         <div class="login-aside">
           <div class="brand" style="color:#fff; font-size:1.6rem; gap: 12px;">
@@ -1645,14 +1969,15 @@
             <label>البريد الإلكتروني</label>
             <div class="field-icon-wrap">
               <span class="field-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2 7 12 13 22 7"/></svg></span>
-              <input id="loginEmail" type="email" placeholder="you@example.com" />
+              <input id="loginEmail" type="email" placeholder="you@example.com" autocomplete="email" inputmode="email" />
             </div>
           </div>
           <div class="field">
             <label>كلمة المرور</label>
-            <div class="field-icon-wrap">
+            <div class="field-icon-wrap has-toggle">
               <span class="field-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
-              <input id="loginPassword" type="password" placeholder="••••••••" />
+              <input id="loginPassword" type="password" placeholder="••••••••" autocomplete="current-password" />
+              <button type="button" class="field-toggle-btn" data-toggle-for="loginPassword" aria-label="إظهار كلمة المرور"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg></button>
             </div>
           </div>
           <button class="btn btn-primary" id="loginSubmitBtn" style="width:100%;">تسجيل الدخول</button>
@@ -1699,8 +2024,8 @@
         </div>
         <div class="sidebar-section-label">التنقل</div>
         <div class="sidebar-nav">
-          <button class="nav-btn active" data-section="dashboard"><span>📊</span><span>لوحة التحكم</span></button>
-          <button class="nav-btn" data-section="expenses"><span>🧾</span><span>المصاريف</span></button>
+          <button class="nav-btn active" data-section="dashboard"><span><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;"><rect x="3" y="12" width="5" height="9"/><rect x="9.5" y="7" width="5" height="14"/><rect x="16" y="3" width="5" height="18"/></svg></span><span>لوحة التحكم</span></button>
+          <button class="nav-btn" data-section="expenses"><span><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg></span><span>المصاريف</span></button>
           <button class="nav-btn" data-section="settle"><span><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></span><span>التسوية</span></button>
           <button class="nav-btn" data-section="settings"><span><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span><span>الإعدادات</span></button>
         </div>
@@ -1745,21 +2070,36 @@
         <section class="content-section active" id="dashboard">
           <div class="stats-grid">
             <div class="card" id="statTotal">
+              <div class="card-icon"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
               <div class="label">إجمالي مصاريف المشروع</div>
               <div class="value" id="totalExpenses">0</div>
             </div>
             <div class="card" id="statShare">
+              <div class="card-icon"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></div>
               <div class="label">متوسط نصيب الفرد</div>
               <div class="value" id="sharePerMember">0</div>
             </div>
             <div class="card" id="statMembers">
+              <div class="card-icon"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
               <div class="label">عدد الأعضاء</div>
               <div class="value" id="memberCount">0</div>
             </div>
             <div class="card" id="statName">
+              <div class="card-icon"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg></div>
               <div class="label">اسم المشروع</div>
               <div class="value" id="projectNameCard">-</div>
             </div>
+          </div>
+
+          <div class="panel" id="budgetPanel" style="display:none; margin-bottom:16px;">
+            <div class="panel-header">
+              <h3 style="display:flex; align-items:center; gap:10px;"><span class="settings-avatar" id="budgetIconAvatar" style="width:32px;height:32px;flex-shrink:0;background:linear-gradient(135deg, #34d399, #10b981);"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>الميزانية</h3>
+              <div class="label" id="budgetSummaryText"></div>
+            </div>
+            <div class="category-bar-track" style="height:12px;">
+              <div class="category-bar-fill" id="budgetBarFill" data-pct="0" style="width:0%;"></div>
+            </div>
+            <div class="label" id="budgetWarningText" style="margin-top:10px;"></div>
           </div>
 
           <div class="dashboard-grid">
@@ -1776,7 +2116,7 @@
                 <div class="panel-header">
                   <h3>سجل النشاط</h3>
                 </div>
-                <button class="btn btn-secondary" id="openActivityLogBtn" style="width:100%;">عرض سجل النشاط</button>
+                <button class="btn btn-secondary" id="openActivityLogBtn" style="width:100%;"><span style="display:inline-flex; vertical-align:-3px; margin-left:6px;"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>عرض سجل النشاط</button>
               </div>
             </div>
           </div>
@@ -1798,6 +2138,13 @@
                   <select id="filterMember"><option value="">كل الأشخاص</option></select>
                   <select id="filterCategory"><option value="">كل الفئات</option></select>
                   <input type="date" id="filterDate" />
+                  <select id="sortExpenses">
+                    <option value="date_desc">الأحدث أولاً</option>
+                    <option value="date_asc">الأقدم أولاً</option>
+                    <option value="amount_desc">السعر: من الأعلى</option>
+                    <option value="amount_asc">السعر: من الأقل</option>
+                    <option value="name_asc">الاسم (أ-ي)</option>
+                  </select>
                   <button class="btn btn-secondary" id="clearFiltersBtn">مسح الفلاتر</button>
                 </div>
               </div>
@@ -1824,19 +2171,23 @@
         <section class="content-section" id="settle">
 
           <div class="panel">
-            <h3 style="margin-top:0;">التسوية المقترحة</h3>
+            <h3 style="margin-top:0; display:flex; align-items:center; gap:10px;"><span class="settings-avatar" style="width:32px;height:32px;background:linear-gradient(135deg, #34d399, #10b981);flex-shrink:0;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>التسوية المقترحة</h3>
             <p class="label" style="margin-top:-6px;">دي التحويلات اللي محتاجة تحصل عشان الكل يبقى متعادل.</p>
             <div id="settlementList"></div>
+            <button class="btn btn-secondary" id="shareSettlementBtn" style="width:100%; margin-top:12px;">
+              <span style="display:inline-flex; vertical-align:-3px; margin-left:6px;"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></span>
+              مشاركة ملخص التسوية
+            </button>
           </div>
 
           <div class="panel" style="margin-top:16px;">
-            <h3 style="margin-top:0;">تسجيل تحويل</h3>
+            <h3 style="margin-top:0; display:flex; align-items:center; gap:10px;"><span class="settings-avatar" style="width:32px;height:32px;flex-shrink:0;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></span>تسجيل تحويل</h3>
             <p class="label" style="margin-top:-6px;">لما حد يحوّل فلوس فعليًا لحد تاني، سجّل التحويل هنا عشان الأرصدة تتحدث.</p>
             <button class="btn btn-primary" id="openRecordSettlementBtn">+ تسجيل تحويل جديد</button>
           </div>
 
           <div class="panel" style="margin-top:16px;">
-            <h3 style="margin-top:0;">سجل التحويلات</h3>
+            <h3 style="margin-top:0; display:flex; align-items:center; gap:10px;"><span class="settings-avatar" style="width:32px;height:32px;background:linear-gradient(135deg, #ffab91, #ff8a65);flex-shrink:0;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>سجل التحويلات</h3>
             <div class="form-grid" style="margin-bottom:12px;">
               <div class="field">
                 <label>فلترة بالحالة</label>
@@ -1952,44 +2303,63 @@
 
           <div class="panel settings-tab-panel" id="settingsTabProject">
             <div class="panel-header">
-              <h3>بيانات المشروع</h3>
+              <h3 style="display:flex; align-items:center; gap:10px;"><span class="settings-avatar" style="width:32px;height:32px;flex-shrink:0;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg></span>بيانات المشروع</h3>
               <div class="helper-text">الاسم والوصف الخاصين بالمشروع</div>
             </div>
             <div class="field" style="margin-bottom:12px;">
               <label>اسم المشروع</label>
-              <input id="projectNameInput" />
+              <input id="projectNameInput" maxlength="60" />
             </div>
             <div class="field" style="margin-bottom:12px;">
-              <label>وصف المشروع</label>
-              <textarea id="projectDescriptionInput" placeholder="اكتب وصفًا للمشروع يساعد الفريق على فهم الهدف."></textarea>
+              <label style="display:flex; justify-content:space-between; align-items:center;">
+                <span>وصف المشروع</span>
+                <span class="label" id="projectDescriptionCounter" style="font-weight:500;">0/300</span>
+              </label>
+              <textarea id="projectDescriptionInput" maxlength="300" placeholder="اكتب وصفًا للمشروع يساعد الفريق على فهم الهدف."></textarea>
+            </div>
+            <div class="field" style="margin-bottom:12px;">
+              <label>الميزانية المستهدفة (اختياري)</label>
+              <input id="projectBudgetInput" type="number" min="0" step="0.01" placeholder="مثال: 5000 — سيبه فاضي لو مفيش حد أقصى" class="amount-input" />
+              <div class="label" style="margin-top:6px;">لو حددت ميزانية، هتشوف شريط تقدم على لوحة التحكم يوضحلك قد ايه صرفتوا منها.</div>
             </div>
             <button class="btn btn-primary" id="saveSettingsBtn">حفظ الإعدادات</button>
+
+            <div class="danger-zone" id="projectDangerZone" style="display:none;">
+              <div class="danger-zone-header">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                <span>منطقة الخطر</span>
+              </div>
+              <p class="label" style="margin:0 0 12px;">حذف المشروع نهائي وهيمسح كل المصاريف والأعضاء والتحويلات، ومينفعش يترجع تاني.</p>
+              <button class="btn btn-danger" id="deleteProjectFromSettingsBtn">حذف المشروع نهائيًا</button>
+            </div>
           </div>
 
           <div class="panel settings-tab-panel" id="settingsTabMembers" style="display:none;">
             <div class="panel-header">
-              <h3>إدارة أعضاء الفريق</h3>
+              <h3 style="display:flex; align-items:center; gap:10px;"><span class="settings-avatar" style="width:32px;height:32px;flex-shrink:0;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>إدارة أعضاء الفريق <span class="settings-badge usage" id="memberSettingsCount">0</span></h3>
               <div class="helper-text">أضف أعضاء جدد وتحكم في صلاحياتهم</div>
             </div>
-            <div class="form-grid" style="margin-bottom:12px;">
-                  <div class="field">
-                <label>اسم العضو الجديد</label>
-                <input id="newMemberName" placeholder="مثال: Karim" />
-              </div>
-              <div class="field">
-                <label>البريد الإلكتروني</label>
-                <input id="newMemberEmail" type="email" placeholder="name@example.com" />
-              </div>
-              <div class="field">
-                <label>صلاحية التعديل</label>
-                <label style="display:flex; align-items:center; gap:10px;">
-                  <input id="newMemberCanEdit" type="checkbox" />
-                  يمكنه التعديل
-                </label>
-              </div>
-              <div class="field">
-                <label>&nbsp;</label>
-                <button class="btn btn-primary" id="addMemberBtn">+ إضافة عضو</button>
+            <div class="add-entity-card">
+              <div class="form-grid">
+                <div class="field">
+                  <label>اسم العضو الجديد</label>
+                  <input id="newMemberName" placeholder="مثال: Karim" />
+                </div>
+                <div class="field">
+                  <label>البريد الإلكتروني</label>
+                  <input id="newMemberEmail" type="email" placeholder="name@example.com" />
+                </div>
+                <div class="field">
+                  <label>صلاحية التعديل</label>
+                  <label style="display:flex; align-items:center; gap:10px;">
+                    <input id="newMemberCanEdit" type="checkbox" />
+                    يمكنه التعديل
+                  </label>
+                </div>
+                <div class="field">
+                  <label>&nbsp;</label>
+                  <button class="btn btn-primary" id="addMemberBtn">+ إضافة عضو</button>
+                </div>
               </div>
             </div>
             <div id="memberSettingsList"></div>
@@ -1997,17 +2367,19 @@
 
           <div class="panel settings-tab-panel" id="settingsTabCategories" style="display:none;">
             <div class="panel-header">
-              <h3>إدارة فئات المصاريف</h3>
+              <h3 style="display:flex; align-items:center; gap:10px;"><span class="settings-avatar category-avatar" style="width:32px;height:32px;flex-shrink:0;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41 11 3.83A2 2 0 0 0 9.59 3.17L4 3v5.59a2 2 0 0 0 .59 1.41l9.58 9.59a2 2 0 0 0 2.83 0l3.59-3.59a2 2 0 0 0 0-2.83z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg></span>إدارة فئات المصاريف <span class="settings-badge usage" id="categorySettingsCount">0</span></h3>
               <div class="helper-text">أضف أو عدّل أو احذف الفئات اللي هتستخدمها في تصنيف المصاريف</div>
             </div>
-            <div class="form-grid" style="margin-bottom:12px;">
-              <div class="field">
-                <label>اسم الفئة الجديدة</label>
-                <input id="newCategoryName" placeholder="مثال: صيانة" />
-              </div>
-              <div class="field">
-                <label>&nbsp;</label>
-                <button class="btn btn-primary" id="addCategoryBtn">+ إضافة فئة</button>
+            <div class="add-entity-card">
+              <div class="form-grid">
+                <div class="field">
+                  <label>اسم الفئة الجديدة</label>
+                  <input id="newCategoryName" placeholder="مثال: صيانة" />
+                </div>
+                <div class="field">
+                  <label>&nbsp;</label>
+                  <button class="btn btn-primary" id="addCategoryBtn">+ إضافة فئة</button>
+                </div>
               </div>
             </div>
             <div id="categorySettingsList"></div>
@@ -2101,14 +2473,15 @@
           <label>البريد الإلكتروني</label>
           <div class="field-icon-wrap">
             <span class="field-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2 7 12 13 22 7"/></svg></span>
-            <input id="authEmail" type="email" placeholder="you@example.com" />
+            <input id="authEmail" type="email" placeholder="you@example.com" autocomplete="email" inputmode="email" />
           </div>
         </div>
         <div class="field" style="margin-top:12px;">
           <label>كلمة المرور</label>
-          <div class="field-icon-wrap">
+          <div class="field-icon-wrap has-toggle">
             <span class="field-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
-            <input id="authPassword" type="password" placeholder="••••••••" />
+            <input id="authPassword" type="password" placeholder="••••••••" autocomplete="current-password" />
+            <button type="button" class="field-toggle-btn" data-toggle-for="authPassword" aria-label="إظهار كلمة المرور"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg></button>
           </div>
         </div>
         <div class="modal-actions" style="justify-content:space-between; align-items:center;">
@@ -2182,7 +2555,7 @@
       </div>
     </div>
 
-    <div class="toast" id="toast"></div>
+    <div class="toast" id="toast"><span class="toast-icon" id="toastIcon"></span><span id="toastText"></span><button class="toast-action" id="toastAction" style="display:none;"></button></div>
 
     <script type="module">
       window.firebaseRules = `rules_version = '2';
@@ -2265,6 +2638,19 @@ service cloud.firestore {
       const auth = getAuth(app);
       const db = getFirestore(app);
 
+      const EMPTY_ICONS = {
+        project: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>',
+        chart: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="12" width="5" height="9"/><rect x="9.5" y="7" width="5" height="14"/><rect x="16" y="3" width="5" height="18"/></svg>',
+        members: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+        expenses: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>',
+        settle: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+        history: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+        category: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41 11 3.83A2 2 0 0 0 9.59 3.17L4 3v5.59a2 2 0 0 0 .59 1.41l9.58 9.59a2 2 0 0 0 2.83 0l3.59-3.59a2 2 0 0 0 0-2.83z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>'
+      };
+      function emptyState(text, icon = 'project') {
+        return `<div class="empty"><span class="empty-icon">${EMPTY_ICONS[icon] || EMPTY_ICONS.project}</span><span class="empty-text">${text}</span></div>`;
+      }
+
       const STORAGE_KEY = 'grad_expense_app_v2';
       const THEME_STORAGE_KEY = 'hesabna_theme';
       const DEFAULT_CATEGORIES = ['أخرى', 'مواد', 'معدات', 'نقل', 'طعام'];
@@ -2313,6 +2699,7 @@ service cloud.firestore {
           projectName: 'Graduation Project',
           projectDescription: 'سجل مُصاريفك وشارك نتائج الفريق بسهولة.',
           currency: 'EGP',
+          budget: 0,
           members: [
             { id: crypto.randomUUID(), name: 'Ahmed', active: true, createdAt: new Date().toISOString() },
             { id: crypto.randomUUID(), name: 'Mohamed', active: true, createdAt: new Date().toISOString() },
@@ -2356,6 +2743,7 @@ service cloud.firestore {
         settlementNote: document.getElementById('settlementNote'),
         recordSettlementBtn: document.getElementById('recordSettlementBtn'),
         openRecordSettlementBtn: document.getElementById('openRecordSettlementBtn'),
+        shareSettlementBtn: document.getElementById('shareSettlementBtn'),
         recordSettlementCancelBtn: document.getElementById('recordSettlementCancelBtn'),
         recordSettlementModal: document.getElementById('recordSettlementModal'),
         settlementStatusFilter: document.getElementById('settlementStatusFilter'),
@@ -2376,6 +2764,7 @@ service cloud.firestore {
         filterMember: document.getElementById('filterMember'),
         filterCategory: document.getElementById('filterCategory'),
         filterDate: document.getElementById('filterDate'),
+        sortExpenses: document.getElementById('sortExpenses'),
         clearFiltersBtn: document.getElementById('clearFiltersBtn'),
         expenseModal: document.getElementById('expenseModal'),
         expenseModalTitle: document.getElementById('expenseModalTitle'),
@@ -2394,6 +2783,14 @@ service cloud.firestore {
         newMemberEmail: document.getElementById('newMemberEmail'),
         newMemberCanEdit: document.getElementById('newMemberCanEdit'),
         projectDescriptionInput: document.getElementById('projectDescriptionInput'),
+        projectBudgetInput: document.getElementById('projectBudgetInput'),
+        budgetPanel: document.getElementById('budgetPanel'),
+        budgetSummaryText: document.getElementById('budgetSummaryText'),
+        budgetBarFill: document.getElementById('budgetBarFill'),
+        budgetWarningText: document.getElementById('budgetWarningText'),
+        budgetIconAvatar: document.getElementById('budgetIconAvatar'),
+        projectDescriptionCounter: document.getElementById('projectDescriptionCounter'),
+        deleteProjectFromSettingsBtn: document.getElementById('deleteProjectFromSettingsBtn'),
         activityList: document.getElementById('activityList'),
         openActivityLogBtn: document.getElementById('openActivityLogBtn'),
         activityLogModal: document.getElementById('activityLogModal'),
@@ -2499,6 +2896,7 @@ service cloud.firestore {
           projectName: typeof base.projectName === 'string' && base.projectName.trim() ? base.projectName : defaultState.projectName,
           projectDescription: typeof base.projectDescription === 'string' ? base.projectDescription : defaultState.projectDescription,
           currency: typeof base.currency === 'string' && base.currency.trim() ? base.currency : defaultState.currency,
+          budget: typeof base.budget === 'number' && base.budget >= 0 ? base.budget : 0,
           categories: dedupedCategories,
           members: members.map((member, index) => ({
             id: member?.id || crypto.randomUUID(),
@@ -2578,6 +2976,15 @@ service cloud.firestore {
         return !!member && member.canEdit;
       }
 
+      // Shared guard for actions that require edit permission: shows the standard denial
+      // toast and returns false when the user can't edit, so call sites can write
+      // `if (!guardCanEdit()) return;` instead of repeating the toast/return each time.
+      function guardCanEdit() {
+        if (canEdit()) return true;
+        showToast('هذا الحساب لا يملك صلاحية التعديل', 'error');
+        return false;
+      }
+
       // Returns the member record linked to the currently logged-in account (owner has no member record).
       function getCurrentMember() {
         if (!currentUser) return null;
@@ -2614,7 +3021,7 @@ service cloud.firestore {
           await setDoc(projectRef, { state: stateForSync, sharedWithEmails, editableEmails, updatedAt: serverTimestamp() }, { merge: true });
         } catch (error) {
           console.error('Firebase save failed', error);
-          showToast('تم الحفظ محليًا فقط بسبب مشكلة في Firebase');
+          showToast('تم الحفظ محليًا فقط بسبب مشكلة في Firebase', 'success');
         }
       }
 
@@ -2649,7 +3056,7 @@ service cloud.firestore {
           updateProjects();
         }, (error) => {
           console.error('Firestore project list error', error);
-          showToast('خطأ في جلب المشاريع من Firebase');
+          showToast('خطأ في جلب المشاريع من Firebase', 'error');
         });
 
         let sharedUnsub = null;
@@ -2659,7 +3066,7 @@ service cloud.firestore {
             updateProjects();
           }, (error) => {
             console.error('Firestore shared project list error', error);
-            showToast('خطأ في جلب المشاريع المشتركة من Firebase');
+            showToast('خطأ في جلب المشاريع المشتركة من Firebase', 'error');
           });
         }
 
@@ -2684,21 +3091,21 @@ service cloud.firestore {
               state = normalizeState(remoteData.state);
               // Settlements sync via their own subcollection listener below, not the project blob.
               state.settlements = normalizeSettlementList(remoteSettlementsCache, state.members);
-              localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+              localStorage.setItem(getStorageKey(), JSON.stringify(state));
             }
             render();
           } else {
-            showToast('المشروع غير موجود');
+            showToast('المشروع غير موجود', 'error');
           }
         }, (error) => {
           console.error('Firestore project error', error);
-          showToast('خطأ في تحميل المشروع');
+          showToast('خطأ في تحميل المشروع', 'error');
         });
         const settlementsRef = collection(db, 'projects', projectId, 'settlements');
         settlementsUnsubscribe = onSnapshot(settlementsRef, (snapshot) => {
           remoteSettlementsCache = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
           state.settlements = normalizeSettlementList(remoteSettlementsCache, state.members);
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+          localStorage.setItem(getStorageKey(), JSON.stringify(state));
           render();
         }, (error) => {
           console.error('Firestore settlements error', error);
@@ -2714,7 +3121,7 @@ service cloud.firestore {
 
       async function createProject() {
         if (!currentUser) {
-          showToast('سجل الدخول أولا');
+          showToast('سجل الدخول أولا', 'error');
           return;
         }
         const projectName = await promptModal('مشروع جديد', 'اسم المشروع', 'مشروعي الجديد');
@@ -2742,10 +3149,10 @@ service cloud.firestore {
         try {
           await setDoc(newProjectRef, newProject);
           selectProject(newProjectRef.id);
-          showToast('تم إنشاء المشروع');
+          showToast('تم إنشاء المشروع', 'success');
         } catch (error) {
           console.error('Create project failed', error);
-          showToast('فشل إنشاء المشروع');
+          showToast('فشل إنشاء المشروع', 'error');
         }
       }
 
@@ -2756,7 +3163,7 @@ service cloud.firestore {
         if (!newName || !newName.trim()) return;
         setDoc(doc(db, 'projects', id), { state: { projectName: newName.trim() }, updatedAt: new Date().toISOString() }, { merge: true })
           .then(() => {
-            showToast('تم تعديل اسم المشروع');
+            showToast('تم تعديل اسم المشروع', 'success');
             if (id === currentProjectId) {
               state.projectName = newName.trim();
               render();
@@ -2764,18 +3171,18 @@ service cloud.firestore {
           })
           .catch(error => {
             console.error('Rename project failed', error);
-            showToast('فشل تعديل اسم المشروع');
+            showToast('فشل تعديل اسم المشروع', 'error');
           });
       }
 
       async function deleteProject(id) {
         const targetId = id || currentProjectId;
         if (!targetId) {
-          showToast('اختر مشروعًا أولاً');
+          showToast('اختر مشروعًا أولاً', 'error');
           return;
         }
         if (targetId === currentProjectId && !canDeleteProject()) {
-          showToast('فقط مالك المشروع يمكنه حذفه');
+          showToast('فقط مالك المشروع يمكنه حذفه', 'error');
           return;
         }
         const confirmed = await confirmModal('حذف المشروع', 'سيتم حذف المشروع نهائيًا مع جميع المصاريف. هل أنت متأكد؟', { confirmText: 'حذف نهائيًا' });
@@ -2800,11 +3207,11 @@ service cloud.firestore {
             state = normalizeState(defaultState);
             render();
           }
-          showToast('تم حذف المشروع');
+          showToast('تم حذف المشروع', 'success');
           renderProjectList();
         } catch (error) {
           console.error('Delete project failed', error);
-          showToast('فشل حذف المشروع');
+          showToast('فشل حذف المشروع', 'error');
         }
       }
 
@@ -2814,11 +3221,11 @@ service cloud.firestore {
 
       async function downloadProjectPdf() {
         if (!currentProjectId) {
-          showToast('اختر مشروعًا أولاً');
+          showToast('اختر مشروعًا أولاً', 'error');
           return;
         }
         if (!window.html2canvas || !window.jspdf) {
-          showToast('مطلوب الاتصال لتحميل تقرير PDF');
+          showToast('مطلوب الاتصال لتحميل تقرير PDF', 'error');
           return;
         }
 
@@ -3029,10 +3436,10 @@ service cloud.firestore {
           }
 
           pdf.save(`${state.projectName || 'project-report'}.pdf`);
-          showToast('تم تنزيل تقرير PDF');
+          showToast('تم تنزيل تقرير PDF', 'success');
         } catch (error) {
           console.error('Download PDF failed', error);
-          showToast('فشل تنزيل ملف PDF');
+          showToast('فشل تنزيل ملف PDF', 'error');
         } finally {
           document.body.removeChild(docContainer);
         }
@@ -3040,7 +3447,7 @@ service cloud.firestore {
 
       function renderProjectList() {
         if (!projectDocs.length) {
-          els.projectList.innerHTML = '<div class="empty">ليس لديك مشروعات بعد. اضغط مشروع جديد لإنشاء أول مشروع.</div>';
+          els.projectList.innerHTML = emptyState('ليس لديك مشروعات بعد. اضغط مشروع جديد لإنشاء أول مشروع.', 'project');
           return;
         }
         els.projectList.innerHTML = projectDocs.map(project => {
@@ -3056,8 +3463,8 @@ service cloud.firestore {
               </span>
             </button>
             <span class="project-item-actions">
-              <button class="btn-mini" title="إعادة تسمية" onclick="renameProject('${project.id}')">✎</button>
-              ${isOwner ? `<button class="btn-mini btn-mini-danger" title="حذف" onclick="deleteProject('${project.id}')">🗑</button>` : ''}
+              <button class="btn-mini" title="إعادة تسمية" onclick="renameProject('${project.id}')"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button>
+              ${isOwner ? `<button class="btn-mini btn-mini-danger" title="حذف" onclick="deleteProject('${project.id}')"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>` : ''}
             </span>
           </div>`;
         }).join('');
@@ -3155,11 +3562,42 @@ service cloud.firestore {
         return transfers;
       }
 
-      function showToast(message) {
-        els.toast.textContent = message;
-        els.toast.classList.add('show');
+      const TOAST_ICONS = {
+        success: '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+        error: '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>',
+        default: '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>'
+      };
+      function showToast(message, type = 'default', action = null) {
+        const textEl = document.getElementById('toastText');
+        const iconEl = document.getElementById('toastIcon');
+        const actionEl = document.getElementById('toastAction');
+        if (textEl) textEl.textContent = message; else els.toast.textContent = message;
+        if (iconEl) iconEl.innerHTML = TOAST_ICONS[type] || TOAST_ICONS.default;
+        if (actionEl) {
+          if (action && action.label && typeof action.onClick === 'function') {
+            actionEl.textContent = action.label;
+            actionEl.style.display = 'inline-flex';
+            actionEl.onclick = () => {
+              action.onClick();
+              clearTimeout(showToast.timeout);
+              clearTimeout(showToast.hideTimeout);
+              els.toast.classList.add('hide');
+              setTimeout(() => els.toast.classList.remove('show', 'hide'), 220);
+            };
+          } else {
+            actionEl.style.display = 'none';
+            actionEl.onclick = null;
+          }
+        }
+        els.toast.className = `toast show ${type}`;
         clearTimeout(showToast.timeout);
-        showToast.timeout = setTimeout(() => els.toast.classList.remove('show'), 2200);
+        clearTimeout(showToast.hideTimeout);
+        showToast.timeout = setTimeout(() => {
+          els.toast.classList.add('hide');
+          showToast.hideTimeout = setTimeout(() => {
+            els.toast.classList.remove('show', 'hide');
+          }, 220);
+        }, action ? 4500 : 2200);
       }
 
       function promptModal(title, label, defaultValue = '') {
@@ -3178,7 +3616,7 @@ service cloud.firestore {
           setTimeout(() => { input.focus(); input.select(); }, 50);
 
           const cleanup = (result) => {
-            backdrop.classList.remove('open');
+            closeModalEl(backdrop);
             confirmBtn.removeEventListener('click', onConfirm);
             cancelBtn.removeEventListener('click', onCancel);
             backdrop.removeEventListener('click', onBackdrop);
@@ -3215,7 +3653,7 @@ service cloud.firestore {
           backdrop.classList.add('open');
 
           const cleanup = (result) => {
-            backdrop.classList.remove('open');
+            closeModalEl(backdrop);
             confirmBtn.removeEventListener('click', onConfirm);
             cancelBtn.removeEventListener('click', onCancel);
             backdrop.removeEventListener('click', onBackdrop);
@@ -3247,7 +3685,7 @@ service cloud.firestore {
       }
 
       function closeAuthModal() {
-        els.authModal.classList.remove('open');
+        closeModalEl(els.authModal);
       }
 
       function getAuthErrorMessage(code) {
@@ -3266,7 +3704,9 @@ service cloud.firestore {
         const email = els.authEmail.value.trim();
         const password = els.authPassword.value;
         if (!email || !password) {
-          showToast('أدخل البريد وكلمة المرور');
+          showToast('أدخل البريد وكلمة المرور', 'error');
+          if (!email) flagInvalidField(els.authEmail);
+          if (!password) flagInvalidField(els.authPassword);
           return;
         }
 
@@ -3276,7 +3716,7 @@ service cloud.firestore {
         try {
           if (authMode === 'login') {
             await signInWithEmailAndPassword(auth, email, password);
-            showToast('تم تسجيل الدخول بنجاح');
+            showToast('تم تسجيل الدخول بنجاح', 'success');
           } else {
             const result = await createUserWithEmailAndPassword(auth, email, password);
             const username = email.split('@')[0];
@@ -3285,10 +3725,10 @@ service cloud.firestore {
             }
             try {
               await sendEmailVerification(result.user);
-              showToast('تم إنشاء الحساب. تم إرسال رابط تأكيد إلى بريدك الإلكتروني');
+              showToast('تم إنشاء الحساب. تم إرسال رابط تأكيد إلى بريدك الإلكتروني', 'success');
             } catch (verifyError) {
               console.warn('Failed to send verification email', verifyError);
-              showToast('تم إنشاء الحساب بنجاح');
+              showToast('تم إنشاء الحساب بنجاح', 'success');
             }
           }
           closeAuthModal();
@@ -3297,7 +3737,7 @@ service cloud.firestore {
           const message = error?.code === 'auth/network-request-failed'
             ? 'فشل الاتصال بالشبكة. تأكد من اتصال الإنترنت ثم حاول مرة أخرى.'
             : getAuthErrorMessage(error?.code);
-          showToast(message);
+          showToast(message, 'error');
         } finally {
           els.authSubmitBtn.disabled = false;
           els.authSubmitBtn.textContent = authMode === 'login' ? 'تسجيل الدخول' : 'إنشاء حساب';
@@ -3309,6 +3749,8 @@ service cloud.firestore {
         const password = els.loginPassword.value;
         if (!email || !password) {
           setLoginHint('أدخل البريد وكلمة المرور', 'error');
+          if (!email) flagInvalidField(els.loginEmail);
+          if (!password) flagInvalidField(els.loginPassword);
           return;
         }
 
@@ -3378,7 +3820,7 @@ service cloud.firestore {
       async function toggleAuth() {
         if (auth.currentUser) {
           await signOut(auth);
-          showToast('تم تسجيل الخروج');
+          showToast('تم تسجيل الخروج', 'success');
           return;
         }
         openAuthModal('login');
@@ -3421,7 +3863,7 @@ service cloud.firestore {
           if (els.mobileProfileBtn) els.mobileProfileBtn.classList.add('visible');
           if (els.mobileProfileAvatar) els.mobileProfileAvatar.src = user.photoURL || '';
           if (user.providerData?.some(p => p.providerId === 'password') && !user.emailVerified) {
-            showToast('لم يتم تأكيد بريدك الإلكتروني بعد، تحقق من صندوق الوارد');
+            showToast('لم يتم تأكيد بريدك الإلكتروني بعد، تحقق من صندوق الوارد', 'success');
           }
           subscribeToProjectList();
         }
@@ -3431,7 +3873,7 @@ service cloud.firestore {
       function diagnoseAuthIssue() {
         const isLocalFile = window.location.protocol === 'file:';
         if (isLocalFile) {
-          showToast('افتح الصفحة عبر خادم محلي مثل http://localhost:8000 حتى يعمل تسجيل الدخول');
+          showToast('افتح الصفحة عبر خادم محلي مثل http://localhost:8000 حتى يعمل تسجيل الدخول', 'error');
         }
       }
 
@@ -3495,17 +3937,17 @@ service cloud.firestore {
         const file = event.target.files && event.target.files[0];
         if (!file) return;
         if (!file.type.startsWith('image/')) {
-          showToast('اختر ملف صورة صالح');
+          showToast('اختر ملف صورة صالح', 'error');
           return;
         }
         try {
           const dataUrl = await resizeImageToDataUrl(file);
           pendingAvatarDataUrl = dataUrl;
           els.profileAvatarPreview.src = dataUrl;
-          showToast('تم اختيار الصورة، اضغط "حفظ البيانات" لتأكيدها');
+          showToast('تم اختيار الصورة، اضغط "حفظ البيانات" لتأكيدها', 'success');
         } catch (error) {
           console.error('avatar resize failed', error);
-          showToast('تعذر معالجة الصورة، جرب صورة أخرى');
+          showToast('تعذر معالجة الصورة، جرب صورة أخرى', 'error');
         }
       }
 
@@ -3534,7 +3976,7 @@ service cloud.firestore {
         if (els.profileStatJoined) els.profileStatJoined.textContent = formatJoinDate(user?.metadata?.creationTime);
 
         if (!projectDocs.length) {
-          els.userProjectsList.innerHTML = '<div class="empty">ليس لديك مشروعات حالياً.</div>';
+          els.userProjectsList.innerHTML = emptyState('ليس لديك مشروعات حالياً.', 'project');
           return;
         }
 
@@ -3553,8 +3995,8 @@ service cloud.firestore {
                 </span>
               </button>
               <span class="project-item-actions">
-                <button class="btn-mini" title="إعادة تسمية" onclick="renameProject('${project.id}')">✎</button>
-                ${isOwner ? `<button class="btn-mini btn-mini-danger" title="حذف" onclick="deleteProject('${project.id}')">🗑</button>` : ''}
+                <button class="btn-mini" title="إعادة تسمية" onclick="renameProject('${project.id}')"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button>
+                ${isOwner ? `<button class="btn-mini btn-mini-danger" title="حذف" onclick="deleteProject('${project.id}')"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>` : ''}
                 ${isActive ? '<span class="permission-badge owner" style="padding:4px 10px; font-size:0.72rem;">نشط</span>' : `<button class="btn btn-secondary" style="padding:6px 12px; min-height:30px; font-size:0.78rem;" onclick="selectProject('${project.id}')">افتح</button>`}
               </span>
             </div>`;
@@ -3563,7 +4005,7 @@ service cloud.firestore {
 
       async function saveProfile() {
         if (!currentUser) {
-          showToast('سجل الدخول أولاً لحفظ الملف الشخصي');
+          showToast('سجل الدخول أولاً لحفظ الملف الشخصي', 'error');
           return;
         }
 
@@ -3579,12 +4021,12 @@ service cloud.firestore {
           els.userName.textContent = currentUser.displayName || currentUser.email || 'User';
           els.userNameSidebar.textContent = currentUser.displayName || currentUser.email || 'User';
           if (els.mobileProfileAvatar) els.mobileProfileAvatar.src = currentUser.photoURL || '';
-          showToast('تم حفظ الملف الشخصي بنجاح');
+          showToast('تم حفظ الملف الشخصي بنجاح', 'success');
           renderProfile();
           closeProfileEditModal();
         } catch (error) {
           console.error('saveProfile failed', error);
-          showToast('فشل حفظ الملف الشخصي، الصورة قد تكون كبيرة الحجم');
+          showToast('فشل حفظ الملف الشخصي، الصورة قد تكون كبيرة الحجم', 'error');
         }
       }
 
@@ -3592,12 +4034,21 @@ service cloud.firestore {
         const projectPanel = document.getElementById('settingsTabProject');
         const membersPanel = document.getElementById('settingsTabMembers');
         const categoriesPanel = document.getElementById('settingsTabCategories');
-        if (projectPanel) projectPanel.style.display = tab === 'project' ? 'block' : 'none';
-        if (membersPanel) membersPanel.style.display = tab === 'members' ? 'block' : 'none';
-        if (categoriesPanel) categoriesPanel.style.display = tab === 'categories' ? 'block' : 'none';
+        [ [projectPanel, 'project'], [membersPanel, 'members'], [categoriesPanel, 'categories'] ].forEach(([panel, key]) => {
+          if (!panel) return;
+          const shouldShow = tab === key;
+          panel.style.display = shouldShow ? 'block' : 'none';
+          if (shouldShow) {
+            panel.classList.remove('settings-tab-fade');
+            void panel.offsetWidth;
+            panel.classList.add('settings-tab-fade');
+          }
+        });
         document.querySelectorAll('[data-settings-tab]').forEach(btn => {
           btn.classList.toggle('active', btn.dataset.settingsTab === tab);
         });
+        const dangerZone = document.getElementById('projectDangerZone');
+        if (dangerZone) dangerZone.style.display = (tab === 'project' && canDeleteProject()) ? 'block' : 'none';
       }
       window.showSettingsTab = showSettingsTab;
 
@@ -3628,21 +4079,94 @@ service cloud.firestore {
       window.saveProfile = saveProfile;
       window.renderProfile = renderProfile;
 
+      function closeModalEl(el) {
+        if (!el || !el.classList.contains('open')) return;
+        el.classList.add('modal-closing');
+        setTimeout(() => {
+          el.classList.remove('open', 'modal-closing');
+        }, 180);
+      }
+
+      function flagInvalidField(el) {
+        if (!el) return;
+        el.classList.remove('field-invalid');
+        void el.offsetWidth;
+        el.classList.add('field-invalid');
+        el.addEventListener('input', function clearInvalid() {
+          el.classList.remove('field-invalid');
+          el.removeEventListener('input', clearInvalid);
+        }, { once: true });
+      }
+
+      function renderBudgetPanel(totalExpenses) {
+        if (!els.budgetPanel) return;
+        if (!currentProjectId || !state.budget || state.budget <= 0) {
+          els.budgetPanel.style.display = 'none';
+          return;
+        }
+        els.budgetPanel.style.display = 'block';
+        const pct = Math.min(100, Math.round((totalExpenses / state.budget) * 100));
+        const remaining = state.budget - totalExpenses;
+        els.budgetSummaryText.textContent = `${formatCurrency(totalExpenses)} من ${formatCurrency(state.budget)} · ${pct}%`;
+        els.budgetBarFill.dataset.pct = pct;
+        requestAnimationFrame(() => { els.budgetBarFill.style.width = `${pct}%`; });
+
+        let color = '#34d399';
+        let iconGradient = 'linear-gradient(135deg, #34d399, #10b981)';
+        if (pct >= 100) {
+          color = '#ff6b6b';
+          iconGradient = 'linear-gradient(135deg, #ff8a65, #ff6b6b)';
+          els.budgetWarningText.innerHTML = `<span class="settings-badge readonly">تجاوزت الميزانية بمقدار ${formatCurrency(Math.abs(remaining))}</span>`;
+        } else if (pct >= 80) {
+          color = '#ffd93d';
+          iconGradient = 'linear-gradient(135deg, #ffd93d, #ffab00)';
+          els.budgetWarningText.innerHTML = `<span class="settings-badge default">اقتربتوا من حد الميزانية — متبقي ${formatCurrency(remaining)}</span>`;
+        } else {
+          els.budgetWarningText.innerHTML = `<span class="settings-badge can-edit">متبقي ${formatCurrency(remaining)} من الميزانية</span>`;
+        }
+        els.budgetBarFill.style.background = color;
+        if (els.budgetIconAvatar) els.budgetIconAvatar.style.background = iconGradient;
+      }
+
+      function setStatValue(el, newValue) {
+        if (!el) return;
+        const newText = String(newValue);
+        if (el.textContent !== newText) {
+          el.textContent = newText;
+          const card = el.closest('.card');
+          if (card) {
+            card.classList.remove('stat-flash');
+            void card.offsetWidth;
+            card.classList.add('stat-flash');
+          }
+        }
+      }
+
       function render() {
         const metrics = calculateMetrics();
         const activeMembers = getActiveMembers();
 
         els.projectNameCard.textContent = currentProjectId ? state.projectName : 'لا يوجد مشروع محدد';
-        els.memberCount.textContent = activeMembers.length;
+        setStatValue(els.memberCount, activeMembers.length);
         const myMember = getCurrentMember();
         const myBalance = myMember ? metrics.balances.find(item => item.id === myMember.id) : null;
-        els.totalExpenses.textContent = formatCurrency(metrics.totalExpenses);
-        els.sharePerMember.textContent = formatCurrency(metrics.sharePerMember);
+        setStatValue(els.totalExpenses, formatCurrency(metrics.totalExpenses));
+        setStatValue(els.sharePerMember, formatCurrency(metrics.sharePerMember));
+        renderBudgetPanel(metrics.totalExpenses);
         els.ownerLabel.textContent = currentProjectOwnerName ? `مالك المشروع: ${currentProjectOwnerName}` : 'مالك المشروع: -';
         els.projectNameInput.value = state.projectName;
         els.projectDescriptionInput.value = state.projectDescription || '';
+        if (els.projectBudgetInput && document.activeElement !== els.projectBudgetInput) {
+          els.projectBudgetInput.value = state.budget > 0 ? state.budget : '';
+        }
+        updateDescriptionCounter();
         els.projectNameInput.disabled = !canEdit();
         els.projectDescriptionInput.disabled = !canEdit();
+        const dangerZoneEl = document.getElementById('projectDangerZone');
+        if (dangerZoneEl) {
+          const projectTabVisible = document.getElementById('settingsTabProject')?.style.display !== 'none';
+          dangerZoneEl.style.display = (projectTabVisible && canDeleteProject()) ? 'block' : 'none';
+        }
         const editStateText = currentProjectId ? (canEdit() ? 'يمكنك التعديل' : 'عرض فقط') : 'اختر مشروعًا أو أنشئ مشروعًا جديدًا';
         els.topSubtitle.textContent = `${activeMembers.length} أعضاء • ${state.expenses.length} مصروف • ${editStateText}`;
 
@@ -3663,7 +4187,7 @@ service cloud.firestore {
 
       function renderCategoryBreakdown() {
         if (!state.expenses.length) {
-          els.categoryBreakdown.innerHTML = '<div class="empty">لا توجد مصاريف بعد لعرض التوزيع.</div>';
+          els.categoryBreakdown.innerHTML = emptyState('لا توجد مصاريف بعد لعرض التوزيع.', 'chart');
           return;
         }
         const totals = {};
@@ -3673,43 +4197,57 @@ service cloud.firestore {
         });
         const grandTotal = Object.values(totals).reduce((sum, value) => sum + value, 0) || 1;
         const rows = Object.entries(totals).sort((a, b) => b[1] - a[1]);
-        els.categoryBreakdown.innerHTML = rows.map(([cat, amount]) => {
+        const dotColors = ['#5a8eff', '#34d399', '#ffd93d', '#ff8a65', '#c792ea', '#4dd0e1', '#f06595'];
+        els.categoryBreakdown.innerHTML = rows.map(([cat, amount], index) => {
           const pct = Math.round((amount / grandTotal) * 100);
+          const color = dotColors[index % dotColors.length];
           return `
             <div class="category-row">
               <div class="category-row-top">
-                <span>${cat}</span>
-                <span>${formatCurrency(amount)} · ${pct}%</span>
+                <span style="display:flex; align-items:center; gap:8px;"><span style="width:9px;height:9px;border-radius:50%;background:${color};flex-shrink:0;display:inline-block;"></span>${escapeHtml(cat)}</span>
+                <span><strong>${formatCurrency(amount)}</strong> · ${pct}%</span>
               </div>
               <div class="category-bar-track">
-                <div class="category-bar-fill" style="width:${pct}%;"></div>
+                <div class="category-bar-fill" data-pct="${pct}" style="width:0%; background:${color};"></div>
               </div>
             </div>`;
         }).join('');
+        requestAnimationFrame(() => {
+          els.categoryBreakdown.querySelectorAll('.category-bar-fill').forEach(bar => {
+            bar.style.width = `${bar.dataset.pct}%`;
+          });
+        });
       }
 
       function renderMembers(balances) {
         if (!balances.length) {
-          els.membersList.innerHTML = '<div class="empty">أضف أعضاء الفريق لتبدأ تتبع المصاريف.</div>';
+          els.membersList.innerHTML = emptyState('أضف أعضاء الفريق لتبدأ تتبع المصاريف.', 'members');
           return;
         }
 
         els.membersList.innerHTML = balances.map(member => {
           let balanceClass = 'balance-zero';
           let balanceText = 'متوازن';
+          let badgeClass = 'usage';
           if (member.balance > 0.0001) {
             balanceClass = 'balance-pos';
             balanceText = `له: ${formatCurrency(member.balance)}`;
+            badgeClass = 'can-edit';
           } else if (member.balance < -0.0001) {
             balanceClass = 'balance-neg';
             balanceText = `عليه: ${formatCurrency(Math.abs(member.balance))}`;
+            badgeClass = 'readonly';
           }
           return `
-            <div class="member-card">
-              <strong>${member.name}</strong>
-              <div class="label">دفع: ${formatCurrency(member.paid)}</div>
-              <div class="label">نصيبه: ${formatCurrency(member.share)}</div>
-              <div class="${balanceClass}">${balanceText}</div>
+            <div class="member-card member-settings-row">
+              <div class="member-settings-row-main">
+                <div class="settings-avatar">${escapeHtml((member.name || '?').trim().charAt(0).toUpperCase())}</div>
+                <div class="member-settings-info">
+                  <strong>${escapeHtml(member.name)}</strong>
+                  <div class="label">دفع ${formatCurrency(member.paid)} · نصيبه ${formatCurrency(member.share)}</div>
+                  <span class="settings-badge ${badgeClass}">${balanceText}</span>
+                </div>
+              </div>
             </div>`;
         }).join('');
       }
@@ -3729,8 +4267,18 @@ service cloud.firestore {
           return matchesSearch && matchesMember && matchesCategory && matchesDate;
         });
 
+        const sortMode = els.sortExpenses ? els.sortExpenses.value : 'date_desc';
+        const sorters = {
+          date_desc: (a, b) => new Date(b.date) - new Date(a.date),
+          date_asc: (a, b) => new Date(a.date) - new Date(b.date),
+          amount_desc: (a, b) => Number(b.amount) - Number(a.amount),
+          amount_asc: (a, b) => Number(a.amount) - Number(b.amount),
+          name_asc: (a, b) => a.itemName.localeCompare(b.itemName, 'ar')
+        };
+        filtered.sort(sorters[sortMode] || sorters.date_desc);
+
         if (!filtered.length) {
-          els.expensesTable.innerHTML = '<tr><td colspan="7"><div class="empty">لا توجد مصاريف بعد. أضف أول مصروف.</div></td></tr>';
+          els.expensesTable.innerHTML = `<tr><td colspan="7">${emptyState('لا توجد مصاريف بعد. أضف أول مصروف.', 'expenses')}</td></tr>`;
           return;
         }
 
@@ -3745,17 +4293,19 @@ service cloud.firestore {
             <td class="actions-col" data-label="الإجراءات">
               <button class="btn btn-secondary" onclick="duplicateExpense('${expense.id}')" ${editable ? '' : 'disabled'}>نسخ</button>
               <button class="btn btn-secondary" onclick="editExpense('${expense.id}')" ${editable ? '' : 'disabled'}>تعديل</button>
-              <button class="btn btn-danger" onclick="deleteExpense('${expense.id}')" ${editable ? '' : 'disabled'}>حذف</button>
+              <button class="btn btn-danger" onclick="deleteExpense('${expense.id}', event)" ${editable ? '' : 'disabled'}>حذف</button>
             </td>
           </tr>
         `).join('');
       }
 
+      let lastSettlementTransfers = [];
       function renderSettlement(balances) {
         const transfers = computeSettlement(balances.map(item => ({ ...item, balance: item.balance })));
+        lastSettlementTransfers = transfers;
         const editable = canEdit();
         if (!transfers.length) {
-          els.settlementList.innerHTML = '<div class="empty">لا توجد تسويات مطلوبة حالياً، كل الأرصدة متوازنة.</div>';
+          els.settlementList.innerHTML = emptyState('لا توجد تسويات مطلوبة حالياً، كل الأرصدة متوازنة.', 'settle');
           return;
         }
         els.settlementList.innerHTML = transfers.map(tx => `
@@ -3771,13 +4321,44 @@ service cloud.firestore {
         `).join('');
       }
 
+      async function shareSettlementSummary() {
+        if (!lastSettlementTransfers.length) {
+          showToast('كل الأرصدة متوازنة، مفيش حاجة نشاركها', 'default');
+          return;
+        }
+        const lines = [
+          `💰 ملخص تسوية "${state.projectName}"`,
+          '',
+          ...lastSettlementTransfers.map(tx => `• ${tx.from} يدفع ${formatCurrency(tx.amount)} إلى ${tx.to}`),
+          '',
+          `تم الإنشاء بواسطة Hesabna`
+        ];
+        const text = lines.join('\n');
+
+        if (navigator.share) {
+          try {
+            await navigator.share({ title: `تسوية ${state.projectName}`, text });
+            return;
+          } catch (error) {
+            if (error?.name === 'AbortError') return;
+            console.error('Share failed', error);
+          }
+        }
+
+        try {
+          await navigator.clipboard.writeText(text);
+          showToast('تم نسخ ملخص التسوية للحافظة', 'success');
+        } catch (error) {
+          console.error('Clipboard write failed', error);
+          showToast('تعذر النسخ، جرّب مرة أخرى', 'error');
+        }
+      }
+      window.shareSettlementSummary = shareSettlementSummary;
+
       // Pre-fills and submits the transfer form directly from a suggested settlement, so the owner
       // can confirm a payoff in one click instead of retyping the same from/to/amount manually.
       function quickSettle(fromId, toId, amount) {
-        if (!canEdit()) {
-          showToast('هذا الحساب لا يملك صلاحية التعديل');
-          return;
-        }
+        if (!guardCanEdit()) return;
         els.settlementFrom.disabled = false;
         els.settlementFrom.value = fromId;
         els.settlementTo.value = toId;
@@ -3789,13 +4370,13 @@ service cloud.firestore {
 
       function openRecordSettlementModal() {
         if (!isProjectParticipant()) {
-          showToast('لازم تكون عضو في المشروع عشان تسجل تحويل');
+          showToast('لازم تكون عضو في المشروع عشان تسجل تحويل', 'error');
           return;
         }
         if (els.recordSettlementModal) els.recordSettlementModal.classList.add('open');
       }
       function closeRecordSettlementModal() {
-        if (els.recordSettlementModal) els.recordSettlementModal.classList.remove('open');
+        if (els.recordSettlementModal) closeModalEl(els.recordSettlementModal);
       }
       window.openRecordSettlementModal = openRecordSettlementModal;
       window.closeRecordSettlementModal = closeRecordSettlementModal;
@@ -3843,11 +4424,12 @@ service cloud.firestore {
           settlements = settlements.filter(item => item.from === memberFilter || item.to === memberFilter);
         }
         if (!settlements.length) {
-          els.settlementHistoryList.innerHTML = '<div class="empty">لا توجد تحويلات مطابقة.</div>';
+          els.settlementHistoryList.innerHTML = emptyState('لا توجد تحويلات مطابقة.', 'history');
           return;
         }
         const editable = canEdit();
         const statusLabel = { pending: 'في انتظار تأكيد المالك', rejected: 'مرفوض', confirmed: 'مؤكد' };
+        const statusBadgeClass = { pending: 'default', rejected: 'readonly', confirmed: 'can-edit' };
         els.settlementHistoryList.innerHTML = settlements.map(settlement => {
           const status = settlement.status || 'confirmed';
           const actions = status === 'pending' && editable
@@ -3856,10 +4438,16 @@ service cloud.firestore {
             : `<button class="btn btn-danger" onclick="deleteSettlement('${settlement.id}')" ${editable ? '' : 'disabled'}>حذف</button>`;
           return `
           <div class="member-card member-settings-row">
-            <div class="member-settings-info">
-              <strong>${escapeHtml(getMemberName(settlement.from))} → ${escapeHtml(getMemberName(settlement.to))}</strong>
-              <div class="label">${formatCurrency(settlement.amount)} • ${escapeHtml(settlement.date)} • ${statusLabel[status] || statusLabel.confirmed}</div>
-              ${settlement.note ? `<div class="label">📝 ${escapeHtml(settlement.note)}</div>` : ''}
+            <div class="member-settings-row-main">
+              <div class="settings-avatar" style="background:linear-gradient(135deg, #8facff, #5a8eff);">
+                <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+              </div>
+              <div class="member-settings-info">
+                <strong>${escapeHtml(getMemberName(settlement.from))} → ${escapeHtml(getMemberName(settlement.to))}</strong>
+                <div class="label">${formatCurrency(settlement.amount)} • ${escapeHtml(settlement.date)}</div>
+                ${settlement.note ? `<div class="label">📝 ${escapeHtml(settlement.note)}</div>` : ''}
+                <span class="settings-badge ${statusBadgeClass[status] || 'can-edit'}">${statusLabel[status] || statusLabel.confirmed}</span>
+              </div>
             </div>
             <div class="actions member-settings-actions">
               ${actions}
@@ -3896,25 +4484,26 @@ service cloud.firestore {
           // A member without edit rights can only report a transfer that *they themselves* sent,
           // and it goes in as "pending" until someone with edit rights confirms it.
           if (!currentMember) {
-            showToast('هذا الحساب لا يملك صلاحية التعديل');
+            showToast('هذا الحساب لا يملك صلاحية التعديل', 'error');
             return;
           }
           if (from !== currentMember.id) {
-            showToast('تقدر تسجل بس تحويل انت اللي بعتّه');
+            showToast('تقدر تسجل بس تحويل انت اللي بعتّه', 'error');
             return;
           }
         }
 
         if (!from || !to) {
-          showToast('اختر الأعضاء أولاً');
+          showToast('اختر الأعضاء أولاً', 'error');
           return;
         }
         if (from === to) {
-          showToast('لازم يكون الدافع والمستلم مختلفين');
+          showToast('لازم يكون الدافع والمستلم مختلفين', 'error');
           return;
         }
         if (!amount || amount <= 0) {
-          showToast('أدخل مبلغًا صحيحًا');
+          showToast('أدخل مبلغًا صحيحًا', 'error');
+          flagInvalidField(els.settlementAmount);
           return;
         }
 
@@ -3939,7 +4528,7 @@ service cloud.firestore {
             await setDoc(doc(db, 'projects', currentProjectId, 'settlements', settlementId), settlementPayload);
           } catch (error) {
             console.error('Failed to record settlement', error);
-            showToast('تعذر تسجيل التحويل، حاول مرة أخرى');
+            showToast('تعذر تسجيل التحويل، حاول مرة أخرى', 'error');
             return;
           }
           // Optimistic local update so the UI reflects it instantly; the live listener will reconcile.
@@ -3963,10 +4552,7 @@ service cloud.firestore {
       }
 
       async function deleteSettlement(id) {
-        if (!canEdit()) {
-          showToast('هذا الحساب لا يملك صلاحية التعديل');
-          return;
-        }
+        if (!guardCanEdit()) return;
         const settlement = state.settlements.find(item => item.id === id);
         if (!settlement) return;
         if (isRemoteProject()) {
@@ -3974,7 +4560,7 @@ service cloud.firestore {
             await deleteDoc(doc(db, 'projects', currentProjectId, 'settlements', id));
           } catch (error) {
             console.error('Failed to delete settlement', error);
-            showToast('تعذر حذف التحويل');
+            showToast('تعذر حذف التحويل', 'error');
             return;
           }
         }
@@ -3982,16 +4568,13 @@ service cloud.firestore {
         logActivity(`تم حذف تحويل ${formatCurrency(settlement.amount)} من "${getMemberName(settlement.from)}" إلى "${getMemberName(settlement.to)}"`);
         saveState();
         render();
-        showToast('تم حذف التحويل');
+        showToast('تم حذف التحويل', 'success');
       }
       window.deleteSettlement = deleteSettlement;
 
       // Only an owner/editor can confirm a settlement a member reported themselves. Once confirmed it counts toward balances.
       async function confirmSettlement(id) {
-        if (!canEdit()) {
-          showToast('هذا الحساب لا يملك صلاحية التعديل');
-          return;
-        }
+        if (!guardCanEdit()) return;
         const settlement = state.settlements.find(item => item.id === id);
         if (!settlement) return;
         if (isRemoteProject()) {
@@ -3999,7 +4582,7 @@ service cloud.firestore {
             await updateDoc(doc(db, 'projects', currentProjectId, 'settlements', id), { status: 'confirmed' });
           } catch (error) {
             console.error('Failed to confirm settlement', error);
-            showToast('تعذر تأكيد التحويل');
+            showToast('تعذر تأكيد التحويل', 'error');
             return;
           }
         }
@@ -4007,16 +4590,13 @@ service cloud.firestore {
         logActivity(`تم تأكيد تحويل ${formatCurrency(settlement.amount)} من "${getMemberName(settlement.from)}" إلى "${getMemberName(settlement.to)}"`);
         saveState();
         render();
-        showToast('تم تأكيد التحويل');
+        showToast('تم تأكيد التحويل', 'success');
       }
       window.confirmSettlement = confirmSettlement;
 
       // Only an owner/editor can reject a settlement a member reported themselves (e.g. it never actually happened).
       async function rejectSettlement(id) {
-        if (!canEdit()) {
-          showToast('هذا الحساب لا يملك صلاحية التعديل');
-          return;
-        }
+        if (!guardCanEdit()) return;
         const settlement = state.settlements.find(item => item.id === id);
         if (!settlement) return;
         if (isRemoteProject()) {
@@ -4024,7 +4604,7 @@ service cloud.firestore {
             await updateDoc(doc(db, 'projects', currentProjectId, 'settlements', id), { status: 'rejected' });
           } catch (error) {
             console.error('Failed to reject settlement', error);
-            showToast('تعذر رفض التحويل');
+            showToast('تعذر رفض التحويل', 'error');
             return;
           }
         }
@@ -4032,7 +4612,7 @@ service cloud.firestore {
         logActivity(`تم رفض تحويل ${formatCurrency(settlement.amount)} من "${getMemberName(settlement.from)}" إلى "${getMemberName(settlement.to)}"`);
         saveState();
         render();
-        showToast('تم رفض التحويل');
+        showToast('تم رفض التحويل', 'success');
       }
       window.rejectSettlement = rejectSettlement;
 
@@ -4045,7 +4625,7 @@ service cloud.firestore {
 
       function activityLogHtml(entries) {
         if (!entries.length) {
-          return '<div class="empty">لا توجد نشاطات بعد.</div>';
+          return emptyState('لا توجد نشاطات بعد.', 'history');
         }
         return entries.map(entry => `
           <div class="activity-item">
@@ -4069,7 +4649,7 @@ service cloud.firestore {
       }
 
       function closeActivityLogModal() {
-        els.activityLogModal.classList.remove('open');
+        closeModalEl(els.activityLogModal);
       }
       window.closeActivityLogModal = closeActivityLogModal;
 
@@ -4085,10 +4665,7 @@ service cloud.firestore {
       }
 
       function duplicateExpense(id) {
-        if (!canEdit()) {
-          showToast('هذا الحساب لا يملك صلاحية التعديل');
-          return;
-        }
+        if (!guardCanEdit()) return;
         const original = state.expenses.find(item => item.id === id);
         if (!original) return;
         const copy = { ...original, id: crypto.randomUUID(), createdAt: new Date().toISOString() };
@@ -4096,7 +4673,7 @@ service cloud.firestore {
         logActivity(`تم تكرار المصروف "${original.itemName}"`);
         saveState();
         render();
-        showToast('تم نسخ المصروف');
+        showToast('تم نسخ المصروف', 'success');
       }
 
       function exportCsv() {
@@ -4120,14 +4697,16 @@ service cloud.firestore {
         link.download = `${state.projectName || 'expenses'}-export.csv`;
         link.click();
         URL.revokeObjectURL(link.href);
-        showToast('تم تصدير CSV');
+        showToast('تم تصدير CSV', 'success');
       }
 
       function renderSettingsMembers() {
         const members = getActiveMembers();
         const editable = canEdit();
+        const countBadge = document.getElementById('memberSettingsCount');
+        if (countBadge) countBadge.textContent = members.length;
         if (!members.length) {
-          els.memberSettingsList.innerHTML = '<div class="empty">لا يوجد أعضاء بعد.</div>';
+          els.memberSettingsList.innerHTML = emptyState('لا يوجد أعضاء بعد.', 'members');
           return;
         }
         els.memberSettingsList.innerHTML = members.map(member => `
@@ -4146,7 +4725,7 @@ service cloud.firestore {
                 <button onclick="toggleMemberPermission('${member.id}'); closeAllMemberMenus();" ${editable ? '' : 'disabled'}>${member.canEdit ? 'إلغاء صلاحية' : 'منح صلاحية'}</button>
                 <button onclick="renameMember('${member.id}'); closeAllMemberMenus();" ${editable ? '' : 'disabled'}>تعديل الاسم</button>
                 <button onclick="editMemberEmail('${member.id}'); closeAllMemberMenus();" ${editable ? '' : 'disabled'}>تعديل البريد</button>
-                <button class="danger" onclick="deleteMember('${member.id}'); closeAllMemberMenus();" ${editable ? '' : 'disabled'}>حذف</button>
+                <button class="danger" onclick="deleteMember('${member.id}', event); closeAllMemberMenus();" ${editable ? '' : 'disabled'}>حذف</button>
               </div>
             </div>
           </div>
@@ -4157,8 +4736,10 @@ service cloud.firestore {
         const categories = getCategories();
         const editable = canEdit();
         if (!els.categorySettingsList) return;
+        const catCountBadge = document.getElementById('categorySettingsCount');
+        if (catCountBadge) catCountBadge.textContent = categories.length;
         if (!categories.length) {
-          els.categorySettingsList.innerHTML = '<div class="empty">لا توجد فئات بعد.</div>';
+          els.categorySettingsList.innerHTML = emptyState('لا توجد فئات بعد.', 'category');
           return;
         }
         els.categorySettingsList.innerHTML = categories.map(cat => {
@@ -4167,7 +4748,7 @@ service cloud.firestore {
           return `
           <div class="member-card member-settings-row">
             <div class="member-settings-row-main">
-              <div class="settings-avatar category-avatar">🏷️</div>
+              <div class="settings-avatar category-avatar"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;"><path d="M20.59 13.41 11 3.83A2 2 0 0 0 9.59 3.17L4 3v5.59a2 2 0 0 0 .59 1.41l9.58 9.59a2 2 0 0 0 2.83 0l3.59-3.59a2 2 0 0 0 0-2.83z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg></div>
               <div class="member-settings-info">
                 <strong>${escapeHtml(cat)}</strong>
                 <span class="settings-badge usage">${usageCount ? `مستخدمة في ${usageCount} مصروف` : 'غير مستخدمة حاليًا'}</span>
@@ -4184,18 +4765,15 @@ service cloud.firestore {
       }
 
       async function addCategory() {
-        if (!canEdit()) {
-          showToast('هذا الحساب لا يملك صلاحية التعديل');
-          return;
-        }
+        if (!guardCanEdit()) return;
         const name = (els.newCategoryName.value || '').trim();
         if (!name) {
-          showToast('اكتب اسم الفئة أولاً');
+          showToast('اكتب اسم الفئة أولاً', 'error');
           return;
         }
         const categories = getCategories();
         if (categories.some(cat => cat.toLowerCase() === name.toLowerCase())) {
-          showToast('الفئة موجودة بالفعل');
+          showToast('الفئة موجودة بالفعل', 'error');
           return;
         }
         state.categories = [...categories, name];
@@ -4203,19 +4781,16 @@ service cloud.firestore {
         logActivity(`تم إضافة فئة جديدة "${name}"`);
         saveState();
         render();
-        showToast('تم إضافة الفئة');
+        showToast('تم إضافة الفئة', 'success');
       }
 
       async function renameCategory(oldName) {
-        if (!canEdit()) {
-          showToast('هذا الحساب لا يملك صلاحية التعديل');
-          return;
-        }
+        if (!guardCanEdit()) return;
         const categories = getCategories();
         const newName = await promptModal('تعديل الفئة', 'اسم الفئة الجديد', oldName);
         if (!newName || newName === oldName) return;
         if (categories.some(cat => cat.toLowerCase() === newName.toLowerCase() && cat !== oldName)) {
-          showToast('يوجد فئة بنفس الاسم بالفعل');
+          showToast('يوجد فئة بنفس الاسم بالفعل', 'error');
           return;
         }
         state.categories = categories.map(cat => (cat === oldName ? newName : cat));
@@ -4225,16 +4800,13 @@ service cloud.firestore {
         logActivity(`تم تعديل اسم الفئة من "${oldName}" إلى "${newName}"`);
         saveState();
         render();
-        showToast('تم تعديل الفئة');
+        showToast('تم تعديل الفئة', 'success');
       }
 
       async function deleteCategory(name) {
-        if (!canEdit()) {
-          showToast('هذا الحساب لا يملك صلاحية التعديل');
-          return;
-        }
+        if (!guardCanEdit()) return;
         if (name === 'أخرى') {
-          showToast('لا يمكن حذف الفئة الافتراضية');
+          showToast('لا يمكن حذف الفئة الافتراضية', 'error');
           return;
         }
         const usageCount = state.expenses.filter(expense => expense.category === name).length;
@@ -4243,6 +4815,8 @@ service cloud.firestore {
           : `هل تريد حذف فئة "${name}"؟`;
         const confirmed = await confirmModal('حذف الفئة', message, { confirmText: 'حذف' });
         if (!confirmed) return;
+        const categoryIndex = getCategories().indexOf(name);
+        const affectedExpenseIds = state.expenses.filter(expense => expense.category === name).map(expense => expense.id);
         state.categories = getCategories().filter(cat => cat !== name);
         state.expenses.forEach(expense => {
           if (expense.category === name) expense.category = 'أخرى';
@@ -4250,7 +4824,22 @@ service cloud.firestore {
         logActivity(`تم حذف فئة "${name}"`);
         saveState();
         render();
-        showToast('تم حذف الفئة');
+        showToast('تم حذف الفئة', 'success', {
+          label: 'تراجع',
+          onClick: () => {
+            const cats = getCategories();
+            const insertAt = Math.min(categoryIndex, cats.length);
+            cats.splice(insertAt, 0, name);
+            state.categories = cats;
+            state.expenses.forEach(expense => {
+              if (affectedExpenseIds.includes(expense.id)) expense.category = name;
+            });
+            logActivity(`تم استرجاع فئة "${name}"`);
+            saveState();
+            render();
+            showToast(`تم استرجاع فئة "${name}"`, 'success');
+          }
+        });
       }
 
       window.renameCategory = renameCategory;
@@ -4258,8 +4847,8 @@ service cloud.firestore {
 
       function populatePaidByOptions() {
         const members = getActiveMembers();
-        els.expensePaidBy.innerHTML = members.map(member => `<option value="${member.id}">${member.name}</option>`).join('');
-        els.filterMember.innerHTML = '<option value="">كل الأشخاص</option>' + members.map(member => `<option value="${member.id}">${member.name}</option>`).join('');
+        els.expensePaidBy.innerHTML = members.map(member => `<option value="${member.id}">${escapeHtml(member.name)}</option>`).join('');
+        els.filterMember.innerHTML = '<option value="">كل الأشخاص</option>' + members.map(member => `<option value="${member.id}">${escapeHtml(member.name)}</option>`).join('');
       }
 
       function getMemberName(id) {
@@ -4315,14 +4904,11 @@ service cloud.firestore {
       }
 
       function closeProfileEditModal() {
-        els.profileEditModal.classList.remove('open');
+        closeModalEl(els.profileEditModal);
       }
 
       function openExpenseModal() {
-        if (!canEdit()) {
-          showToast('هذا الحساب لا يملك صلاحية التعديل');
-          return;
-        }
+        if (!guardCanEdit()) return;
         editingExpenseId = null;
         els.expenseModalTitle.textContent = 'إضافة مصروف';
         els.expenseItem.value = '';
@@ -4337,14 +4923,11 @@ service cloud.firestore {
       }
 
       function closeExpenseModal() {
-        els.expenseModal.classList.remove('open');
+        closeModalEl(els.expenseModal);
       }
 
       function saveExpense() {
-        if (!canEdit()) {
-          showToast('هذا الحساب لا يملك صلاحية التعديل');
-          return;
-        }
+        if (!guardCanEdit()) return;
         const itemName = els.expenseItem.value.trim();
         const amount = Number(els.expenseAmount.value);
         const paidBy = els.expensePaidBy.value;
@@ -4354,12 +4937,15 @@ service cloud.firestore {
         const activeMembers = getActiveMembers();
 
         if (!activeMembers.length) {
-          showToast('أضف عضوًا واحدًا على الأقل قبل إضافة مصروف');
+          showToast('أضف عضوًا واحدًا على الأقل قبل إضافة مصروف', 'error');
           return;
         }
 
         if (!itemName || !amount || !paidBy) {
-          showToast('يرجى إدخال الاسم والسعر والشخص الذي دفع');
+          showToast('يرجى إدخال الاسم والسعر والشخص الذي دفع', 'error');
+          if (!itemName) flagInvalidField(els.expenseItem);
+          if (!amount) flagInvalidField(els.expenseAmount);
+          if (!paidBy) flagInvalidField(els.expensePaidBy);
           return;
         }
 
@@ -4369,7 +4955,7 @@ service cloud.firestore {
           const values = getExpenseSplitCustomValues();
           const total = Object.values(values).reduce((sum, v) => sum + v, 0);
           if (Math.abs(total - 100) > 0.5) {
-            showToast('مجموع النسب لازم يكون 100%');
+            showToast('مجموع النسب لازم يكون 100%', 'error');
             return;
           }
           splitType = 'custom';
@@ -4380,11 +4966,11 @@ service cloud.firestore {
         if (editingExpenseId) {
           state.expenses = state.expenses.map(item => item.id === editingExpenseId ? expense : item);
           logActivity(`تم تعديل المصروف "${itemName}" بنجاح`);
-          showToast('تم تعديل المصروف بنجاح');
+          showToast('تم تعديل المصروف بنجاح', 'success');
         } else {
           state.expenses.unshift(expense);
           logActivity(`تم إضافة المصروف "${itemName}" بقيمة ${formatCurrency(amount)}`);
-          showToast('تم إضافة المصروف بنجاح');
+          showToast('تم إضافة المصروف بنجاح', 'success');
         }
         saveState();
         closeExpenseModal();
@@ -4392,10 +4978,7 @@ service cloud.firestore {
       }
 
       function editExpense(id) {
-        if (!canEdit()) {
-          showToast('هذا الحساب لا يملك صلاحية التعديل');
-          return;
-        }
+        if (!guardCanEdit()) return;
         const expense = state.expenses.find(item => item.id === id);
         if (!expense) return;
         editingExpenseId = id;
@@ -4418,36 +5001,43 @@ service cloud.firestore {
         els.expenseModal.classList.add('open');
       }
 
-      async function deleteExpense(id) {
-        if (!canEdit()) {
-          showToast('هذا الحساب لا يملك صلاحية التعديل');
-          return;
-        }
+      async function deleteExpense(id, event) {
+        if (!guardCanEdit()) return;
         const expense = state.expenses.find(item => item.id === id);
         if (!expense) return;
         const confirmed = await confirmModal('حذف المصروف', `هل تريد حذف "${expense.itemName}"؟`, { confirmText: 'حذف' });
         if (!confirmed) return;
+        await animateExit(event?.target?.closest('tr'));
+        const expenseIndex = state.expenses.findIndex(item => item.id === id);
+        const removedExpense = expense;
         state.expenses = state.expenses.filter(item => item.id !== id);
         logActivity(`تم حذف المصروف "${expense.itemName}"`);
         saveState();
         render();
-        showToast('تم حذف المصروف');
+        showToast('تم حذف المصروف', 'success', {
+          label: 'تراجع',
+          onClick: () => {
+            const insertAt = Math.min(expenseIndex, state.expenses.length);
+            state.expenses.splice(insertAt, 0, removedExpense);
+            logActivity(`تم استرجاع المصروف "${removedExpense.itemName}"`);
+            saveState();
+            render();
+            showToast('تم استرجاع المصروف', 'success');
+          }
+        });
       }
 
       function addMember() {
-        if (!canEdit()) {
-          showToast('هذا الحساب لا يملك صلاحية التعديل');
-          return;
-        }
+        if (!guardCanEdit()) return;
         const name = els.newMemberName.value.trim();
         const email = normalizeEmail(els.newMemberEmail.value);
         const canEditMember = els.newMemberCanEdit.checked;
         if (!name) {
-          showToast('أدخل اسم العضو أولاً');
+          showToast('أدخل اسم العضو أولاً', 'error');
           return;
         }
         if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-          showToast('أدخل بريدًا إلكترونيًا صحيحًا');
+          showToast('أدخل بريدًا إلكترونيًا صحيحًا', 'error');
           return;
         }
         state = normalizeState(state);
@@ -4458,14 +5048,11 @@ service cloud.firestore {
         logActivity(`تمت إضافة عضو "${name}"${email ? ` (${email})` : ''}`);
         saveState();
         render();
-        showToast('تمت إضافة العضو');
+        showToast('تمت إضافة العضو', 'success');
       }
 
       async function renameMember(id) {
-        if (!canEdit()) {
-          showToast('هذا الحساب لا يملك صلاحية التعديل');
-          return;
-        }
+        if (!guardCanEdit()) return;
         const member = state.members.find(item => item.id === id);
         if (!member) return;
         const newName = await promptModal('تعديل اسم العضو', 'الاسم', member.name);
@@ -4475,22 +5062,19 @@ service cloud.firestore {
           logActivity(`تم تعديل اسم العضو من "${oldName}" إلى "${member.name}"`);
           saveState();
           render();
-          showToast('تم تعديل الاسم');
+          showToast('تم تعديل الاسم', 'success');
         }
       }
 
       async function editMemberEmail(id) {
-        if (!canEdit()) {
-          showToast('هذا الحساب لا يملك صلاحية التعديل');
-          return;
-        }
+        if (!guardCanEdit()) return;
         const member = state.members.find(item => item.id === id);
         if (!member) return;
         const newEmailRaw = await promptModal('تعديل بريد العضو', 'البريد الإلكتروني', member.email || '');
         if (newEmailRaw === null) return;
         const newEmail = normalizeEmail(newEmailRaw);
         if (newEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)) {
-          showToast('أدخل بريدًا إلكترونيًا صحيحًا');
+          showToast('أدخل بريدًا إلكترونيًا صحيحًا', 'error');
           return;
         }
         const oldEmail = member.email;
@@ -4498,22 +5082,28 @@ service cloud.firestore {
         logActivity(`تم تعديل بريد العضو "${member.name}" من "${oldEmail || 'غير محدد'}" إلى "${newEmail || 'غير محدد'}"`);
         saveState();
         render();
-        showToast('تم تعديل البريد الإلكتروني');
+        showToast('تم تعديل البريد الإلكتروني', 'success');
       }
 
-      async function deleteMember(id) {
-        if (!canEdit()) {
-          showToast('هذا الحساب لا يملك صلاحية التعديل');
-          return;
-        }
+      async function deleteMember(id, event) {
+        if (!guardCanEdit()) return;
         const member = state.members.find(item => item.id === id);
         if (!member) return;
         const confirmed = await confirmModal('حذف العضو', `هل تريد حذف "${member.name}"؟ بياناته السابقة في المصاريف هتفضل محفوظة.`, { confirmText: 'حذف' });
         if (!confirmed) return;
+        await animateExit(event?.target?.closest('.member-card'));
         member.active = false;
         saveState();
         render();
-        showToast('تم حذف العضو مع الاحتفاظ بالبيانات السابقة');
+        showToast('تم حذف العضو مع الاحتفاظ بالبيانات السابقة', 'success', {
+          label: 'تراجع',
+          onClick: () => {
+            member.active = true;
+            saveState();
+            render();
+            showToast(`تم استرجاع "${member.name}"`, 'success');
+          }
+        });
       }
 
       function closeAllMemberMenus() {
@@ -4551,10 +5141,7 @@ service cloud.firestore {
       });
 
       function toggleMemberPermission(id) {
-        if (!canEdit()) {
-          showToast('هذا الحساب لا يملك صلاحية التعديل');
-          return;
-        }
+        if (!guardCanEdit()) return;
         const member = state.members.find(item => item.id === id);
         if (!member) return;
         member.canEdit = !member.canEdit;
@@ -4564,20 +5151,19 @@ service cloud.firestore {
       }
 
       function saveProjectSettings() {
-        if (!canEdit()) {
-          showToast('هذا الحساب لا يملك صلاحية التعديل');
-          return;
-        }
+        if (!guardCanEdit()) return;
         const previousName = state.projectName;
         state.projectName = els.projectNameInput.value.trim() || state.projectName;
         state.projectDescription = els.projectDescriptionInput.value.trim();
+        const budgetValue = Number(els.projectBudgetInput.value);
+        state.budget = budgetValue > 0 ? budgetValue : 0;
         if (previousName !== state.projectName) {
           logActivity(`تم تغيير اسم المشروع إلى "${state.projectName}"`);
         }
         logActivity('تم حفظ إعدادات المشروع');
         saveState();
         render();
-        showToast('تم حفظ الإعدادات');
+        showToast('تم حفظ الإعدادات', 'success');
       }
 
       document.querySelectorAll('.nav-btn[data-section]').forEach(btn => btn.addEventListener('click', () => showSection(btn.dataset.section)));
@@ -4586,11 +5172,13 @@ service cloud.firestore {
       if (els.filterMember) els.filterMember.addEventListener('change', () => { renderExpenses(); updateFiltersToggleState(); });
       if (els.filterCategory) els.filterCategory.addEventListener('change', () => { renderExpenses(); updateFiltersToggleState(); });
       if (els.filterDate) els.filterDate.addEventListener('change', () => { renderExpenses(); updateFiltersToggleState(); });
+      if (els.sortExpenses) els.sortExpenses.addEventListener('change', renderExpenses);
       if (els.clearFiltersBtn) els.clearFiltersBtn.addEventListener('click', () => {
         els.searchInput.value = '';
         els.filterMember.value = '';
         els.filterCategory.value = '';
         els.filterDate.value = '';
+        if (els.sortExpenses) els.sortExpenses.value = 'date_desc';
         renderExpenses();
         updateFiltersToggleState();
       });
@@ -4607,10 +5195,25 @@ service cloud.firestore {
           filtersAdvanced.classList.toggle('open');
         });
       }
-      if (els.saveExpenseBtn) els.saveExpenseBtn.addEventListener('click', saveExpense);
+      if (els.saveExpenseBtn) els.saveExpenseBtn.addEventListener('click', withLoading(els.saveExpenseBtn, saveExpense));
       if (els.saveSettingsBtn) els.saveSettingsBtn.addEventListener('click', saveProjectSettings);
-      if (els.recordSettlementBtn) els.recordSettlementBtn.addEventListener('click', recordSettlement);
+      function updateDescriptionCounter() {
+        if (!els.projectDescriptionInput || !els.projectDescriptionCounter) return;
+        const len = els.projectDescriptionInput.value.length;
+        els.projectDescriptionCounter.textContent = `${len}/300`;
+        els.projectDescriptionCounter.style.color = len >= 300 ? '#ff6b6b' : '';
+      }
+      if (els.projectDescriptionInput) {
+        els.projectDescriptionInput.addEventListener('input', updateDescriptionCounter);
+      }
+      if (els.deleteProjectFromSettingsBtn) {
+        els.deleteProjectFromSettingsBtn.addEventListener('click', () => {
+          if (currentProjectId) deleteProject(currentProjectId);
+        });
+      }
+      if (els.recordSettlementBtn) els.recordSettlementBtn.addEventListener('click', withLoading(els.recordSettlementBtn, recordSettlement));
       if (els.openRecordSettlementBtn) els.openRecordSettlementBtn.addEventListener('click', openRecordSettlementModal);
+      if (els.shareSettlementBtn) els.shareSettlementBtn.addEventListener('click', shareSettlementSummary);
       if (els.recordSettlementCancelBtn) els.recordSettlementCancelBtn.addEventListener('click', closeRecordSettlementModal);
       if (els.recordSettlementModal) {
         els.recordSettlementModal.addEventListener('click', (event) => {
@@ -4619,22 +5222,16 @@ service cloud.firestore {
       }
       if (els.settlementStatusFilter) els.settlementStatusFilter.addEventListener('change', renderSettlementHistory);
       if (els.settlementMemberFilter) els.settlementMemberFilter.addEventListener('change', renderSettlementHistory);
-      if (els.addMemberBtn) els.addMemberBtn.addEventListener('click', addMember);
-      if (els.addCategoryBtn) els.addCategoryBtn.addEventListener('click', addCategory);
+      if (els.addMemberBtn) els.addMemberBtn.addEventListener('click', withLoading(els.addMemberBtn, addMember));
+      if (els.addCategoryBtn) els.addCategoryBtn.addEventListener('click', withLoading(els.addCategoryBtn, addCategory));
       if (els.addExpenseBtn) els.addExpenseBtn.addEventListener('click', () => {
-        if (!canEdit()) {
-          showToast('هذا الحساب لا يملك صلاحية التعديل');
-          return;
-        }
+        if (!guardCanEdit()) return;
         openExpenseModal();
       });
       const mobileFabBtn = document.getElementById('mobileFabBtn');
       if (mobileFabBtn) {
         mobileFabBtn.addEventListener('click', () => {
-          if (!canEdit()) {
-            showToast('هذا الحساب لا يملك صلاحية التعديل');
-            return;
-          }
+          if (!guardCanEdit()) return;
           openExpenseModal();
         });
       }
@@ -4645,7 +5242,7 @@ service cloud.firestore {
           await toggleAuth();
         } catch (error) {
           console.error(error);
-          showToast('فشل العملية');
+          showToast('فشل العملية', 'error');
         }
       });
       if (els.logoutBtn) {
@@ -4654,7 +5251,7 @@ service cloud.firestore {
             await toggleAuth();
           } catch (error) {
             console.error(error);
-            showToast('فشل العملية');
+            showToast('فشل العملية', 'error');
           }
         });
       }
@@ -4664,7 +5261,7 @@ service cloud.firestore {
             await toggleAuth();
           } catch (error) {
             console.error(error);
-            showToast('فشل العملية');
+            showToast('فشل العملية', 'error');
           }
         });
       }
@@ -4674,7 +5271,7 @@ service cloud.firestore {
             await toggleAuth();
           } catch (error) {
             console.error(error);
-            showToast('فشل العملية');
+            showToast('فشل العملية', 'error');
           }
         });
       }
@@ -4683,17 +5280,21 @@ service cloud.firestore {
       if (els.authSwitchBtn) els.authSwitchBtn.addEventListener('click', () => {
         openAuthModal(authMode === 'login' ? 'signup' : 'login');
       });
-      if (els.authSubmitBtn) els.authSubmitBtn.addEventListener('click', submitAuthForm);
-      if (els.loginSubmitBtn) els.loginSubmitBtn.addEventListener('click', submitLoginForm);
+      if (els.authSubmitBtn) els.authSubmitBtn.addEventListener('click', withLoading(els.authSubmitBtn, submitAuthForm));
+      if (els.authEmail) els.authEmail.addEventListener('keydown', (e) => { if (e.key === 'Enter') submitAuthForm(); });
+      if (els.authPassword) els.authPassword.addEventListener('keydown', (e) => { if (e.key === 'Enter') submitAuthForm(); });
+      if (els.loginSubmitBtn) els.loginSubmitBtn.addEventListener('click', withLoading(els.loginSubmitBtn, submitLoginForm));
+      if (els.loginEmail) els.loginEmail.addEventListener('keydown', (e) => { if (e.key === 'Enter') submitLoginForm(); });
+      if (els.loginPassword) els.loginPassword.addEventListener('keydown', (e) => { if (e.key === 'Enter') submitLoginForm(); });
       function closeLoginMoreMenu() {
         document.getElementById('loginMoreDropdown')?.classList.remove('open');
         document.getElementById('loginMoreBtn')?.setAttribute('aria-expanded', 'false');
       }
       if (els.resetPasswordBtn) els.resetPasswordBtn.addEventListener('click', () => { resetPassword(); closeLoginMoreMenu(); });
-      if (els.googleSignInBtn) els.googleSignInBtn.addEventListener('click', signInWithGoogle);
+      if (els.googleSignInBtn) els.googleSignInBtn.addEventListener('click', withLoading(els.googleSignInBtn, signInWithGoogle));
       if (els.createAccountBtn) els.createAccountBtn.addEventListener('click', () => { openAuthModal('signup'); closeLoginMoreMenu(); });
       if (els.downloadPdfBtn) els.downloadPdfBtn.addEventListener('click', downloadProjectPdf);
-      if (els.saveProfileBtn) els.saveProfileBtn.addEventListener('click', saveProfile);
+      if (els.saveProfileBtn) els.saveProfileBtn.addEventListener('click', withLoading(els.saveProfileBtn, saveProfile));
       if (els.editProfileBtn) els.editProfileBtn.addEventListener('click', openProfileEditModal);
       if (els.profileEditCancelBtn) els.profileEditCancelBtn.addEventListener('click', closeProfileEditModal);
       if (els.profileEditModal) els.profileEditModal.addEventListener('click', (event) => {
@@ -4721,15 +5322,7 @@ service cloud.firestore {
         }
       });
 
-      window.closeExpenseModal = closeExpenseModal;
-      window.selectProject = selectProject;
-      window.duplicateExpense = duplicateExpense;
-      window.editExpense = editExpense;
-      window.deleteExpense = deleteExpense;
-      window.toggleMemberPermission = toggleMemberPermission;
-      window.renameMember = renameMember;
       window.editMemberEmail = editMemberEmail;
-      window.deleteMember = deleteMember;
       window.toggleMemberMenu = toggleMemberMenu;
       window.closeAllMemberMenus = closeAllMemberMenus;
 
@@ -4741,7 +5334,7 @@ service cloud.firestore {
           renderAuth(user);
           if (user) {
             isFirebaseReady = true;
-            showToast(`مرحبًا ${user.displayName || 'بك'}`);
+            showToast(`مرحبًا ${user.displayName || 'بك'}`, 'success');
           }
           hideAppSplash();
         });
@@ -4754,6 +5347,46 @@ service cloud.firestore {
       function hideAppSplash() {
         const splash = document.getElementById('appSplash');
         if (splash && !splash.classList.contains('hidden')) splash.classList.add('hidden');
+      }
+
+      function animateExit(el) {
+        return new Promise(resolve => {
+          if (!el) return resolve();
+          let done = false;
+          const finish = () => { if (!done) { done = true; resolve(); } };
+          el.addEventListener('animationend', finish, { once: true });
+          el.classList.add('row-exit');
+          setTimeout(finish, 260);
+        });
+      }
+
+      const EYE_ICON = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>';
+      const EYE_OFF_ICON = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a18.5 18.5 0 0 1 4.22-5.19M9.9 4.24A10.94 10.94 0 0 1 12 5c7 0 11 7 11 7a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+      document.querySelectorAll('.field-toggle-btn[data-toggle-for]').forEach(btn => {
+        const input = document.getElementById(btn.dataset.toggleFor);
+        if (!input) return;
+        btn.innerHTML = EYE_ICON;
+        btn.addEventListener('click', () => {
+          const showing = input.type === 'text';
+          input.type = showing ? 'password' : 'text';
+          btn.innerHTML = showing ? EYE_ICON : EYE_OFF_ICON;
+          btn.setAttribute('aria-label', showing ? 'إظهار كلمة المرور' : 'إخفاء كلمة المرور');
+          input.focus({ preventScroll: true });
+        });
+      });
+
+      function withLoading(btn, fn) {
+        return async (...args) => {
+          if (!btn || btn.classList.contains('btn-loading')) return;
+          btn.classList.add('btn-loading');
+          btn.disabled = true;
+          try {
+            await fn(...args);
+          } finally {
+            btn.classList.remove('btn-loading');
+            btn.disabled = false;
+          }
+        };
       }
 
       function haptic(strength = 10) {
