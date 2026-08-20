@@ -2839,16 +2839,11 @@ service cloud.firestore {
 
       function createDefaultState() {
         return {
-          projectName: 'Graduation Project',
-          projectDescription: 'سجل مُصاريفك وشارك نتائج الفريق بسهولة.',
+          projectName: '',
+          projectDescription: '',
           currency: 'EGP',
           budget: 0,
-          members: [
-            { id: crypto.randomUUID(), name: 'Ahmed', active: true, createdAt: new Date().toISOString() },
-            { id: crypto.randomUUID(), name: 'Mohamed', active: true, createdAt: new Date().toISOString() },
-            { id: crypto.randomUUID(), name: 'Ali', active: true, createdAt: new Date().toISOString() },
-            { id: crypto.randomUUID(), name: 'Omar', active: true, createdAt: new Date().toISOString() }
-          ],
+          members: [],
           categories: [...DEFAULT_CATEGORIES],
           expenses: [],
           settlements: [],
