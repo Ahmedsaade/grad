@@ -237,6 +237,62 @@
         border-color: rgba(90, 142, 255, 0.3);
         box-shadow: 0 4px 12px rgba(90, 142, 255, 0.15);
       }
+      /* Sliding highlight pill that glides between sidebar nav items on selection,
+         positioned/sized via JS to match the active button's bounding box. */
+      .nav-indicator {
+        position: absolute;
+        right: 0;
+        border-radius: var(--radius-sm);
+        background: linear-gradient(135deg, rgba(90, 142, 255, 0.16), rgba(90, 142, 255, 0.05));
+        border: 1px solid rgba(90, 142, 255, 0.22);
+        pointer-events: none;
+        z-index: 0;
+        opacity: 0;
+        transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), height 0.32s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+      }
+      .nav-indicator.ready { opacity: 1; }
+      .sidebar-nav .nav-btn { position: relative; z-index: 1; background: transparent; }
+      .sidebar-nav .nav-btn.active { background: transparent; box-shadow: none; border-color: transparent; }
+      .mobile-nav-indicator {
+        position: absolute;
+        top: 6px;
+        bottom: 6px;
+        border-radius: var(--radius-sm);
+        background: linear-gradient(135deg, rgba(90, 142, 255, 0.16), rgba(90, 142, 255, 0.05));
+        pointer-events: none;
+        z-index: 0;
+        opacity: 0;
+        transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), width 0.32s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+      }
+      .mobile-nav-indicator.ready { opacity: 1; }
+      .mobile-nav button { position: relative; z-index: 1; }
+      @media (prefers-reduced-motion: reduce) {
+        .nav-indicator, .mobile-nav-indicator { transition: opacity 0.15s ease; }
+      }
+      /* Material-style ripple feedback on any .btn / .nav-btn / mobile-nav click */
+      .ripple-clip {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        border-radius: inherit;
+        pointer-events: none;
+        z-index: 0;
+      }
+      .ripple {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.45);
+        transform: scale(0);
+        pointer-events: none;
+        animation: rippleExpand 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+      [data-theme="light"] .ripple { background: rgba(51, 102, 221, 0.18); }
+      @keyframes rippleExpand {
+        to { transform: scale(1); opacity: 0; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .ripple { animation: none; display: none; }
+      }
 
       .sidebar-footer {
         margin-top: auto;
@@ -617,6 +673,56 @@
       @media (prefers-reduced-motion: reduce) {
         .content-section.active { animation: none; }
       }
+      .confetti-layer {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 9999;
+        overflow: hidden;
+      }
+      .confetti-piece {
+        position: absolute;
+        border-radius: 2px;
+        opacity: 0;
+        animation: confettiBurst 1.1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        will-change: transform, opacity;
+      }
+      @keyframes confettiBurst {
+        0% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+        70% { opacity: 1; }
+        100% { transform: translate(var(--dx), calc(var(--dy) + 220px)) rotate(var(--rot)); opacity: 0; }
+      }
+      /* Animated success checkmark — briefly replaces a button's own content with a
+         drawn checkmark (stroke-dashoffset trick) to confirm an action landed. */
+      .btn-success-check {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: inherit;
+        border-radius: inherit;
+        color: inherit;
+        z-index: 2;
+        animation: successCheckIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+      }
+      .btn-success-check svg { width: 20px; height: 20px; }
+      .btn-success-check svg path {
+        stroke-dasharray: 24;
+        stroke-dashoffset: 24;
+        animation: successCheckDraw 0.32s 0.05s ease forwards;
+      }
+      @keyframes successCheckIn {
+        from { opacity: 0; transform: scale(0.85); }
+        to { opacity: 1; transform: scale(1); }
+      }
+      @keyframes successCheckDraw {
+        to { stroke-dashoffset: 0; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .btn-success-check { animation: none; }
+        .btn-success-check svg path { animation: none; stroke-dashoffset: 0; }
+      }
       .content-section > .panel + .panel,
       .content-section > .dashboard-grid { margin-top: var(--space-4); }
 
@@ -658,6 +764,10 @@
       /* ===== Member actions dropdown ===== */
       .member-menu {
         position: relative;
+      }
+      .member-card.menu-open {
+        position: relative;
+        z-index: 60;
       }
       .member-menu-btn {
         width: 34px;
@@ -940,6 +1050,14 @@
         border-color: var(--primary);
         background: rgba(var(--panel-rgb), 0.9);
         box-shadow: 0 0 0 3px rgba(90, 142, 255, 0.1);
+        animation: focusPulse 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      @keyframes focusPulse {
+        0% { box-shadow: 0 0 0 0 rgba(90, 142, 255, 0.28); }
+        100% { box-shadow: 0 0 0 3px rgba(90, 142, 255, 0.1); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        input:focus, select:focus, textarea:focus { animation: none; }
       }
       textarea { min-height: 96px; resize: vertical; }
       input.field-invalid, select.field-invalid, textarea.field-invalid {
@@ -1277,6 +1395,11 @@
         flex-direction: column;
         align-items: center;
         gap: 10px;
+        animation: emptyFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+      }
+      @keyframes emptyFadeIn {
+        from { opacity: 0; transform: translateY(6px); }
+        to { opacity: 1; transform: translateY(0); }
       }
       .empty-icon {
         width: 44px;
@@ -1288,6 +1411,15 @@
         background: rgba(90, 142, 255, 0.1);
         color: var(--primary-light);
         flex-shrink: 0;
+        animation: emptyIconFloat 2.6s ease-in-out infinite;
+      }
+      @keyframes emptyIconFloat {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-5px); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .empty { animation: none; }
+        .empty-icon { animation: none; }
       }
       .empty-text { max-width: 320px; line-height: 1.6; }
 
@@ -1568,11 +1700,13 @@
         .mobile-profile-btn.visible { display: flex; }
         .main { padding-bottom: 100px; }
 
-        /* dashboard order on mobile: money summary first, then activity, members last */
+        /* dashboard order on mobile: keep members (the actionable content) first,
+           matching their DOM order and their desktop position — activity log is
+           supplementary, so it stays second instead of jumping ahead of it. */
         .dashboard-grid { display: flex; flex-direction: column; gap: var(--space-4); }
         .dashboard-col { display: contents; }
-        #activityPanel { order: 1; }
-        #membersPanel { order: 2; }
+        #membersPanel { order: 1; }
+        #activityPanel { order: 2; }
       }
 
       @media (max-width: 760px) {
@@ -2023,7 +2157,8 @@
           <div id="projectList" style="margin-top:12px;"></div>
         </div>
         <div class="sidebar-section-label">التنقل</div>
-        <div class="sidebar-nav">
+        <div class="sidebar-nav" id="sidebarNav" style="position:relative;">
+          <div class="nav-indicator" id="navIndicator" aria-hidden="true"></div>
           <button class="nav-btn active" data-section="dashboard"><span><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;"><rect x="3" y="12" width="5" height="9"/><rect x="9.5" y="7" width="5" height="14"/><rect x="16" y="3" width="5" height="18"/></svg></span><span>لوحة التحكم</span></button>
           <button class="nav-btn" data-section="expenses"><span><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg></span><span>المصاريف</span></button>
           <button class="nav-btn" data-section="settle"><span><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></span><span>التسوية</span></button>
@@ -2394,7 +2529,8 @@
       <span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
     </button>
 
-    <div class="mobile-nav">
+    <div class="mobile-nav" id="mobileNav">
+      <div class="mobile-nav-indicator" id="mobileNavIndicator" aria-hidden="true"></div>
       <button class="active" data-section="dashboard"><span class="mobile-nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block; margin:0 auto;"><rect x="3" y="12" width="5" height="9"/><rect x="9.5" y="7" width="5" height="14"/><rect x="16" y="3" width="5" height="18"/></svg></span><span>لوحة</span></button>
       <button data-section="expenses"><span class="mobile-nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block; margin:0 auto;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg></span><span>المصاريف</span></button>
       <button data-section="settle"><span class="mobile-nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block; margin:0 auto;"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></span><span>التسوية</span></button>
@@ -2415,7 +2551,7 @@
           </div>
           <div class="field">
             <label>السعر</label>
-            <input id="expenseAmount" type="number" step="0.01" placeholder="500" class="amount-input" />
+            <input id="expenseAmount" type="number" step="0.01" min="0" placeholder="500" class="amount-input" />
           </div>
           <div class="field">
             <label>الشخص الذي دفع</label>
@@ -2791,7 +2927,6 @@ service cloud.firestore {
         budgetIconAvatar: document.getElementById('budgetIconAvatar'),
         projectDescriptionCounter: document.getElementById('projectDescriptionCounter'),
         deleteProjectFromSettingsBtn: document.getElementById('deleteProjectFromSettingsBtn'),
-        activityList: document.getElementById('activityList'),
         openActivityLogBtn: document.getElementById('openActivityLogBtn'),
         activityLogModal: document.getElementById('activityLogModal'),
         activityLogFullList: document.getElementById('activityLogFullList'),
@@ -2814,7 +2949,6 @@ service cloud.firestore {
         profileEditCancelBtn: document.getElementById('profileEditCancelBtn'),
         userProjectsList: document.getElementById('userProjectsList'),
         createProjectFromProfileBtn: document.getElementById('createProjectFromProfileBtn'),
-        profileTopBtn: document.getElementById('profileTopBtn'),
         profileSidebarBtn: document.getElementById('profileSidebarBtn'),
         profileAvatarPreview: document.getElementById('profileAvatarPreview'),
         profileAvatarEditBtn: document.getElementById('profileAvatarEditBtn'),
@@ -2827,14 +2961,10 @@ service cloud.firestore {
         profileStatOwned: document.getElementById('profileStatOwned'),
         profileStatExpenses: document.getElementById('profileStatExpenses'),
         profileStatJoined: document.getElementById('profileStatJoined'),
-        logoutBtn: document.getElementById('logoutBtn'),
         logoutBtnSidebar: document.getElementById('logoutBtnSidebar'),
         logoutBtnProfile: document.getElementById('logoutBtnProfile'),
-        userAvatar: document.getElementById('userAvatar'),
         userAvatarSidebar: document.getElementById('userAvatarSidebar'),
-        userName: document.getElementById('userName'),
         userNameSidebar: document.getElementById('userNameSidebar'),
-        userEmail: document.getElementById('userEmail'),
         userEmailSidebar: document.getElementById('userEmailSidebar'),
         authModal: document.getElementById('authModal'),
         authModalTitle: document.getElementById('authModalTitle'),
@@ -3021,7 +3151,7 @@ service cloud.firestore {
           await setDoc(projectRef, { state: stateForSync, sharedWithEmails, editableEmails, updatedAt: serverTimestamp() }, { merge: true });
         } catch (error) {
           console.error('Firebase save failed', error);
-          showToast('تم الحفظ محليًا فقط بسبب مشكلة في Firebase', 'success');
+          showToast('تم الحفظ محليًا فقط بسبب مشكلة في Firebase', 'error');
         }
       }
 
@@ -3839,9 +3969,7 @@ service cloud.firestore {
           if (els.appRoot) els.appRoot.classList.add('hidden');
           if (els.loginScreen) els.loginScreen.style.display = 'flex';
           if (els.authBtn) els.authBtn.style.display = 'flex';
-          if (els.profileTopBtn) els.profileTopBtn.style.display = 'none';
           if (els.profileSidebarBtn) els.profileSidebarBtn.style.display = 'none';
-          if (els.logoutBtn) els.logoutBtn.style.display = 'none';
           if (els.logoutBtnSidebar) els.logoutBtnSidebar.style.display = 'none';
           if (els.authBtnLabel) els.authBtnLabel.textContent = 'تسجيل الدخول';
           if (els.mobileProfileBtn) els.mobileProfileBtn.classList.remove('visible');
@@ -3850,15 +3978,10 @@ service cloud.firestore {
           if (els.appRoot) els.appRoot.classList.remove('hidden');
           if (els.loginScreen) els.loginScreen.style.display = 'none';
           if (els.authBtn) els.authBtn.style.display = 'none';
-          if (els.profileTopBtn) els.profileTopBtn.style.display = 'none';
           if (els.profileSidebarBtn) els.profileSidebarBtn.style.display = 'flex';
-          if (els.logoutBtn) els.logoutBtn.style.display = 'none';
           if (els.logoutBtnSidebar) els.logoutBtnSidebar.style.display = 'inline-flex';
-          if (els.userAvatar) els.userAvatar.src = user.photoURL || '';
           if (els.userAvatarSidebar) els.userAvatarSidebar.src = user.photoURL || '';
-          if (els.userName) els.userName.textContent = user.displayName || 'User';
           if (els.userNameSidebar) els.userNameSidebar.textContent = user.displayName || 'User';
-          if (els.userEmail) els.userEmail.textContent = user.email || '';
           if (els.userEmailSidebar) els.userEmailSidebar.textContent = user.email || '';
           if (els.mobileProfileBtn) els.mobileProfileBtn.classList.add('visible');
           if (els.mobileProfileAvatar) els.mobileProfileAvatar.src = user.photoURL || '';
@@ -3970,9 +4093,9 @@ service cloud.firestore {
 
         const ownedCount = projectDocs.filter(project => project.ownerId === user?.uid).length;
         const totalExpensesCount = projectDocs.reduce((sum, project) => sum + ((project?.state?.expenses || []).length), 0);
-        if (els.profileStatProjects) els.profileStatProjects.textContent = projectDocs.length;
-        if (els.profileStatOwned) els.profileStatOwned.textContent = ownedCount;
-        if (els.profileStatExpenses) els.profileStatExpenses.textContent = totalExpensesCount;
+        if (els.profileStatProjects) animateStatValue(els.profileStatProjects, projectDocs.length);
+        if (els.profileStatOwned) animateStatValue(els.profileStatOwned, ownedCount);
+        if (els.profileStatExpenses) animateStatValue(els.profileStatExpenses, totalExpensesCount);
         if (els.profileStatJoined) els.profileStatJoined.textContent = formatJoinDate(user?.metadata?.creationTime);
 
         if (!projectDocs.length) {
@@ -4016,11 +4139,10 @@ service cloud.firestore {
         try {
           await updateProfile(currentUser, { displayName: displayName || currentUser.displayName, photoURL: photoURL || currentUser.photoURL || '' });
           pendingAvatarDataUrl = null;
-          els.userAvatar.src = currentUser.photoURL || '';
-          els.userAvatarSidebar.src = currentUser.photoURL || '';
-          els.userName.textContent = currentUser.displayName || currentUser.email || 'User';
-          els.userNameSidebar.textContent = currentUser.displayName || currentUser.email || 'User';
+          if (els.userAvatarSidebar) els.userAvatarSidebar.src = currentUser.photoURL || '';
+          if (els.userNameSidebar) els.userNameSidebar.textContent = currentUser.displayName || currentUser.email || 'User';
           if (els.mobileProfileAvatar) els.mobileProfileAvatar.src = currentUser.photoURL || '';
+          flashSuccessCheck(els.saveProfileBtn);
           showToast('تم حفظ الملف الشخصي بنجاح', 'success');
           renderProfile();
           closeProfileEditModal();
@@ -4059,6 +4181,7 @@ service cloud.firestore {
           const isTarget = panel.id === section;
           panel.classList.toggle('active', isTarget);
         });
+        positionNavIndicator();
         const topbar = document.getElementById('mainTopbar');
         if (topbar) topbar.style.display = section === 'profile' ? 'none' : '';
         if (section === 'profile') {
@@ -4105,9 +4228,10 @@ service cloud.firestore {
           return;
         }
         els.budgetPanel.style.display = 'block';
-        const pct = Math.min(100, Math.round((totalExpenses / state.budget) * 100));
+        const rawPct = state.budget > 0 ? Math.round((totalExpenses / state.budget) * 100) : 0;
+        const pct = Math.min(100, rawPct);
         const remaining = state.budget - totalExpenses;
-        els.budgetSummaryText.textContent = `${formatCurrency(totalExpenses)} من ${formatCurrency(state.budget)} · ${pct}%`;
+        els.budgetSummaryText.textContent = `${formatCurrency(totalExpenses)} من ${formatCurrency(state.budget)} · ${rawPct}%`;
         els.budgetBarFill.dataset.pct = pct;
         requestAnimationFrame(() => { els.budgetBarFill.style.width = `${pct}%`; });
 
@@ -4142,6 +4266,113 @@ service cloud.firestore {
         }
       }
 
+      const REDUCE_MOTION = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      function easeOutExpo(t) {
+        return t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
+      }
+
+      // Tweens a stat's numeric value from its current displayed number up/down to `target`,
+      // re-formatting every frame with `formatter`. Falls back to an instant set when the
+      // element has no previous numeric value, when the change is negligible, or when the
+      // user prefers reduced motion.
+      function animateStatValue(el, target, formatter = (n) => String(n), duration = 650) {
+        if (!el) return;
+        const targetNum = Number(target) || 0;
+        // Prefer the value actually on screen right now (mid-tween) over the last
+        // *stored* target, so restarting the animation continues smoothly instead of
+        // jumping back to wherever the previous tween was heading.
+        const liveValue = Number(el._displayValue);
+        const storedValue = Number(el.dataset.rawValue);
+        const start = Number.isFinite(liveValue) ? liveValue : (Number.isFinite(storedValue) ? storedValue : targetNum);
+        el.dataset.rawValue = String(targetNum);
+
+        const card = el.closest('.card');
+        if (Math.abs(targetNum - start) < 0.005) {
+          el.textContent = formatter(targetNum);
+          el._displayValue = targetNum;
+          return;
+        }
+        if (REDUCE_MOTION) {
+          el.textContent = formatter(targetNum);
+          el._displayValue = targetNum;
+          if (card) { card.classList.remove('stat-flash'); void card.offsetWidth; card.classList.add('stat-flash'); }
+          return;
+        }
+
+        if (card) { card.classList.remove('stat-flash'); void card.offsetWidth; card.classList.add('stat-flash'); }
+        if (el._countRaf) cancelAnimationFrame(el._countRaf);
+        const startTime = performance.now();
+        const tick = (now) => {
+          const progress = Math.min(1, (now - startTime) / duration);
+          const eased = easeOutExpo(progress);
+          const current = start + (targetNum - start) * eased;
+          el._displayValue = progress === 1 ? targetNum : current;
+          el.textContent = formatter(el._displayValue);
+          if (progress < 1) {
+            el._countRaf = requestAnimationFrame(tick);
+          } else {
+            el._countRaf = null;
+          }
+        };
+        el._countRaf = requestAnimationFrame(tick);
+      }
+
+      // Fun little celebratory burst — no external libs, just a handful of absolutely
+      // positioned pieces animated with CSS and cleaned up after they finish falling.
+      function celebrateConfetti(originEl) {
+        if (REDUCE_MOTION) return;
+        const colors = ['#5a8eff', '#34d399', '#ffd93d', '#ff8a65', '#c792ea', '#f06595'];
+        const rect = originEl && originEl.getBoundingClientRect
+          ? originEl.getBoundingClientRect()
+          : { left: window.innerWidth / 2 - 40, top: window.innerHeight / 3, width: 80, height: 20 };
+        const originX = rect.left + rect.width / 2;
+        const originY = rect.top + rect.height / 2;
+
+        const layer = document.createElement('div');
+        layer.className = 'confetti-layer';
+        document.body.appendChild(layer);
+
+        const count = 26;
+        for (let i = 0; i < count; i += 1) {
+          const piece = document.createElement('span');
+          piece.className = 'confetti-piece';
+          const angle = (Math.PI * 2 * i) / count + (Math.random() * 0.6 - 0.3);
+          const distance = 90 + Math.random() * 140;
+          const dx = Math.cos(angle) * distance;
+          const dy = Math.sin(angle) * distance - 60;
+          const rotate = Math.round(Math.random() * 520 - 260);
+          const size = 6 + Math.round(Math.random() * 5);
+          piece.style.setProperty('--dx', `${dx}px`);
+          piece.style.setProperty('--dy', `${dy}px`);
+          piece.style.setProperty('--rot', `${rotate}deg`);
+          piece.style.left = `${originX}px`;
+          piece.style.top = `${originY}px`;
+          piece.style.width = `${size}px`;
+          piece.style.height = `${size * 0.4}px`;
+          piece.style.background = colors[i % colors.length];
+          piece.style.animationDelay = `${Math.random() * 0.08}s`;
+          layer.appendChild(piece);
+        }
+        setTimeout(() => layer.remove(), 1300);
+      }
+      window.celebrateConfetti = celebrateConfetti;
+
+      // Briefly overlays a button with a drawn checkmark to confirm a save/action
+      // succeeded, then restores the button's normal content automatically.
+      function flashSuccessCheck(btn, duration = 900) {
+        if (!btn) return;
+        if (getComputedStyle(btn).position === 'static') btn.style.position = 'relative';
+        const existing = btn.querySelector(':scope > .btn-success-check');
+        if (existing) existing.remove();
+        const overlay = document.createElement('span');
+        overlay.className = 'btn-success-check';
+        overlay.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l6 6L20 6"/></svg>';
+        btn.appendChild(overlay);
+        setTimeout(() => overlay.remove(), duration);
+      }
+      window.flashSuccessCheck = flashSuccessCheck;
+
       function render() {
         const metrics = calculateMetrics();
         const activeMembers = getActiveMembers();
@@ -4150,8 +4381,8 @@ service cloud.firestore {
         setStatValue(els.memberCount, activeMembers.length);
         const myMember = getCurrentMember();
         const myBalance = myMember ? metrics.balances.find(item => item.id === myMember.id) : null;
-        setStatValue(els.totalExpenses, formatCurrency(metrics.totalExpenses));
-        setStatValue(els.sharePerMember, formatCurrency(metrics.sharePerMember));
+        animateStatValue(els.totalExpenses, metrics.totalExpenses, formatCurrency);
+        animateStatValue(els.sharePerMember, metrics.sharePerMember, formatCurrency);
         renderBudgetPanel(metrics.totalExpenses);
         els.ownerLabel.textContent = currentProjectOwnerName ? `مالك المشروع: ${currentProjectOwnerName}` : 'مالك المشروع: -';
         els.projectNameInput.value = state.projectName;
@@ -4286,10 +4517,10 @@ service cloud.firestore {
           <tr>
             <td data-label="الاسم" class="expense-name-cell">${escapeHtml(expense.itemName)}${expense.splitType === 'custom' ? ' <span class="label" style="opacity:0.75;">(تقسيم مخصص)</span>' : ''}</td>
             <td data-label="السعر" class="expense-amount-cell">${formatCurrency(expense.amount)}</td>
-            <td data-label="الفئة">${expense.category || 'أخرى'}</td>
-            <td data-label="المدفوع من">${getMemberName(expense.paidBy)}</td>
+            <td data-label="الفئة">${escapeHtml(expense.category || 'أخرى')}</td>
+            <td data-label="المدفوع من">${escapeHtml(getMemberName(expense.paidBy))}</td>
             <td data-label="التاريخ">${expense.date}</td>
-            <td data-label="ملاحظات">${expense.notes || '—'}</td>
+            <td data-label="ملاحظات">${expense.notes ? escapeHtml(expense.notes) : '—'}</td>
             <td class="actions-col" data-label="الإجراءات">
               <button class="btn btn-secondary" onclick="duplicateExpense('${expense.id}')" ${editable ? '' : 'disabled'}>نسخ</button>
               <button class="btn btn-secondary" onclick="editExpense('${expense.id}')" ${editable ? '' : 'disabled'}>تعديل</button>
@@ -4300,10 +4531,16 @@ service cloud.firestore {
       }
 
       let lastSettlementTransfers = [];
+      let wasFullySettled = null;
       function renderSettlement(balances) {
         const transfers = computeSettlement(balances.map(item => ({ ...item, balance: item.balance })));
         lastSettlementTransfers = transfers;
         const editable = canEdit();
+        const isFullySettled = transfers.length === 0 && balances.length > 0;
+        if (isFullySettled && wasFullySettled === false) {
+          celebrateConfetti(els.settlementList);
+        }
+        wasFullySettled = isFullySettled;
         if (!transfers.length) {
           els.settlementList.innerHTML = emptyState('لا توجد تسويات مطلوبة حالياً، كل الأرصدة متوازنة.', 'settle');
           return;
@@ -4714,8 +4951,8 @@ service cloud.firestore {
             <div class="member-settings-row-main">
               <div class="settings-avatar">${escapeHtml((member.name || '?').trim().charAt(0).toUpperCase())}</div>
               <div class="member-settings-info">
-                <strong>${member.name}</strong>
-                <div class="label">${member.email ? member.email : 'بريد غير محدد'} · تمت الإضافة في ${new Date(member.createdAt).toLocaleDateString('en-GB')}</div>
+                <strong>${escapeHtml(member.name)}</strong>
+                <div class="label">${member.email ? escapeHtml(member.email) : 'بريد غير محدد'} · تمت الإضافة في ${new Date(member.createdAt).toLocaleDateString('en-GB')}</div>
                 <span class="settings-badge ${member.canEdit ? 'can-edit' : 'readonly'}">${member.canEdit ? 'له صلاحية تعديل' : 'عرض فقط'}</span>
               </div>
             </div>
@@ -4941,10 +5178,10 @@ service cloud.firestore {
           return;
         }
 
-        if (!itemName || !amount || !paidBy) {
-          showToast('يرجى إدخال الاسم والسعر والشخص الذي دفع', 'error');
+        if (!itemName || !amount || !paidBy || amount < 0 || !Number.isFinite(amount)) {
+          showToast(amount < 0 ? 'قيمة المصروف لازم تكون رقم موجب' : 'يرجى إدخال الاسم والسعر والشخص الذي دفع', 'error');
           if (!itemName) flagInvalidField(els.expenseItem);
-          if (!amount) flagInvalidField(els.expenseAmount);
+          if (!amount || amount < 0 || !Number.isFinite(amount)) flagInvalidField(els.expenseAmount);
           if (!paidBy) flagInvalidField(els.expensePaidBy);
           return;
         }
@@ -5040,6 +5277,11 @@ service cloud.firestore {
           showToast('أدخل بريدًا إلكترونيًا صحيحًا', 'error');
           return;
         }
+        if (email && state.members.some(item => item.active !== false && normalizeEmail(item.email) === email)) {
+          showToast('يوجد عضو آخر بنفس البريد الإلكتروني بالفعل', 'error');
+          flagInvalidField(els.newMemberEmail);
+          return;
+        }
         state = normalizeState(state);
         state.members.push({ id: crypto.randomUUID(), name, email, canEdit: canEditMember, active: true, createdAt: new Date().toISOString() });
         els.newMemberName.value = '';
@@ -5077,6 +5319,10 @@ service cloud.firestore {
           showToast('أدخل بريدًا إلكترونيًا صحيحًا', 'error');
           return;
         }
+        if (newEmail && state.members.some(item => item.id !== id && item.active !== false && normalizeEmail(item.email) === newEmail)) {
+          showToast('يوجد عضو آخر بنفس البريد الإلكتروني بالفعل', 'error');
+          return;
+        }
         const oldEmail = member.email;
         member.email = newEmail;
         logActivity(`تم تعديل بريد العضو "${member.name}" من "${oldEmail || 'غير محدد'}" إلى "${newEmail || 'غير محدد'}"`);
@@ -5108,6 +5354,7 @@ service cloud.firestore {
 
       function closeAllMemberMenus() {
         document.querySelectorAll('.member-menu-dropdown.open').forEach(el => el.classList.remove('open'));
+        document.querySelectorAll('.member-card.menu-open').forEach(el => el.classList.remove('menu-open'));
       }
 
       function toggleMemberMenu(event, id) {
@@ -5116,7 +5363,11 @@ service cloud.firestore {
         if (!dropdown) return;
         const isOpen = dropdown.classList.contains('open');
         closeAllMemberMenus();
-        if (!isOpen) dropdown.classList.add('open');
+        if (!isOpen) {
+          dropdown.classList.add('open');
+          const card = dropdown.closest('.member-card');
+          if (card) card.classList.add('menu-open');
+        }
       }
 
       document.addEventListener('click', (event) => {
@@ -5245,16 +5496,6 @@ service cloud.firestore {
           showToast('فشل العملية', 'error');
         }
       });
-      if (els.logoutBtn) {
-        els.logoutBtn.addEventListener('click', async () => {
-          try {
-            await toggleAuth();
-          } catch (error) {
-            console.error(error);
-            showToast('فشل العملية', 'error');
-          }
-        });
-      }
       if (els.logoutBtnSidebar) {
         els.logoutBtnSidebar.addEventListener('click', async () => {
           try {
@@ -5306,7 +5547,6 @@ service cloud.firestore {
       if (els.profileAvatarInput) els.profileAvatarInput.addEventListener('change', handleAvatarFileSelected);
       if (els.createProjectBtn) els.createProjectBtn.addEventListener('click', createProject);
       if (els.createProjectFromProfileBtn) els.createProjectFromProfileBtn.addEventListener('click', createProject);
-      if (els.profileTopBtn) els.profileTopBtn.addEventListener('click', () => showSection('profile'));
       if (els.profileSidebarBtn) els.profileSidebarBtn.addEventListener('click', () => showSection('profile'));
       if (els.mobileProfileBtn) els.mobileProfileBtn.addEventListener('click', () => showSection('profile'));
       if (els.authModal) els.authModal.addEventListener('click', (event) => {
@@ -5342,6 +5582,7 @@ service cloud.firestore {
         render();
         els.expenseDate.value = new Date().toISOString().slice(0, 10);
         setTimeout(hideAppSplash, 900);
+        requestAnimationFrame(positionNavIndicator);
       });
 
       function hideAppSplash() {
@@ -5388,6 +5629,66 @@ service cloud.firestore {
           }
         };
       }
+
+      function positionNavIndicator() {
+        const sidebarNav = document.getElementById('sidebarNav');
+        const sidebarIndicator = document.getElementById('navIndicator');
+        if (sidebarNav && sidebarIndicator) {
+          const activeBtn = sidebarNav.querySelector('.nav-btn.active');
+          if (activeBtn) {
+            sidebarIndicator.style.width = `${activeBtn.offsetWidth}px`;
+            sidebarIndicator.style.height = `${activeBtn.offsetHeight}px`;
+            sidebarIndicator.style.transform = `translateY(${activeBtn.offsetTop}px)`;
+            sidebarIndicator.classList.add('ready');
+          } else {
+            sidebarIndicator.classList.remove('ready');
+          }
+        }
+        const mobileNav = document.getElementById('mobileNav');
+        const mobileIndicator = document.getElementById('mobileNavIndicator');
+        if (mobileNav && mobileIndicator) {
+          const activeBtn = mobileNav.querySelector('button.active');
+          if (activeBtn) {
+            mobileIndicator.style.width = `${activeBtn.offsetWidth}px`;
+            mobileIndicator.style.transform = `translateX(${activeBtn.offsetLeft}px)`;
+            mobileIndicator.classList.add('ready');
+          } else {
+            mobileIndicator.classList.remove('ready');
+          }
+        }
+      }
+      window.addEventListener('resize', positionNavIndicator);
+
+      // Material-style ripple: spawns a circle from the click point that expands and
+      // fades out. Confined by a dedicated absolutely-positioned overlay (matching the
+      // button's own border-radius) so it never clips the button's own box-shadow/glow.
+      function spawnRipple(target, clientX, clientY) {
+        if (REDUCE_MOTION || !target) return;
+        if (getComputedStyle(target).position === 'static') {
+          target.style.position = 'relative';
+        }
+        let clip = target.querySelector(':scope > .ripple-clip');
+        if (!clip) {
+          clip = document.createElement('span');
+          clip.className = 'ripple-clip';
+          target.insertBefore(clip, target.firstChild);
+        }
+        const rect = target.getBoundingClientRect();
+        const size = Math.max(rect.width, rect.height) * 1.6;
+        const ripple = document.createElement('span');
+        ripple.className = 'ripple';
+        ripple.style.width = `${size}px`;
+        ripple.style.height = `${size}px`;
+        ripple.style.left = `${(clientX ?? rect.left + rect.width / 2) - rect.left - size / 2}px`;
+        ripple.style.top = `${(clientY ?? rect.top + rect.height / 2) - rect.top - size / 2}px`;
+        clip.appendChild(ripple);
+        ripple.addEventListener('animationend', () => ripple.remove(), { once: true });
+        setTimeout(() => ripple.remove(), 650);
+      }
+      document.addEventListener('click', (event) => {
+        const target = event.target.closest('.btn, .nav-btn, .mobile-nav button, .mobile-fab');
+        if (target) spawnRipple(target, event.clientX, event.clientY);
+      });
 
       function haptic(strength = 10) {
         if (window.navigator && typeof window.navigator.vibrate === 'function') {
