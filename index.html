@@ -2793,7 +2793,7 @@ service cloud.firestore {
   }
 }`;
       import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js';
-      import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, onAuthStateChanged, signOut, updateProfile, GoogleAuthProvider, signInWithPopup } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js';
+      import { getAuth, setPersistence, browserLocalPersistence, browserSessionPersistence, inMemoryPersistence, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, onAuthStateChanged, signOut, updateProfile, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js';
       import { getFirestore, collection, query, where, doc, setDoc, updateDoc, deleteDoc, onSnapshot, serverTimestamp, or } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js';
 
       const firebaseConfig = {
@@ -2808,6 +2808,59 @@ service cloud.firestore {
       const app = initializeApp(firebaseConfig);
       const auth = getAuth(app);
       const db = getFirestore(app);
+
+      // ---------------------------------------------------------------------------
+      // ROOT CAUSE FIX (iOS Safari infinite loading on login):
+      // Firebase Auth's default persistence writes to IndexedDB. In Safari Private
+      // Browsing (and some locked-down in-app WebViews on iOS), IndexedDB access
+      // throws or silently never resolves. Firebase does not surface this as a
+      // rejected promise on its own — the SDK's internal storage layer can stall,
+      // which leaves sign-in calls (signInWithEmailAndPassword / signInWithPopup)
+      // pending forever with no error ever reaching the UI. That is why the app
+      // could get stuck on a loading state specifically on iOS, while Android/desktop
+      // Chrome (where IndexedDB in private mode behaves normally) were unaffected.
+      //
+      // Fix: explicitly request persistence with an automatic fallback chain
+      // (IndexedDB -> sessionStorage -> in-memory), so a blocked storage layer can
+      // never hang the SDK. This also guarantees "session persists after refresh"
+      // whenever the browser allows it, and degrades gracefully (session won't
+      // survive a refresh, but login/logout still work) when it doesn't.
+      const authReadyPromise = (async () => {
+        try {
+          await setPersistence(auth, browserLocalPersistence);
+          console.log('[auth] persistence: local (IndexedDB)');
+        } catch (err) {
+          console.warn('[auth] local persistence unavailable, falling back to session storage', err);
+          try {
+            await setPersistence(auth, browserSessionPersistence);
+            console.log('[auth] persistence: session storage');
+          } catch (err2) {
+            console.warn('[auth] session persistence unavailable, falling back to memory (likely Private Browsing)', err2);
+            try {
+              await setPersistence(auth, inMemoryPersistence);
+              console.log('[auth] persistence: memory only (session will not survive a refresh)');
+            } catch (err3) {
+              console.error('[auth] could not set any persistence mode; continuing with SDK default', err3);
+            }
+          }
+        }
+      })();
+
+      // Belt-and-suspenders: even with correct persistence, a stalled network or
+      // storage call should never leave a login button (or the user) waiting
+      // forever. Any auth call wrapped with this rejects with a clear, catchable
+      // error after `ms` milliseconds instead of hanging indefinitely.
+      function withTimeout(promise, ms, timeoutMessage) {
+        return new Promise((resolve, reject) => {
+          const timer = setTimeout(() => {
+            reject(Object.assign(new Error(timeoutMessage), { code: 'auth/timeout' }));
+          }, ms);
+          promise.then(
+            (value) => { clearTimeout(timer); resolve(value); },
+            (err) => { clearTimeout(timer); reject(err); }
+          );
+        });
+      }
 
       const EMPTY_ICONS = {
         project: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>',
@@ -3899,6 +3952,10 @@ service cloud.firestore {
           case 'auth/wrong-password': return 'كلمة المرور غير صحيحة';
           case 'auth/email-already-in-use': return 'هذا البريد مستخدم بالفعل';
           case 'auth/weak-password': return 'كلمة المرور ضعيفة جدًا';
+          case 'auth/popup-blocked': return 'المتصفح منع نافذة تسجيل الدخول، افتح إعدادات المتصفح واسمح بالنوافذ المنبثقة ثم حاول مرة أخرى';
+          case 'auth/popup-closed-by-user': return 'تم إغلاق نافذة تسجيل الدخول قبل الاكتمال';
+          case 'auth/cancelled-popup-request': return 'تم إلغاء الطلب، حاول مرة أخرى';
+          case 'auth/timeout': return 'استغرق تسجيل الدخول وقتًا طويلاً بدون رد. تأكد من اتصال الإنترنت، ولو كنت في وضع التصفح الخاص جرّب وضعًا عاديًا، ثم حاول مرة أخرى';
           default: return 'حدث خطأ في المصادقة';
         }
       }
@@ -3917,11 +3974,20 @@ service cloud.firestore {
         els.authSubmitBtn.textContent = 'جارٍ المعالجة...';
 
         try {
+          await authReadyPromise;
           if (authMode === 'login') {
-            await signInWithEmailAndPassword(auth, email, password);
+            await withTimeout(
+              signInWithEmailAndPassword(auth, email, password),
+              15000,
+              'Login timed out'
+            );
             showToast('تم تسجيل الدخول بنجاح', 'success');
           } else {
-            const result = await createUserWithEmailAndPassword(auth, email, password);
+            const result = await withTimeout(
+              createUserWithEmailAndPassword(auth, email, password),
+              15000,
+              'Sign up timed out'
+            );
             const username = email.split('@')[0];
             if (!result.user.displayName) {
               await updateProfile(result.user, { displayName: username });
@@ -3962,7 +4028,12 @@ service cloud.firestore {
         setLoginHint('جارٍ تسجيل الدخول...', 'loading');
 
         try {
-          await signInWithEmailAndPassword(auth, email, password);
+          await authReadyPromise;
+          await withTimeout(
+            signInWithEmailAndPassword(auth, email, password),
+            15000,
+            'Login timed out'
+          );
           setLoginHint('تم تسجيل الدخول بنجاح', 'success');
         } catch (error) {
           console.error(error);
@@ -3994,7 +4065,12 @@ service cloud.firestore {
         setLoginHint('جارٍ إرسال رابط الاستعادة...', 'loading');
 
         try {
-          await sendPasswordResetEmail(auth, email);
+          await authReadyPromise;
+          await withTimeout(
+            sendPasswordResetEmail(auth, email),
+            15000,
+            'Password reset timed out'
+          );
           setLoginHint('تم إرسال رابط استعادة كلمة المرور إلى بريدك', 'success');
         } catch (error) {
           console.error(error);
@@ -4010,13 +4086,49 @@ service cloud.firestore {
         }
       }
 
+      // iOS Safari (and most in-app browsers on iOS) frequently break
+      // signInWithPopup: Safari's storage partitioning can prevent the popup
+      // window from communicating its result back to the opener, so the promise
+      // never resolves or rejects and the button spins forever. signInWithRedirect
+      // avoids the popup entirely (full-page navigation to Google and back), which
+      // is the reliable path on iOS. We detect iOS/Safari and use redirect there,
+      // and keep the nicer popup flow (no full navigation) everywhere else.
+      function isIosOrSafari() {
+        const ua = window.navigator.userAgent;
+        const isIOS = /iPad|iPhone|iPod/.test(ua) || (ua.includes('Macintosh') && navigator.maxTouchPoints > 1);
+        const isSafari = /^((?!chrome|android|crios|fxios|edgios).)*safari/i.test(ua);
+        return isIOS || isSafari;
+      }
+
       async function signInWithGoogle() {
         try {
-          await signInWithPopup(auth, provider);
+          await authReadyPromise;
+          if (isIosOrSafari()) {
+            // Full-page redirect; result is picked up by getRedirectResult() below
+            // after the page reloads. Nothing more to do here.
+            await signInWithRedirect(auth, provider);
+            return;
+          }
+          await withTimeout(signInWithPopup(auth, provider), 30000, 'Google sign-in timed out');
           setLoginHint('تم تسجيل الدخول بجوجل', 'success');
         } catch (error) {
           console.error(error);
           setLoginHint(getAuthErrorMessage(error?.code) || 'فشل تسجيل الدخول بجوجل', 'error');
+        }
+      }
+
+      // Completes a signInWithRedirect() flow after the page reloads. Must run
+      // once on startup; resolves to null if the user didn't just come back from
+      // a redirect sign-in.
+      async function completeGoogleRedirectSignIn() {
+        try {
+          const result = await getRedirectResult(auth);
+          if (result?.user) {
+            showToast('تم تسجيل الدخول بجوجل', 'success');
+          }
+        } catch (error) {
+          console.error('[auth] redirect sign-in failed', error);
+          showToast(getAuthErrorMessage(error?.code) || 'فشل تسجيل الدخول بجوجل', 'error');
         }
       }
 
@@ -5657,6 +5769,7 @@ service cloud.firestore {
         setTimeout(hideAppSplash, 900);
         try {
           diagnoseAuthIssue();
+          authReadyPromise.finally(() => { completeGoogleRedirectSignIn(); });
           els.loginEmail.value = '';
           els.loginPassword.value = '';
           onAuthStateChanged(
