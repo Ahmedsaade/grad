@@ -1334,10 +1334,7 @@
       .login-more-trigger svg { transition: transform 0.2s ease; }
       .login-more-trigger[aria-expanded="true"] svg { transform: rotate(180deg); }
       .login-more-dropdown {
-        position: absolute;
-        bottom: calc(100% + 8px);
-        left: 50%;
-        transform: translateX(-50%);
+        position: fixed;
         min-width: 210px;
         background: var(--card);
         border: 1px solid var(--border-strong);
@@ -1347,7 +1344,7 @@
         display: none;
         flex-direction: column;
         gap: 2px;
-        z-index: 50;
+        z-index: 200;
         animation: fadeUp 0.18s cubic-bezier(0.16, 1, 0.3, 1) both;
       }
       .login-more-dropdown.open { display: flex; }
@@ -2086,6 +2083,30 @@
       <div class="app-splash-name">Hesabna</div>
       <div class="app-splash-spinner"></div>
     </div>
+    <script>
+      // Failsafe: guarantees the splash screen disappears even if the app script
+      // below throws an error, hangs, or fails to load (seen on some iOS Safari
+      // setups). Runs independently of the module script.
+      (function () {
+        var forced = false;
+        function forceHideSplash() {
+          if (forced) return;
+          forced = true;
+          var splash = document.getElementById('appSplash');
+          if (splash) splash.classList.add('hidden');
+        }
+        window.__forceHideSplash = forceHideSplash;
+        window.addEventListener('error', function (e) {
+          console.error('Caught error, forcing splash to hide:', e.error || e.message);
+          forceHideSplash();
+        });
+        window.addEventListener('unhandledrejection', function (e) {
+          console.error('Caught unhandled rejection, forcing splash to hide:', e.reason);
+          forceHideSplash();
+        });
+        setTimeout(forceHideSplash, 6000);
+      })();
+    </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <div class="login-screen" id="loginScreen">
@@ -3088,7 +3109,11 @@ service cloud.firestore {
 
       function saveState({ syncRemote = true } = {}) {
         state = normalizeState(state);
-        localStorage.setItem(getStorageKey(), JSON.stringify(state));
+        try {
+          localStorage.setItem(getStorageKey(), JSON.stringify(state));
+        } catch (error) {
+          console.warn('Could not save state to localStorage (private browsing / quota?)', error);
+        }
         if (syncRemote && isFirebaseReady && isProjectParticipant() && currentProjectId) {
           syncToFirebase();
         }
@@ -3223,7 +3248,11 @@ service cloud.firestore {
               state = normalizeState(remoteData.state);
               // Settlements sync via their own subcollection listener below, not the project blob.
               state.settlements = normalizeSettlementList(remoteSettlementsCache, state.members);
-              localStorage.setItem(getStorageKey(), JSON.stringify(state));
+              try {
+                localStorage.setItem(getStorageKey(), JSON.stringify(state));
+              } catch (error) {
+                console.warn('Could not cache project state locally', error);
+              }
             }
             render();
           } else {
@@ -3237,7 +3266,11 @@ service cloud.firestore {
         settlementsUnsubscribe = onSnapshot(settlementsRef, (snapshot) => {
           remoteSettlementsCache = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
           state.settlements = normalizeSettlementList(remoteSettlementsCache, state.members);
-          localStorage.setItem(getStorageKey(), JSON.stringify(state));
+          try {
+            localStorage.setItem(getStorageKey(), JSON.stringify(state));
+          } catch (error) {
+            console.warn('Could not cache settlements locally', error);
+          }
           render();
         }, (error) => {
           console.error('Firestore settlements error', error);
@@ -5413,6 +5446,18 @@ service cloud.firestore {
         const dropdown = document.getElementById('loginMoreDropdown');
         if (!dropdown || !trigger) return;
         const isOpen = dropdown.classList.contains('open');
+        if (!isOpen) {
+          // Positioned via JS (position:fixed) rather than CSS bottom/left, so the
+          // dropdown escapes .login-shell's overflow:hidden clipping instead of
+          // rendering invisibly behind it.
+          const rect = trigger.getBoundingClientRect();
+          const dropdownWidth = Math.max(210, dropdown.offsetWidth || 210);
+          let left = rect.left + rect.width / 2 - dropdownWidth / 2;
+          left = Math.max(12, Math.min(left, window.innerWidth - dropdownWidth - 12));
+          dropdown.style.left = `${left}px`;
+          dropdown.style.width = `${dropdownWidth}px`;
+          dropdown.style.bottom = `${window.innerHeight - rect.top + 8}px`;
+        }
         dropdown.classList.toggle('open', !isOpen);
         trigger.setAttribute('aria-expanded', String(!isOpen));
       }
@@ -5600,22 +5645,42 @@ service cloud.firestore {
       window.closeAllMemberMenus = closeAllMemberMenus;
 
       document.addEventListener('DOMContentLoaded', () => {
-        diagnoseAuthIssue();
-        els.loginEmail.value = '';
-        els.loginPassword.value = '';
-        onAuthStateChanged(auth, (user) => {
-          renderAuth(user);
-          if (user) {
-            isFirebaseReady = true;
-            showToast(`مرحبًا ${user.displayName || 'بك'}`, 'success');
-          }
-          hideAppSplash();
-        });
-        isFirebaseReady = true;
-        render();
-        els.expenseDate.value = new Date().toISOString().slice(0, 10);
+        // Register the splash failsafe FIRST, before anything that could throw,
+        // so the splash is guaranteed to hide even if init below fails partway.
         setTimeout(hideAppSplash, 900);
-        requestAnimationFrame(positionNavIndicator);
+        try {
+          diagnoseAuthIssue();
+          els.loginEmail.value = '';
+          els.loginPassword.value = '';
+          onAuthStateChanged(
+            auth,
+            (user) => {
+              try {
+                renderAuth(user);
+                if (user) {
+                  isFirebaseReady = true;
+                  showToast(`مرحبًا ${user.displayName || 'بك'}`, 'success');
+                }
+              } catch (err) {
+                console.error('renderAuth failed:', err);
+              } finally {
+                hideAppSplash();
+              }
+            },
+            (err) => {
+              console.error('onAuthStateChanged error:', err);
+              hideAppSplash();
+            }
+          );
+          isFirebaseReady = true;
+          render();
+          els.expenseDate.value = new Date().toISOString().slice(0, 10);
+          requestAnimationFrame(positionNavIndicator);
+        } catch (err) {
+          console.error('App init failed:', err);
+        } finally {
+          hideAppSplash();
+        }
       });
 
       function hideAppSplash() {
