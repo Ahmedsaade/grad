@@ -2533,6 +2533,31 @@
               </div>
             </div>
             <div id="memberSettingsList"></div>
+
+            <div class="panel" id="shareProjectPanel" style="margin-top:16px; display:none;">
+              <div class="panel-header">
+                <h3 style="display:flex; align-items:center; gap:10px;"><span class="settings-avatar" style="width:32px;height:32px;flex-shrink:0;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></span>مشاركة المشروع</h3>
+                <div class="helper-text">أي شخص لديه هذا الرابط يمكنه طلب الانضمام، وسيبقى بدون صلاحية حتى تقبل طلبه</div>
+              </div>
+              <div class="form-grid">
+                <div class="field" style="grid-column:1 / -1;">
+                  <label>رابط الانضمام</label>
+                  <input id="joinLinkInput" readonly />
+                </div>
+                <div class="field">
+                  <label>&nbsp;</label>
+                  <button class="btn btn-secondary" id="copyJoinLinkBtn">نسخ الرابط</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel" id="joinRequestsPanel" style="margin-top:16px; display:none;">
+              <div class="panel-header">
+                <h3 style="display:flex; align-items:center; gap:10px;"><span class="settings-avatar" style="width:32px;height:32px;flex-shrink:0;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg></span>طلبات الانضمام <span class="settings-badge usage" id="joinRequestsCount">0</span></h3>
+                <div class="helper-text">راجع الطلبات الواردة على المشروع واقبلها أو ارفضها</div>
+              </div>
+              <div id="joinRequestsList"></div>
+            </div>
           </div>
 
           <div class="panel settings-tab-panel" id="settingsTabCategories" style="display:none;">
@@ -2690,6 +2715,21 @@
       </div>
     </div>
 
+    <div class="modal-backdrop" id="joinProjectModal">
+      <div class="modal">
+        <div class="modal-header">
+          <h3 id="joinModalTitle">دعوة للانضمام إلى مشروع</h3>
+          <button class="modal-close-btn" type="button" onclick="closeJoinModal()" aria-label="إغلاق"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+        <div id="joinModalBody">
+          <p class="label" id="joinModalMessage">أنت على وشك طلب الانضمام إلى مشروع مشترك.</p>
+        </div>
+        <div class="modal-actions" id="joinModalActions">
+          <button class="btn btn-primary" id="joinLoginBtn">تسجيل الدخول للمتابعة</button>
+        </div>
+      </div>
+    </div>
+
     <div class="modal-backdrop" id="recordSettlementModal">
       <div class="modal">
         <div class="modal-header">
@@ -2794,7 +2834,7 @@ service cloud.firestore {
 }`;
       import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js';
       import { getAuth, setPersistence, browserLocalPersistence, browserSessionPersistence, inMemoryPersistence, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, onAuthStateChanged, signOut, updateProfile, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js';
-      import { getFirestore, collection, query, where, doc, setDoc, updateDoc, deleteDoc, onSnapshot, serverTimestamp, or } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js';
+      import { getFirestore, collection, query, where, doc, setDoc, updateDoc, deleteDoc, onSnapshot, serverTimestamp, or, getDoc, getDocs, addDoc, writeBatch, arrayUnion, limit } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js';
 
       const firebaseConfig = {
         apiKey: 'AIzaSyAjDRJSIhRRxDZ7U3iSaz9PV7R4wqNdaEA',
@@ -2944,6 +2984,9 @@ service cloud.firestore {
       let projectListUnsubscribe = null;
       let projectDocUnsubscribe = null;
       let settlementsUnsubscribe = null;
+      let joinRequestsUnsubscribe = null;
+      let pendingJoinToken = null; // ?join=<projectId> saved across the login flow
+      let myJoinRequest = null; // { id, status, projectId } for the token above, if any
       let remoteSettlementsCache = [];
       const provider = new GoogleAuthProvider();
 
@@ -3050,6 +3093,11 @@ service cloud.firestore {
         userNameSidebar: document.getElementById('userNameSidebar'),
         userEmailSidebar: document.getElementById('userEmailSidebar'),
         authModal: document.getElementById('authModal'),
+        joinProjectModal: document.getElementById('joinProjectModal'),
+        joinModalTitle: document.getElementById('joinModalTitle'),
+        joinModalMessage: document.getElementById('joinModalMessage'),
+        joinModalActions: document.getElementById('joinModalActions'),
+        joinLinkInput: document.getElementById('joinLinkInput'),
         authModalTitle: document.getElementById('authModalTitle'),
         authEmail: document.getElementById('authEmail'),
         authPassword: document.getElementById('authPassword'),
@@ -3447,6 +3495,366 @@ service cloud.firestore {
         } catch (error) {
           console.error('Delete project failed', error);
           showToast('فشل حذف المشروع', 'error');
+        }
+      }
+
+      // ===== Share Project + Join Request system =====
+      // Design notes (see summary sent to the user for full rationale):
+      // - The join link embeds the raw Firestore project ID (?join=<projectId>). Project IDs
+      //   from doc(collection(db,'projects')) are random ~20-char auto-generated IDs, already
+      //   unguessable, and knowing one grants ZERO read/write access on its own — Firestore
+      //   Rules still gate every read/write to /projects/{id} on ownerId/sharedWithEmails.
+      //   So no separate opaque "joinToken" collection is needed; the ID itself is the token.
+      // - Nothing about the project (name, members, expenses) is fetched or shown before the
+      //   requester is an approved member — the join modal never reads /projects/{id} directly.
+      // - Join requests live in their own top-level collection, /joinRequests/{requestId}, whose
+      //   Firestore Rules (see delivered rules) are the actual enforcement layer: a requester can
+      //   only create a request for themselves, can never set its status, and only the project's
+      //   owner can move a request from "pending" to "approved"/"rejected".
+      // - Approval writes two documents in one writeBatch (join request -> approved, project doc
+      //   -> sharedWithEmails/members updated). Both writes are independently permitted by the
+      //   existing/new Rules for the owner, and Firestore commits a batch atomically, so there is
+      //   no window where one write lands without the other.
+
+      const JOIN_TOKEN_STORAGE_KEY = 'hesabna_pending_join_token';
+
+      function getJoinTokenFromUrl() {
+        try {
+          return new URLSearchParams(window.location.search).get('join');
+        } catch (error) {
+          return null;
+        }
+      }
+
+      // Removes ?join=... from the visible URL without touching any other query params or
+      // triggering a reload, so the invite link doesn't linger after it's been handled.
+      function clearJoinTokenFromUrl() {
+        try {
+          const url = new URL(window.location.href);
+          if (!url.searchParams.has('join')) return;
+          url.searchParams.delete('join');
+          window.history.replaceState({}, '', url.toString());
+        } catch (error) { /* no-op */ }
+      }
+
+      function openJoinModal() {
+        if (els.joinProjectModal) els.joinProjectModal.classList.add('open');
+      }
+      function closeJoinModal() {
+        closeModalEl(els.joinProjectModal);
+      }
+      window.closeJoinModal = closeJoinModal;
+
+      // Entry point: called once on load (after the join token from the URL/session has been
+      // captured) and again every time auth state changes, so the flow resumes correctly after
+      // a login/signup — including the redirect-based Google sign-in used on iOS/Safari.
+      async function handleJoinFlow() {
+        if (!pendingJoinToken) return;
+        const projectId = pendingJoinToken;
+
+        if (!currentUser) {
+          els.joinModalTitle.textContent = 'دعوة للانضمام إلى مشروع';
+          els.joinModalMessage.textContent = 'أنت على وشك طلب الانضمام إلى مشروع مشترك. سجل الدخول أولاً للمتابعة.';
+          els.joinModalActions.innerHTML = '';
+          const loginBtn = document.createElement('button');
+          loginBtn.className = 'btn btn-primary';
+          loginBtn.textContent = 'تسجيل الدخول للمتابعة';
+          loginBtn.addEventListener('click', () => { closeJoinModal(); openAuthModal('login'); });
+          els.joinModalActions.appendChild(loginBtn);
+          openJoinModal();
+          return;
+        }
+
+        // Already a participant of that project (owner or existing member)? Nothing to request.
+        if (currentProjectOwnerId === null) {
+          // If this project isn't the one currently loaded we can't cheaply know membership
+          // without reading it, and we deliberately never read /projects/{id} for a non-member.
+        }
+
+        let existing = null;
+        try {
+          existing = await getMyJoinRequestForProject(projectId);
+        } catch (error) {
+          console.error('Could not check existing join request', error);
+          showToast('تعذر التحقق من حالة طلب الانضمام', 'error');
+          return;
+        }
+        myJoinRequest = existing;
+
+        if (existing && existing.status === 'pending') {
+          els.joinModalTitle.textContent = 'طلبك قيد المراجعة';
+          els.joinModalMessage.textContent = '⏳ طلبك قيد المراجعة. سننتظر موافقة مالك المشروع، وستظهر لك المشاركة فور القبول.';
+          els.joinModalActions.innerHTML = '<button class="btn btn-secondary" onclick="closeJoinModal()">حسنًا</button>';
+          openJoinModal();
+          return;
+        }
+
+        if (existing && existing.status === 'approved') {
+          els.joinModalTitle.textContent = 'تم قبول طلبك';
+          els.joinModalMessage.textContent = '✓ تمت الموافقة على طلبك وتمت إضافتك إلى المشروع.';
+          els.joinModalActions.innerHTML = '';
+          const goBtn = document.createElement('button');
+          goBtn.className = 'btn btn-primary';
+          goBtn.textContent = 'الذهاب إلى المشروع';
+          goBtn.addEventListener('click', () => { closeJoinModal(); selectProject(projectId); pendingJoinToken = null; sessionStorage.removeItem(JOIN_TOKEN_STORAGE_KEY); clearJoinTokenFromUrl(); });
+          els.joinModalActions.appendChild(goBtn);
+          openJoinModal();
+          return;
+        }
+
+        if (existing && existing.status === 'rejected') {
+          els.joinModalTitle.textContent = 'تم رفض طلب الانضمام';
+          els.joinModalMessage.textContent = 'تم رفض طلب انضمامك السابق لهذا المشروع من قبل مالكه.';
+          els.joinModalActions.innerHTML = '<button class="btn btn-secondary" onclick="closeJoinModal()">إغلاق</button>';
+          openJoinModal();
+          return;
+        }
+
+        // No existing request: offer to send one. We don't fetch or show the project name —
+        // showing it would require a public read that the security model here deliberately avoids.
+        els.joinModalTitle.textContent = 'طلب الانضمام إلى مشروع';
+        els.joinModalMessage.textContent = 'هل تريد إرسال طلب انضمام إلى هذا المشروع؟ لن تحصل على صلاحية دخول إلا بعد موافقة مالك المشروع.';
+        els.joinModalActions.innerHTML = '';
+        const sendBtn = document.createElement('button');
+        sendBtn.className = 'btn btn-primary';
+        sendBtn.textContent = 'إرسال طلب الانضمام';
+        sendBtn.addEventListener('click', withLoading(sendBtn, async () => {
+          await createJoinRequest(projectId);
+        }));
+        const cancelBtn = document.createElement('button');
+        cancelBtn.className = 'btn btn-secondary';
+        cancelBtn.textContent = 'إلغاء';
+        cancelBtn.addEventListener('click', () => { closeJoinModal(); pendingJoinToken = null; sessionStorage.removeItem(JOIN_TOKEN_STORAGE_KEY); clearJoinTokenFromUrl(); });
+        els.joinModalActions.appendChild(sendBtn);
+        els.joinModalActions.appendChild(cancelBtn);
+        openJoinModal();
+      }
+
+      // One pending/approved/rejected request per (user, project) — enforced here for UX and,
+      // more importantly, by Firestore Rules on create (see delivered rules) so this can't be
+      // bypassed by calling createJoinRequest() directly.
+      async function getMyJoinRequestForProject(projectId) {
+        if (!currentUser) return null;
+        const q = query(
+          collection(db, 'joinRequests'),
+          where('projectId', '==', projectId),
+          where('requesterUid', '==', currentUser.uid),
+          limit(1)
+        );
+        const snap = await getDocs(q);
+        if (snap.empty) return null;
+        const docSnap = snap.docs[0];
+        return { id: docSnap.id, ...docSnap.data() };
+      }
+
+      async function createJoinRequest(projectId) {
+        if (!currentUser) return;
+        try {
+          const already = await getMyJoinRequestForProject(projectId);
+          if (already) {
+            myJoinRequest = already;
+            if (already.status === 'pending') {
+              showToast('لديك بالفعل طلب انضمام قيد المراجعة', 'error');
+            }
+            handleJoinFlow();
+            return;
+          }
+          const payload = {
+            projectId,
+            requesterUid: currentUser.uid,
+            requesterEmail: normalizeEmail(currentUser.email),
+            requesterName: currentUser.displayName || currentUser.email || 'مستخدم',
+            status: 'pending',
+            createdAt: serverTimestamp(),
+            reviewedAt: null,
+            reviewedBy: null
+          };
+          const ref = await addDoc(collection(db, 'joinRequests'), payload);
+          myJoinRequest = { id: ref.id, ...payload };
+          closeJoinModal();
+          showToast('تم إرسال طلب الانضمام، بانتظار موافقة مالك المشروع', 'success');
+        } catch (error) {
+          console.error('Create join request failed', error);
+          showToast('فشل إرسال طلب الانضمام', 'error');
+        }
+      }
+
+      // Owner-only: live list of pending join requests for the currently open project.
+      function subscribeToJoinRequests(projectId) {
+        if (joinRequestsUnsubscribe) { joinRequestsUnsubscribe(); joinRequestsUnsubscribe = null; }
+        if (!projectId || !currentUser || currentProjectOwnerId !== currentUser.uid) {
+          renderJoinRequestsList([]);
+          return;
+        }
+        const q = query(
+          collection(db, 'joinRequests'),
+          where('projectId', '==', projectId),
+          where('status', '==', 'pending')
+        );
+        joinRequestsUnsubscribe = onSnapshot(q, (snapshot) => {
+          renderJoinRequestsList(snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() })));
+        }, (error) => {
+          console.error('Join requests subscription failed', error);
+        });
+      }
+
+      function timeAgo(date) {
+        if (!date) return '';
+        const diffMs = Date.now() - date.getTime();
+        const mins = Math.floor(diffMs / 60000);
+        if (mins < 1) return 'الآن';
+        if (mins < 60) return `منذ ${mins} دقيقة`;
+        const hours = Math.floor(mins / 60);
+        if (hours < 24) return `منذ ${hours} ساعة`;
+        const days = Math.floor(hours / 24);
+        return `منذ ${days} يوم`;
+      }
+
+      function renderJoinRequestsList(requests) {
+        const countEl = document.getElementById('joinRequestsCount');
+        const panelEl = document.getElementById('joinRequestsPanel');
+        const listEl = document.getElementById('joinRequestsList');
+        if (!listEl) return;
+        const isOwner = !!(currentUser && currentProjectOwnerId === currentUser.uid);
+        if (panelEl) panelEl.style.display = isOwner ? 'block' : 'none';
+        if (countEl) countEl.textContent = String(requests.length);
+        if (!requests.length) {
+          listEl.innerHTML = '<div class="label" style="padding:12px 0;">لا توجد طلبات انضمام حاليًا.</div>';
+          return;
+        }
+        listEl.innerHTML = requests.map(reqItem => {
+          const createdDate = reqItem.createdAt && reqItem.createdAt.toDate ? reqItem.createdAt.toDate() : null;
+          return `
+            <div class="member-card" style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+              <div>
+                <div style="font-weight:700;">${escapeHtml(reqItem.requesterName || 'مستخدم')}</div>
+                <div class="label">${escapeHtml(reqItem.requesterEmail || '')}</div>
+                <div class="label">${escapeHtml(timeAgo(createdDate))}</div>
+              </div>
+              <div style="display:flex; gap:8px;">
+                <button class="btn btn-primary" onclick="approveJoinRequest('${reqItem.id}')">قبول</button>
+                <button class="btn btn-secondary" onclick="rejectJoinRequest('${reqItem.id}')">رفض</button>
+              </div>
+            </div>`;
+        }).join('');
+      }
+
+      async function approveJoinRequest(requestId) {
+        if (!currentUser || currentProjectOwnerId !== currentUser.uid) {
+          showToast('فقط مالك المشروع يمكنه قبول طلبات الانضمام', 'error');
+          return;
+        }
+        try {
+          const reqRef = doc(db, 'joinRequests', requestId);
+          const reqSnap = await getDoc(reqRef);
+          if (!reqSnap.exists() || reqSnap.data().status !== 'pending') {
+            showToast('هذا الطلب لم يعد متاحًا', 'error');
+            return;
+          }
+          const reqData = reqSnap.data();
+          if (reqData.projectId !== currentProjectId) {
+            showToast('هذا الطلب لا يخص هذا المشروع', 'error');
+            return;
+          }
+          const alreadyMember = state.members.some(member => member.active !== false && normalizeEmail(member.email) === reqData.requesterEmail);
+          if (alreadyMember) {
+            // Nothing to add on the project side, but still resolve the request so it stops showing up.
+            const batch = writeBatch(db);
+            batch.update(reqRef, { status: 'approved', reviewedAt: serverTimestamp(), reviewedBy: currentUser.uid });
+            await batch.commit();
+            showToast('هذا المستخدم عضو بالفعل في المشروع', 'default');
+            return;
+          }
+
+          const projectRef = doc(db, 'projects', currentProjectId);
+          const newMember = {
+            id: crypto.randomUUID(),
+            name: reqData.requesterName || reqData.requesterEmail,
+            email: reqData.requesterEmail,
+            canEdit: false, // owner can promote to editor afterwards from the existing members UI
+            active: true,
+            createdAt: new Date().toISOString()
+          };
+          const updatedMembers = [...state.members, newMember];
+          const updatedSharedWithEmails = Array.from(new Set([...state.members.map(m => normalizeEmail(m.email)).filter(Boolean), reqData.requesterEmail]));
+
+          // Batched so the request's "approved" status and the member's project access land
+          // together — Firestore commits a batch atomically (all writes succeed or none do).
+          const batch = writeBatch(db);
+          batch.update(reqRef, { status: 'approved', reviewedAt: serverTimestamp(), reviewedBy: currentUser.uid });
+          batch.set(projectRef, {
+            state: { members: updatedMembers },
+            sharedWithEmails: updatedSharedWithEmails,
+            updatedAt: serverTimestamp()
+          }, { merge: true });
+          await batch.commit();
+
+          state.members = updatedMembers;
+          logActivity(`تمت الموافقة على طلب انضمام ${reqData.requesterName || reqData.requesterEmail}`);
+          saveState();
+          showToast('تمت الموافقة على طلب الانضمام', 'success');
+        } catch (error) {
+          console.error('Approve join request failed', error);
+          showToast('فشل قبول طلب الانضمام', 'error');
+        }
+      }
+      window.approveJoinRequest = approveJoinRequest;
+
+      async function rejectJoinRequest(requestId) {
+        if (!currentUser || currentProjectOwnerId !== currentUser.uid) {
+          showToast('فقط مالك المشروع يمكنه رفض طلبات الانضمام', 'error');
+          return;
+        }
+        try {
+          const reqRef = doc(db, 'joinRequests', requestId);
+          const reqSnap = await getDoc(reqRef);
+          if (!reqSnap.exists() || reqSnap.data().status !== 'pending') {
+            showToast('هذا الطلب لم يعد متاحًا', 'error');
+            return;
+          }
+          const reqData = reqSnap.data();
+          await updateDoc(reqRef, { status: 'rejected', reviewedAt: serverTimestamp(), reviewedBy: currentUser.uid });
+          logActivity(`تم رفض طلب انضمام ${reqData.requesterName || reqData.requesterEmail}`);
+          saveState();
+          showToast('تم رفض طلب الانضمام', 'default');
+        } catch (error) {
+          console.error('Reject join request failed', error);
+          showToast('فشل رفض طلب الانضمام', 'error');
+        }
+      }
+      window.rejectJoinRequest = rejectJoinRequest;
+
+      function copyProjectJoinLink() {
+        if (!currentProjectId) return;
+        const link = `${window.location.origin}${window.location.pathname}?join=${currentProjectId}`;
+        if (els.joinLinkInput) els.joinLinkInput.value = link;
+        navigator.clipboard?.writeText(link).then(() => {
+          showToast('تم نسخ رابط الانضمام', 'success');
+        }).catch(() => {
+          showToast('تعذر نسخ الرابط، انسخه يدويًا', 'error');
+        });
+      }
+
+      // Keeps the share link + join-requests panels and the live subscription in sync with
+      // whichever project is currently open, without needing to be wired into every place
+      // currentProjectId changes.
+      function renderShareAndJoinPanel() {
+        const isOwner = !!(currentUser && currentProjectId && currentProjectOwnerId === currentUser.uid);
+        const shareEl = document.getElementById('shareProjectPanel');
+        if (shareEl) shareEl.style.display = isOwner ? 'block' : 'none';
+        if (isOwner && els.joinLinkInput) {
+          els.joinLinkInput.value = `${window.location.origin}${window.location.pathname}?join=${currentProjectId}`;
+        }
+        if (isOwner) {
+          if (renderShareAndJoinPanel._lastSubscribedProject !== currentProjectId) {
+            renderShareAndJoinPanel._lastSubscribedProject = currentProjectId;
+            subscribeToJoinRequests(currentProjectId);
+          }
+        } else {
+          if (joinRequestsUnsubscribe) { joinRequestsUnsubscribe(); joinRequestsUnsubscribe = null; }
+          renderShareAndJoinPanel._lastSubscribedProject = null;
+          const panelEl = document.getElementById('joinRequestsPanel');
+          if (panelEl) panelEl.style.display = 'none';
         }
       }
 
@@ -4799,6 +5207,7 @@ service cloud.firestore {
           const projectTabVisible = document.getElementById('settingsTabProject')?.style.display !== 'none';
           dangerZoneEl.style.display = (projectTabVisible && canDeleteProject()) ? 'block' : 'none';
         }
+        renderShareAndJoinPanel();
         const editStateText = currentProjectId ? (canEdit() ? 'يمكنك التعديل' : 'عرض فقط') : 'اختر مشروعًا أو أنشئ مشروعًا جديدًا';
         els.topSubtitle.textContent = `${activeMembers.length} أعضاء • ${state.expenses.length} مصروف • ${editStateText}`;
 
@@ -5948,6 +6357,11 @@ service cloud.firestore {
       if (els.googleSignInBtn) els.googleSignInBtn.addEventListener('click', withLoading(els.googleSignInBtn, signInWithGoogle));
       if (els.createAccountBtn) els.createAccountBtn.addEventListener('click', () => { openAuthModal('signup'); closeLoginMoreMenu(); });
       if (els.downloadPdfBtn) els.downloadPdfBtn.addEventListener('click', withLoading(els.downloadPdfBtn, downloadProjectPdf));
+      const copyJoinLinkBtn = document.getElementById('copyJoinLinkBtn');
+      if (copyJoinLinkBtn) copyJoinLinkBtn.addEventListener('click', copyProjectJoinLink);
+      if (els.joinProjectModal) els.joinProjectModal.addEventListener('click', (event) => {
+        if (event.target.id === 'joinProjectModal') closeJoinModal();
+      });
       if (els.saveProfileBtn) els.saveProfileBtn.addEventListener('click', withLoading(els.saveProfileBtn, saveProfile));
       if (els.editProfileBtn) els.editProfileBtn.addEventListener('click', openProfileEditModal);
       if (els.profileEditCancelBtn) els.profileEditCancelBtn.addEventListener('click', closeProfileEditModal);
@@ -5984,6 +6398,15 @@ service cloud.firestore {
         // so the splash is guaranteed to hide even if init below fails partway.
         setTimeout(hideAppSplash, 900);
         try {
+          // Capture ?join=<projectId> before anything else touches the URL, and stash it in
+          // sessionStorage so it survives a full-page redirect (e.g. Google sign-in on iOS/Safari).
+          const urlJoinToken = getJoinTokenFromUrl();
+          if (urlJoinToken) {
+            pendingJoinToken = urlJoinToken;
+            try { sessionStorage.setItem(JOIN_TOKEN_STORAGE_KEY, urlJoinToken); } catch (e) { /* no-op */ }
+          } else {
+            try { pendingJoinToken = sessionStorage.getItem(JOIN_TOKEN_STORAGE_KEY); } catch (e) { pendingJoinToken = null; }
+          }
           diagnoseAuthIssue();
           authReadyPromise.finally(() => { completeGoogleRedirectSignIn(); });
           els.loginEmail.value = '';
@@ -5997,6 +6420,7 @@ service cloud.firestore {
                   isFirebaseReady = true;
                   showToast(`مرحبًا ${user.displayName || 'بك'}`, 'success');
                 }
+                handleJoinFlow();
               } catch (err) {
                 console.error('renderAuth failed:', err);
               } finally {
