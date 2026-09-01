@@ -2534,6 +2534,14 @@
             </div>
             <div id="memberSettingsList"></div>
 
+            <div class="panel" id="leaveProjectPanel" style="margin-top:16px; display:none;">
+              <div class="panel-header">
+                <h3 style="display:flex; align-items:center; gap:10px;">مغادرة المشروع</h3>
+                <div class="helper-text" id="leaveProjectHelperText"></div>
+              </div>
+              <button class="btn btn-danger" id="leaveProjectBtn" onclick="leaveProject()" style="display:none;">مغادرة المشروع</button>
+            </div>
+
             <div class="panel" id="shareProjectPanel" style="margin-top:16px; display:none;">
               <div class="panel-header">
                 <h3 style="display:flex; align-items:center; gap:10px;"><span class="settings-avatar" style="width:32px;height:32px;flex-shrink:0;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></span>مشاركة المشروع</h3>
@@ -2773,10 +2781,14 @@
 service cloud.firestore {
   match /databases/{database}/documents {
     match /projects/{projectId} {
+      function email() {
+        return request.auth.token.email.lower();
+      }
+
       allow read: if request.auth != null
         && (
           resource.data.ownerId == request.auth.uid ||
-          request.auth.token.email.lower() in resource.data.sharedWithEmails
+          email() in resource.data.sharedWithEmails
         );
 
       allow create: if request.auth != null
@@ -2784,16 +2796,42 @@ service cloud.firestore {
         && request.resource.data.sharedWithEmails is list
         && request.resource.data.editableEmails is list;
 
+      // Self-leave: a non-owner member currently in sharedWithEmails may remove *only their own*
+      // email from sharedWithEmails and (if present) editableEmails, and nothing else about the
+      // project document. This is intentionally narrower than the editor-update clause below —
+      // it does not require editableEmails membership (read-only members must be able to leave
+      // too), and unlike the editor clause it DOES allow sharedWithEmails/editableEmails to
+      // change, but only ever by removing the caller's own email, verified with removeAll() so
+      // no other entry can be touched. state/ownerId/budget/expenses/categories/activityLog etc.
+      // must stay byte-identical, which rules out privilege escalation, editing financial data,
+      // or removing/adding any other member while "leaving". (state.members still shows the
+      // member as active until the owner's own client reconciles it — see
+      // reconcileDepartedMembers() client-side; that write is done by the owner, who already has
+      // full update rights below, so it needs no extra rule.)
+      function isSelfLeave() {
+        return request.auth != null
+          && resource.data.ownerId != request.auth.uid
+          && email() in resource.data.sharedWithEmails
+          && request.resource.data.ownerId == resource.data.ownerId
+          && request.resource.data.state == resource.data.state
+          && request.resource.data.sharedWithEmails == resource.data.sharedWithEmails.removeAll([email()])
+          && request.resource.data.editableEmails == resource.data.editableEmails.removeAll([email()])
+          && request.resource.data.diff(resource.data).affectedKeys()
+               .hasOnly(['sharedWithEmails', 'editableEmails', 'updatedAt']);
+      }
+
       allow update: if request.auth != null
         && (
           resource.data.ownerId == request.auth.uid
           ||
           (
-            request.auth.token.email.lower() in resource.data.editableEmails
+            email() in resource.data.editableEmails
             && request.resource.data.ownerId == resource.data.ownerId
             && request.resource.data.sharedWithEmails == resource.data.sharedWithEmails
             && request.resource.data.editableEmails == resource.data.editableEmails
           )
+          ||
+          isSelfLeave()
         );
 
       allow delete: if request.auth != null
@@ -2830,11 +2868,51 @@ service cloud.firestore {
         allow delete: if isOwner() || isEditor();
       }
     }
+
+    // joinRequests: a top-level collection (not nested under /projects) so a requester can create
+    // one before they have any read access to the project itself. Each doc is scoped to exactly
+    // one (requesterUid, projectId) pair.
+    match /joinRequests/{requestId} {
+      function isRequester() {
+        return request.auth != null && resource.data.requesterUid == request.auth.uid;
+      }
+      function isProjectOwner() {
+        return request.auth != null
+          && get(/databases/$(database)/documents/projects/$(resource.data.projectId)).data.ownerId == request.auth.uid;
+      }
+
+      // Requester can read their own request (to poll its status); the project owner can read
+      // requests addressed to their project (to list/approve/reject them).
+      allow read: if isRequester() || (
+        request.auth != null
+        && get(/databases/$(database)/documents/projects/$(resource.data.projectId)).data.ownerId == request.auth.uid
+      );
+
+      // Anyone authenticated can *create* a request for themselves, always starting 'pending' and
+      // unreviewed — this is the one write a not-yet-a-member user is allowed to make.
+      allow create: if request.auth != null
+        && request.resource.data.requesterUid == request.auth.uid
+        && request.resource.data.requesterEmail == request.auth.token.email.lower()
+        && request.resource.data.status == 'pending'
+        && request.resource.data.reviewedAt == null
+        && request.resource.data.reviewedBy == null;
+
+      // Only the target project's owner may transition a request (approve/reject), and only the
+      // status/review fields — never projectId/requesterUid/requesterEmail after the fact.
+      allow update: if isProjectOwner()
+        && request.resource.data.projectId == resource.data.projectId
+        && request.resource.data.requesterUid == resource.data.requesterUid
+        && request.resource.data.requesterEmail == resource.data.requesterEmail
+        && request.resource.data.status in ['approved', 'rejected']
+        && request.resource.data.reviewedBy == request.auth.uid;
+
+      allow delete: if isRequester() || isProjectOwner();
+    }
   }
 }`;
       import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js';
       import { getAuth, setPersistence, browserLocalPersistence, browserSessionPersistence, inMemoryPersistence, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, onAuthStateChanged, signOut, updateProfile, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js';
-      import { getFirestore, collection, query, where, doc, setDoc, updateDoc, deleteDoc, onSnapshot, serverTimestamp, or, getDoc, getDocs, addDoc, writeBatch, arrayUnion, limit } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js';
+      import { getFirestore, collection, query, where, doc, setDoc, updateDoc, deleteDoc, onSnapshot, serverTimestamp, or, getDoc, getDocs, addDoc, writeBatch, arrayUnion, arrayRemove, limit } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js';
 
       const firebaseConfig = {
         apiKey: 'AIzaSyAjDRJSIhRRxDZ7U3iSaz9PV7R4wqNdaEA',
@@ -3282,7 +3360,14 @@ service cloud.firestore {
         if (!currentProjectId) return;
         try {
           const projectRef = doc(db, 'projects', currentProjectId);
+          // BUG FIX: this used to include every member ever added, regardless of `active`.
+          // deleteMember() only soft-deletes (active=false) so financial history stays intact,
+          // but that means a removed member's email must still be scrubbed out of the Firestore
+          // access-control lists here, or they silently keep read/write access forever even
+          // though the UI shows them as removed. `sharedWithEmails` (and `editableEmails`) are
+          // the actual source of truth for access — always derive them from *active* members only.
           const sharedWithEmails = state.members
+            .filter(member => member.active !== false)
             .map(member => normalizeEmail(member.email))
             .filter(email => email);
           const editableEmails = state.members
@@ -3371,6 +3456,7 @@ service cloud.firestore {
               } catch (error) {
                 console.warn('Could not cache project state locally', error);
               }
+              reconcileDepartedMembers(remoteData);
             }
             render();
           } else {
@@ -3378,7 +3464,14 @@ service cloud.firestore {
           }
         }, (error) => {
           console.error('Firestore project error', error);
-          showToast('خطأ في تحميل المشروع', 'error');
+          // permission-denied here means access to this project was just revoked (owner removed
+          // this user, or they left from another tab/device) — bail out of the project instead of
+          // leaving the UI stuck showing data the server will no longer serve.
+          if (error.code === 'permission-denied') {
+            handleRemovedFromProject();
+          } else {
+            showToast('خطأ في تحميل المشروع', 'error');
+          }
         });
         const settlementsRef = collection(db, 'projects', projectId, 'settlements');
         settlementsUnsubscribe = onSnapshot(settlementsRef, (snapshot) => {
@@ -3392,6 +3485,9 @@ service cloud.firestore {
           render();
         }, (error) => {
           console.error('Firestore settlements error', error);
+          if (error.code === 'permission-denied') {
+            handleRemovedFromProject();
+          }
         });
       }
 
@@ -3767,16 +3863,34 @@ service cloud.firestore {
           }
 
           const projectRef = doc(db, 'projects', currentProjectId);
-          const newMember = {
-            id: crypto.randomUUID(),
-            name: reqData.requesterName || reqData.requesterEmail,
-            email: reqData.requesterEmail,
-            canEdit: false, // owner can promote to editor afterwards from the existing members UI
-            active: true,
-            createdAt: new Date().toISOString()
-          };
-          const updatedMembers = [...state.members, newMember];
-          const updatedSharedWithEmails = Array.from(new Set([...state.members.map(m => normalizeEmail(m.email)).filter(Boolean), reqData.requesterEmail]));
+          // If this person was a member before (left, or was removed) they'll still have an
+          // inactive record in state.members preserving their historical expenses/settlements.
+          // Reuse that record instead of creating a new one, so paidBy/split references and the
+          // member's history stay attached to a single, stable member id (no duplicates).
+          const existingInactive = state.members.find(member => member.active === false && normalizeEmail(member.email) === reqData.requesterEmail);
+          let updatedMembers;
+          if (existingInactive) {
+            updatedMembers = state.members.map(member => member.id === existingInactive.id
+              ? { ...member, name: reqData.requesterName || member.name, active: true, canEdit: false }
+              : member);
+          } else {
+            const newMember = {
+              id: crypto.randomUUID(),
+              name: reqData.requesterName || reqData.requesterEmail,
+              email: reqData.requesterEmail,
+              canEdit: false, // owner can promote to editor afterwards from the existing members UI
+              active: true,
+              createdAt: new Date().toISOString()
+            };
+            updatedMembers = [...state.members, newMember];
+          }
+          // Same access-list bug as syncToFirebase(): only *active* members belong in
+          // sharedWithEmails, otherwise a re-approved member would resurrect every previously
+          // removed member's access too.
+          const updatedSharedWithEmails = Array.from(new Set([
+            ...state.members.filter(m => m.active !== false).map(m => normalizeEmail(m.email)).filter(Boolean),
+            reqData.requesterEmail
+          ]));
 
           // Batched so the request's "approved" status and the member's project access land
           // together — Firestore commits a batch atomically (all writes succeed or none do).
@@ -5777,6 +5891,33 @@ service cloud.firestore {
             </div>
           </div>
         `).join('');
+
+        renderLeaveProjectPanel();
+      }
+
+      // Owner never sees a "Leave" option (owner leaving a project doesn't make sense — they'd
+      // have to delete it or transfer ownership instead). Any other current participant
+      // (editor or read-only) gets a Leave button.
+      function renderLeaveProjectPanel() {
+        const panel = document.getElementById('leaveProjectPanel');
+        const helper = document.getElementById('leaveProjectHelperText');
+        const btn = document.getElementById('leaveProjectBtn');
+        if (!panel || !helper || !btn) return;
+        const isOwner = !!(currentProjectOwnerId && currentUser && currentUser.uid === currentProjectOwnerId);
+        if (!currentProjectId || !currentUser) {
+          panel.style.display = 'none';
+          return;
+        }
+        panel.style.display = 'block';
+        if (isOwner) {
+          helper.textContent = 'مالك المشروع لا يمكنه مغادرته. يمكنك حذف المشروع أو إضافة نظام نقل الملكية إذا كان ذلك مدعومًا.';
+          btn.style.display = 'none';
+        } else if (isProjectParticipant()) {
+          helper.textContent = 'بعد المغادرة لن تتمكن من رؤية مصروفات المشروع أو تعديلها إلا إذا تمت دعوتك مرة أخرى.';
+          btn.style.display = 'inline-flex';
+        } else {
+          panel.style.display = 'none';
+        }
       }
 
       function renderSettingsCategories() {
@@ -6149,17 +6290,117 @@ service cloud.firestore {
         if (!confirmed) return;
         await animateExit(event?.target?.closest('.member-card'));
         member.active = false;
+        logActivity(`تمت إزالة "${member.name}" من المشروع`);
         saveState();
         render();
         showToast('تم حذف العضو مع الاحتفاظ بالبيانات السابقة', 'success', {
           label: 'تراجع',
           onClick: () => {
             member.active = true;
+            logActivity(`تمت إعادة "${member.name}" إلى المشروع`);
             saveState();
             render();
             showToast(`تم استرجاع "${member.name}"`, 'success');
           }
         });
+      }
+
+      // ---------------------------------------------------------------------------
+      // MEMBER LEAVE PROJECT
+      // ---------------------------------------------------------------------------
+      // Any non-owner member (editor or read-only) can remove themselves from a project.
+      // This can NOT go through saveState()/syncToFirebase(), because a plain member is not
+      // guaranteed to hold editableEmails write access (read-only members never do), and even
+      // when they do, the project update rule requires editableEmails/sharedWithEmails to stay
+      // byte-identical for that path — by design, so a compromised/editor account can't rewrite
+      // membership. Instead this performs a narrow, separately-authorized Firestore update that
+      // *only* removes the caller's own email from sharedWithEmails/editableEmails via
+      // arrayRemove — see the "self-leave" clause in the Firestore Rules for exactly what this
+      // is allowed to touch. It intentionally does NOT try to also patch state.members (that
+      // would require a full state write, which the self-leave rule does not permit) — the
+      // owner's client reconciles state.members automatically the next time it's online, see
+      // reconcileDepartedMembers().
+      async function leaveProject() {
+        if (!currentUser || !currentProjectId) return;
+        if (currentProjectOwnerId && currentUser.uid === currentProjectOwnerId) {
+          showToast('مالك المشروع لا يمكنه مغادرته. يمكنك حذف المشروع بدلاً من ذلك.', 'error');
+          return;
+        }
+        if (!isProjectParticipant()) return;
+        const confirmed = await confirmModal(
+          'مغادرة المشروع',
+          'هل أنت متأكد من مغادرة المشروع؟\n\nبعد المغادرة لن تتمكن من رؤية مصروفات المشروع أو تعديلها إلا إذا تمت دعوتك مرة أخرى.',
+          { confirmText: 'مغادرة المشروع' }
+        );
+        if (!confirmed) return;
+
+        const leavingProjectId = currentProjectId;
+        const ownEmail = normalizeEmail(currentUser.email);
+        try {
+          const projectRef = doc(db, 'projects', leavingProjectId);
+          await updateDoc(projectRef, {
+            sharedWithEmails: arrayRemove(ownEmail),
+            editableEmails: arrayRemove(ownEmail),
+            updatedAt: serverTimestamp()
+          });
+        } catch (error) {
+          console.error('Leave project failed', error);
+          showToast('فشلت مغادرة المشروع، حاول مرة أخرى', 'error');
+          return;
+        }
+
+        closeCurrentProjectLocally({ removeCache: true });
+        showToast('تمت مغادرة المشروع بنجاح', 'success');
+        renderProjectList();
+        render();
+      }
+      window.leaveProject = leaveProject;
+
+      // Tears down all live listeners/state tied to the currently open project and forgets its
+      // cached copy, without touching any other project's data. Shared by leaveProject() and the
+      // permission-denied handler below so both land the user back on the project list the same
+      // way, and neither one leaves a stale listener trying to re-subscribe to a project the user
+      // no longer has access to.
+      function closeCurrentProjectLocally({ removeCache = false } = {}) {
+        if (projectDocUnsubscribe) { projectDocUnsubscribe(); projectDocUnsubscribe = null; }
+        if (settlementsUnsubscribe) { settlementsUnsubscribe(); settlementsUnsubscribe = null; }
+        currentProjectId = null;
+        currentProjectOwnerId = null;
+        currentProjectOwnerName = null;
+        remoteSettlementsCache = [];
+        if (removeCache) {
+          try { localStorage.removeItem(getStorageKey()); } catch (error) { /* ignore */ }
+        }
+        state = createDefaultState();
+      }
+
+      // Fires when a realtime project listener comes back with permission-denied — the only way
+      // that happens (rules always required auth+membership to read) is that the owner just
+      // removed this user, or someone changed the membership out from under them mid-session.
+      // Never leave the app stuck on the now-inaccessible project screen.
+      function handleRemovedFromProject() {
+        closeCurrentProjectLocally({ removeCache: true });
+        showToast('تمت إزالتك من هذا المشروع.', 'error');
+        renderProjectList();
+        render();
+      }
+
+      // Runs only for the project owner (the only role with unrestricted write access to
+      // state.members). Self-leave can only safely touch sharedWithEmails/editableEmails (see
+      // leaveProject()), so a departed member's entry inside state.members is left `active: true`
+      // until the owner's own client notices the mismatch and reconciles it — this keeps the
+      // Members list, balances, and activity log correct for the owner without ever requiring a
+      // non-owner client to hold write access to the shared state blob.
+      function reconcileDepartedMembers(remoteData) {
+        if (!currentUser || remoteData.ownerId !== currentUser.uid) return;
+        const shared = new Set((remoteData.sharedWithEmails || []).map(normalizeEmail));
+        const departed = state.members.filter(member => member.active !== false && !shared.has(normalizeEmail(member.email)));
+        if (!departed.length) return;
+        departed.forEach(member => {
+          member.active = false;
+          logActivity(`غادر "${member.name}" المشروع`);
+        });
+        saveState();
       }
 
       function closeAllMemberMenus() {
