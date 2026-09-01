@@ -3080,7 +3080,17 @@ service cloud.firestore {
       // Normalizes a raw settlement list against the current members (shared by normalizeState and
       // by the live settlements subcollection listener, since settlements now sync independently).
       function normalizeSettlementList(list, members) {
-        const safeMembers = Array.isArray(members) && members.length ? members : (state?.members || []);
+        // NOTE: previously fell back to the module-level `state` variable here
+        // (`state?.members`) when `members` was empty. That variable is being
+        // assigned via `let state = loadState()` at module init time, and
+        // loadState() calls into this function - so on a first-ever visit
+        // (nothing in localStorage yet, members ends up empty) this hit the
+        // outer `state` while it was still in its temporal dead zone, throwing
+        // "Cannot access 'state' before initialization" and aborting the whole
+        // script before any event listeners (including the Google button) were
+        // ever attached. All call sites already pass an explicit members list,
+        // so falling back to [] here is correct and removes the TDZ hazard.
+        const safeMembers = Array.isArray(members) ? members : [];
         return (Array.isArray(list) ? list : []).map((settlement) => ({
           id: settlement?.id || crypto.randomUUID(),
           from: settlement?.from || safeMembers[0]?.id || '',
@@ -4101,6 +4111,7 @@ service cloud.firestore {
       }
 
       async function signInWithGoogle() {
+        console.log('[auth] Google sign-in button clicked, provider:', provider ? 'ready' : 'MISSING', 'auth:', auth ? 'ready' : 'MISSING');
         try {
           // IMPORTANT: do NOT await anything before signInWithPopup/signInWithRedirect.
           // Browsers only allow a popup (or treat a redirect as user-initiated) when it
@@ -4110,19 +4121,25 @@ service cloud.firestore {
           // authReadyPromise is kicked off as soon as the script loads, long before the
           // user can click, so by click time it is effectively always already settled.
           if (isIosOrSafari()) {
+            console.log('[auth] iOS/Safari detected -> using signInWithRedirect');
             // Full-page redirect; result is picked up by getRedirectResult() below
             // after the page reloads. Nothing more to do here.
             signInWithRedirect(auth, provider).catch((error) => {
-              console.error(error);
+              console.error('[auth] signInWithRedirect failed:', error?.code, error);
+              showToast(getAuthErrorMessage(error?.code) || 'فشل تسجيل الدخول بجوجل', 'error');
               setLoginHint(getAuthErrorMessage(error?.code) || 'فشل تسجيل الدخول بجوجل', 'error');
             });
             return;
           }
+          console.log('[auth] Not iOS/Safari -> calling signInWithPopup now');
           await withTimeout(signInWithPopup(auth, provider), 30000, 'Google sign-in timed out');
+          console.log('[auth] signInWithPopup resolved successfully');
           setLoginHint('تم تسجيل الدخول بجوجل', 'success');
         } catch (error) {
-          console.error(error);
-          setLoginHint(getAuthErrorMessage(error?.code) || 'فشل تسجيل الدخول بجوجل', 'error');
+          console.error('[auth] Google sign-in failed:', error?.code, error);
+          const message = getAuthErrorMessage(error?.code) || 'فشل تسجيل الدخول بجوجل';
+          showToast(message, 'error');
+          setLoginHint(message, 'error');
         }
       }
 
