@@ -3634,7 +3634,12 @@ service cloud.firestore {
             scale: 2,
             backgroundColor: '#ffffff',
             useCORS: true,
-            letterRendering: true,
+            // letterRendering forces html2canvas to draw each character separately
+            // instead of the full text run, which breaks Arabic letter-joining and
+            // reverses the visual order - that's what caused the garbled/mirrored
+            // Arabic in the exported PDF. Letting html2canvas render whole text runs
+            // (the default) lets the browser's own text shaping handle Arabic
+            // correctly.
             width: 794,
             height: docContainer.scrollHeight,
             windowWidth: 794,
