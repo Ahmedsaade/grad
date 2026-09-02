@@ -455,6 +455,38 @@
         border-color: rgba(255, 107, 107, 0.25);
       }
 
+      .sync-status {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        background: rgba(126, 143, 163, 0.1);
+        color: var(--muted);
+        border: 1px solid var(--border);
+      }
+      .sync-status .sync-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        background: currentColor;
+      }
+      .sync-status.saving { color: #ffd93d; border-color: rgba(255, 217, 61, 0.3); background: rgba(255, 217, 61, 0.1); }
+      .sync-status.saving .sync-dot { animation: syncPulse 1s ease-in-out infinite; }
+      .sync-status.synced { color: #6ee7b7; border-color: rgba(52, 211, 153, 0.25); background: rgba(52, 211, 153, 0.1); }
+      .sync-status.offline { color: #ff9898; border-color: rgba(255, 107, 107, 0.25); background: rgba(255, 107, 107, 0.12); }
+      .sync-status.error { color: #ff9898; border-color: rgba(255, 107, 107, 0.25); background: rgba(255, 107, 107, 0.12); }
+      @keyframes syncPulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.4; transform: scale(0.75); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .sync-status.saving .sync-dot { animation: none; }
+      }
+
       .helper-text { 
         font-size: 0.8rem; 
         color: var(--muted); 
@@ -2197,6 +2229,7 @@
           <button class="nav-btn active" data-section="dashboard"><span><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;"><rect x="3" y="12" width="5" height="9"/><rect x="9.5" y="7" width="5" height="14"/><rect x="16" y="3" width="5" height="18"/></svg></span><span>لوحة التحكم</span></button>
           <button class="nav-btn" data-section="expenses"><span><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg></span><span>المصاريف</span></button>
           <button class="nav-btn" data-section="settle"><span><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></span><span>التسوية</span></button>
+          <button class="nav-btn" data-section="profile"><span><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><span>الملف الشخصي</span></button>
           <button class="nav-btn" data-section="settings"><span><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span><span>الإعدادات</span></button>
         </div>
         <div class="sidebar-footer">
@@ -2223,6 +2256,7 @@
           <div class="actions">
             <div class="actions-secondary">
               <div id="permissionBadge" class="permission-badge readonly">عرض فقط</div>
+              <div id="syncStatus" class="sync-status" style="display:none;"></div>
               <div id="ownerLabel" class="helper-text">مالك المشروع: -</div>
               <button class="btn btn-secondary btn-icon" id="themeToggleTopBtn" title="تبديل الوضع الليلي/النهاري"><span id="themeToggleTopIcon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></span></button>
               <button class="btn btn-secondary btn-icon" id="downloadPdfBtn" title="تنزيل PDF"><span><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 18 15 15"/></svg></span></button>
@@ -2255,8 +2289,8 @@
               <div class="value" id="memberCount">0</div>
             </div>
             <div class="card" id="statName">
-              <div class="card-icon"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg></div>
-              <div class="label">اسم المشروع</div>
+              <div class="card-icon"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41 11 3.83A2 2 0 0 0 9.59 3.17L4 3v5.59a2 2 0 0 0 .59 1.41l9.58 9.59a2 2 0 0 0 2.83 0l3.59-3.59a2 2 0 0 0 0-2.83z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg></div>
+              <div class="label">الفئة الأكثر إنفاقًا</div>
               <div class="value" id="projectNameCard">-</div>
             </div>
           </div>
@@ -2286,7 +2320,14 @@
                 <div class="panel-header">
                   <h3>سجل النشاط</h3>
                 </div>
+                <div id="activityPreview" style="margin-bottom:12px;"></div>
                 <button class="btn btn-secondary" id="openActivityLogBtn" style="width:100%;"><span style="display:inline-flex; vertical-align:-3px; margin-left:6px;"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>عرض سجل النشاط</button>
+              </div>
+              <div class="panel" id="categoryBreakdownPanel">
+                <div class="panel-header">
+                  <h3>توزيع الفئات</h3>
+                </div>
+                <div id="categoryBreakdown"></div>
               </div>
             </div>
           </div>
@@ -2339,8 +2380,22 @@
         </section>
 
         <section class="content-section" id="settle">
+          <div class="settings-tabs">
+            <button class="settings-tab-btn active" data-settle-tab="due" onclick="showSettleTab('due')">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>المطلوب</span>
+            </button>
+            <button class="settings-tab-btn" data-settle-tab="record" onclick="showSettleTab('record')">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+              <span>تسجيل تحويل</span>
+            </button>
+            <button class="settings-tab-btn" data-settle-tab="history" onclick="showSettleTab('history')">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              <span>السجل</span>
+            </button>
+          </div>
 
-          <div class="panel">
+          <div class="panel settle-tab-panel" id="settleTabDue">
             <h3 style="margin-top:0; display:flex; align-items:center; gap:10px;"><span class="settings-avatar" style="width:32px;height:32px;background:linear-gradient(135deg, #34d399, #10b981);flex-shrink:0;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>التسوية المقترحة</h3>
             <p class="label" style="margin-top:-6px;">دي التحويلات اللي محتاجة تحصل عشان الكل يبقى متعادل.</p>
             <div id="settlementList"></div>
@@ -2350,13 +2405,13 @@
             </button>
           </div>
 
-          <div class="panel" style="margin-top:16px;">
+          <div class="panel settle-tab-panel" id="settleTabRecord" style="display:none;">
             <h3 style="margin-top:0; display:flex; align-items:center; gap:10px;"><span class="settings-avatar" style="width:32px;height:32px;flex-shrink:0;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></span>تسجيل تحويل</h3>
             <p class="label" style="margin-top:-6px;">لما حد يحوّل فلوس فعليًا لحد تاني، سجّل التحويل هنا عشان الأرصدة تتحدث.</p>
             <button class="btn btn-primary" id="openRecordSettlementBtn">+ تسجيل تحويل جديد</button>
           </div>
 
-          <div class="panel" style="margin-top:16px;">
+          <div class="panel settle-tab-panel" id="settleTabHistory" style="display:none;">
             <h3 style="margin-top:0; display:flex; align-items:center; gap:10px;"><span class="settings-avatar" style="width:32px;height:32px;background:linear-gradient(135deg, #ffab91, #ff8a65);flex-shrink:0;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>سجل التحويلات</h3>
             <div class="form-grid" style="margin-bottom:12px;">
               <div class="field">
@@ -2509,6 +2564,30 @@
               <h3 style="display:flex; align-items:center; gap:10px;"><span class="settings-avatar" style="width:32px;height:32px;flex-shrink:0;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>إدارة أعضاء الفريق <span class="settings-badge usage" id="memberSettingsCount">0</span></h3>
               <div class="helper-text">أضف أعضاء جدد وتحكم في صلاحياتهم</div>
             </div>
+
+            <div class="add-entity-card" id="inviteLinkCard" style="margin-bottom:16px;">
+              <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+                <div>
+                  <strong style="font-size:0.92rem; display:flex; align-items:center; gap:8px;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>رابط دعوة</strong>
+                  <div class="label" style="margin-top:2px;">ابعت اللينك أو الـQR لأي حد، لما يفتحه هيقدر يبعتلك طلب انضمام تقبله انت من هنا.</div>
+                </div>
+                <button class="btn btn-secondary" id="toggleInviteQrBtn" type="button">عرض QR</button>
+              </div>
+              <div style="display:flex; gap:8px; margin-top:12px;">
+                <input id="inviteLinkInput" readonly style="flex:1;" />
+                <button class="btn btn-primary" id="copyInviteLinkBtn" type="button">نسخ</button>
+              </div>
+              <div id="inviteQrWrap" style="display:none; margin-top:14px; text-align:center;">
+                <img id="inviteQrImage" alt="QR كود لرابط الدعوة" width="160" height="160" style="border-radius:12px; background:#fff; padding:8px;" />
+              </div>
+            </div>
+
+            <div class="add-entity-card" id="joinRequestsCard" style="display:none; margin-bottom:16px;">
+              <h4 style="margin:0 0 4px; font-size:0.92rem; display:flex; align-items:center; gap:8px;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>طلبات انضمام جديدة</h4>
+              <div class="label" style="margin-bottom:10px;">ناس طلبت الانضمام عن طريق رابط الدعوة — هتتضاف كعضو "عرض فقط" لحد ما تديله صلاحية تعديل بنفسك.</div>
+              <div id="joinRequestsList"></div>
+            </div>
+
             <div class="add-entity-card">
               <div class="form-grid">
                 <div class="field">
@@ -2533,39 +2612,6 @@
               </div>
             </div>
             <div id="memberSettingsList"></div>
-
-            <div class="panel" id="leaveProjectPanel" style="margin-top:16px; display:none;">
-              <div class="panel-header">
-                <h3 style="display:flex; align-items:center; gap:10px;">مغادرة المشروع</h3>
-                <div class="helper-text" id="leaveProjectHelperText"></div>
-              </div>
-              <button class="btn btn-danger" id="leaveProjectBtn" onclick="leaveProject()" style="display:none;">مغادرة المشروع</button>
-            </div>
-
-            <div class="panel" id="shareProjectPanel" style="margin-top:16px; display:none;">
-              <div class="panel-header">
-                <h3 style="display:flex; align-items:center; gap:10px;"><span class="settings-avatar" style="width:32px;height:32px;flex-shrink:0;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></span>مشاركة المشروع</h3>
-                <div class="helper-text">أي شخص لديه هذا الرابط يمكنه طلب الانضمام، وسيبقى بدون صلاحية حتى تقبل طلبه</div>
-              </div>
-              <div class="form-grid">
-                <div class="field" style="grid-column:1 / -1;">
-                  <label>رابط الانضمام</label>
-                  <input id="joinLinkInput" readonly />
-                </div>
-                <div class="field">
-                  <label>&nbsp;</label>
-                  <button class="btn btn-secondary" id="copyJoinLinkBtn">نسخ الرابط</button>
-                </div>
-              </div>
-            </div>
-
-            <div class="panel" id="joinRequestsPanel" style="margin-top:16px; display:none;">
-              <div class="panel-header">
-                <h3 style="display:flex; align-items:center; gap:10px;"><span class="settings-avatar" style="width:32px;height:32px;flex-shrink:0;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg></span>طلبات الانضمام <span class="settings-badge usage" id="joinRequestsCount">0</span></h3>
-                <div class="helper-text">راجع الطلبات الواردة على المشروع واقبلها أو ارفضها</div>
-              </div>
-              <div id="joinRequestsList"></div>
-            </div>
           </div>
 
           <div class="panel settings-tab-panel" id="settingsTabCategories" style="display:none;">
@@ -2667,6 +2713,58 @@
       </div>
     </div>
 
+    <div class="modal-backdrop" id="joinRequestModal">
+      <div class="modal">
+        <h3 style="margin-top:0;">طلب انضمام لمشروع</h3>
+        <p class="label" style="margin-top:-4px;">حد شاركك رابط دعوة عشان تنضم لمشروع على حسابنا.</p>
+        <p class="label">هتنضم كـ"عرض فقط" أول ما صاحب المشروع يقبل طلبك — وبعدين يقدر يديك صلاحية تعديل لو حابب.</p>
+        <div class="modal-actions">
+          <button class="btn btn-secondary" onclick="closeJoinRequestModal()">إلغاء</button>
+          <button class="btn btn-primary" id="submitJoinRequestBtn">إرسال طلب الانضمام</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-backdrop" id="onboardingModal">
+      <div class="modal">
+        <h3 style="margin-top:0;">أهلًا بيك في حسابنا 👋</h3>
+        <p class="label" style="margin-top:-4px;">قبل ما تبدأ، دي 3 حاجات هتفهمك التطبيق بسرعة:</p>
+        <div style="display:flex; flex-direction:column; gap:14px; margin:16px 0;">
+          <div style="display:flex; gap:12px; align-items:flex-start;">
+            <span class="settings-avatar" style="width:34px;height:34px;flex-shrink:0;background:linear-gradient(135deg, #34d399, #10b981);">👑</span>
+            <div>
+              <strong style="font-size:0.92rem;">مالك المشروع</strong>
+              <div class="label" style="margin-top:2px;">الشخص اللي أنشأ المشروع — بيقدر يعدّل كل حاجة ويحذف المشروع نفسه.</div>
+            </div>
+          </div>
+          <div style="display:flex; gap:12px; align-items:flex-start;">
+            <span class="settings-avatar" style="width:34px;height:34px;flex-shrink:0;background:linear-gradient(135deg, #5a8eff, #3366dd);">✎</span>
+            <div>
+              <strong style="font-size:0.92rem;">محرر (Editor)</strong>
+              <div class="label" style="margin-top:2px;">عضو ليه صلاحية "تعديل" — يقدر يضيف/يعدّل مصاريف وأعضاء وتسويات.</div>
+            </div>
+          </div>
+          <div style="display:flex; gap:12px; align-items:flex-start;">
+            <span class="settings-avatar" style="width:34px;height:34px;flex-shrink:0;background:linear-gradient(135deg, #ffab91, #ff8a65);">👁</span>
+            <div>
+              <strong style="font-size:0.92rem;">عرض فقط (Read-only)</strong>
+              <div class="label" style="margin-top:2px;">يشوف كل حاجة بس مايقدرش يعدّل — تقدر تديله صلاحية تعديل بعدين من إعدادات الأعضاء.</div>
+            </div>
+          </div>
+          <div style="display:flex; gap:12px; align-items:flex-start;">
+            <span class="settings-avatar" style="width:34px;height:34px;flex-shrink:0;background:linear-gradient(135deg, #c792ea, #a370d8);">%</span>
+            <div>
+              <strong style="font-size:0.92rem;">التقسيم المخصص</strong>
+              <div class="label" style="margin-top:2px;">لما تضيف مصروف، تقدر تختار "تقسيم مخصص" بدل بالتساوي وتحدد نسبة كل عضو بنفسك.</div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-primary" style="width:100%;" onclick="closeOnboardingModal()">فهمت، يلا نبدأ</button>
+        </div>
+      </div>
+    </div>
+
     <div class="modal-backdrop" id="authModal">
       <div class="modal">
         <div class="modal-header">
@@ -2723,21 +2821,6 @@
       </div>
     </div>
 
-    <div class="modal-backdrop" id="joinProjectModal">
-      <div class="modal">
-        <div class="modal-header">
-          <h3 id="joinModalTitle">دعوة للانضمام إلى مشروع</h3>
-          <button class="modal-close-btn" type="button" onclick="closeJoinModal()" aria-label="إغلاق"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-        </div>
-        <div id="joinModalBody">
-          <p class="label" id="joinModalMessage">أنت على وشك طلب الانضمام إلى مشروع مشترك.</p>
-        </div>
-        <div class="modal-actions" id="joinModalActions">
-          <button class="btn btn-primary" id="joinLoginBtn">تسجيل الدخول للمتابعة</button>
-        </div>
-      </div>
-    </div>
-
     <div class="modal-backdrop" id="recordSettlementModal">
       <div class="modal">
         <div class="modal-header">
@@ -2781,14 +2864,10 @@
 service cloud.firestore {
   match /databases/{database}/documents {
     match /projects/{projectId} {
-      function email() {
-        return request.auth.token.email.lower();
-      }
-
       allow read: if request.auth != null
         && (
           resource.data.ownerId == request.auth.uid ||
-          email() in resource.data.sharedWithEmails
+          request.auth.token.email.lower() in resource.data.sharedWithEmails
         );
 
       allow create: if request.auth != null
@@ -2796,42 +2875,16 @@ service cloud.firestore {
         && request.resource.data.sharedWithEmails is list
         && request.resource.data.editableEmails is list;
 
-      // Self-leave: a non-owner member currently in sharedWithEmails may remove *only their own*
-      // email from sharedWithEmails and (if present) editableEmails, and nothing else about the
-      // project document. This is intentionally narrower than the editor-update clause below —
-      // it does not require editableEmails membership (read-only members must be able to leave
-      // too), and unlike the editor clause it DOES allow sharedWithEmails/editableEmails to
-      // change, but only ever by removing the caller's own email, verified with removeAll() so
-      // no other entry can be touched. state/ownerId/budget/expenses/categories/activityLog etc.
-      // must stay byte-identical, which rules out privilege escalation, editing financial data,
-      // or removing/adding any other member while "leaving". (state.members still shows the
-      // member as active until the owner's own client reconciles it — see
-      // reconcileDepartedMembers() client-side; that write is done by the owner, who already has
-      // full update rights below, so it needs no extra rule.)
-      function isSelfLeave() {
-        return request.auth != null
-          && resource.data.ownerId != request.auth.uid
-          && email() in resource.data.sharedWithEmails
-          && request.resource.data.ownerId == resource.data.ownerId
-          && request.resource.data.state == resource.data.state
-          && request.resource.data.sharedWithEmails == resource.data.sharedWithEmails.removeAll([email()])
-          && request.resource.data.editableEmails == resource.data.editableEmails.removeAll([email()])
-          && request.resource.data.diff(resource.data).affectedKeys()
-               .hasOnly(['sharedWithEmails', 'editableEmails', 'updatedAt']);
-      }
-
       allow update: if request.auth != null
         && (
           resource.data.ownerId == request.auth.uid
           ||
           (
-            email() in resource.data.editableEmails
+            request.auth.token.email.lower() in resource.data.editableEmails
             && request.resource.data.ownerId == resource.data.ownerId
             && request.resource.data.sharedWithEmails == resource.data.sharedWithEmails
             && request.resource.data.editableEmails == resource.data.editableEmails
           )
-          ||
-          isSelfLeave()
         );
 
       allow delete: if request.auth != null
@@ -2868,51 +2921,11 @@ service cloud.firestore {
         allow delete: if isOwner() || isEditor();
       }
     }
-
-    // joinRequests: a top-level collection (not nested under /projects) so a requester can create
-    // one before they have any read access to the project itself. Each doc is scoped to exactly
-    // one (requesterUid, projectId) pair.
-    match /joinRequests/{requestId} {
-      function isRequester() {
-        return request.auth != null && resource.data.requesterUid == request.auth.uid;
-      }
-      function isProjectOwner() {
-        return request.auth != null
-          && get(/databases/$(database)/documents/projects/$(resource.data.projectId)).data.ownerId == request.auth.uid;
-      }
-
-      // Requester can read their own request (to poll its status); the project owner can read
-      // requests addressed to their project (to list/approve/reject them).
-      allow read: if isRequester() || (
-        request.auth != null
-        && get(/databases/$(database)/documents/projects/$(resource.data.projectId)).data.ownerId == request.auth.uid
-      );
-
-      // Anyone authenticated can *create* a request for themselves, always starting 'pending' and
-      // unreviewed — this is the one write a not-yet-a-member user is allowed to make.
-      allow create: if request.auth != null
-        && request.resource.data.requesterUid == request.auth.uid
-        && request.resource.data.requesterEmail == request.auth.token.email.lower()
-        && request.resource.data.status == 'pending'
-        && request.resource.data.reviewedAt == null
-        && request.resource.data.reviewedBy == null;
-
-      // Only the target project's owner may transition a request (approve/reject), and only the
-      // status/review fields — never projectId/requesterUid/requesterEmail after the fact.
-      allow update: if isProjectOwner()
-        && request.resource.data.projectId == resource.data.projectId
-        && request.resource.data.requesterUid == resource.data.requesterUid
-        && request.resource.data.requesterEmail == resource.data.requesterEmail
-        && request.resource.data.status in ['approved', 'rejected']
-        && request.resource.data.reviewedBy == request.auth.uid;
-
-      allow delete: if isRequester() || isProjectOwner();
-    }
   }
 }`;
       import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js';
       import { getAuth, setPersistence, browserLocalPersistence, browserSessionPersistence, inMemoryPersistence, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, onAuthStateChanged, signOut, updateProfile, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js';
-      import { getFirestore, collection, query, where, doc, setDoc, updateDoc, deleteDoc, onSnapshot, serverTimestamp, or, getDoc, getDocs, addDoc, writeBatch, arrayUnion, arrayRemove, limit } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js';
+      import { getFirestore, collection, query, where, doc, setDoc, updateDoc, deleteDoc, onSnapshot, serverTimestamp, or } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js';
 
       const firebaseConfig = {
         apiKey: 'AIzaSyAjDRJSIhRRxDZ7U3iSaz9PV7R4wqNdaEA',
@@ -3028,6 +3041,42 @@ service cloud.firestore {
 
       let currentUser = null;
 
+      let syncStatusHideTimer = null;
+      function setSyncStatus(status) {
+        if (!els.syncStatus) return;
+        if (syncStatusHideTimer) {
+          clearTimeout(syncStatusHideTimer);
+          syncStatusHideTimer = null;
+        }
+        const labels = {
+          saving: 'جارٍ الحفظ...',
+          synced: 'تم الحفظ لكل الأعضاء',
+          offline: 'غير متصل — الحفظ محليًا فقط',
+          error: 'فشل الحفظ على السيرفر'
+        };
+        if (!status || !labels[status]) {
+          els.syncStatus.style.display = 'none';
+          return;
+        }
+        els.syncStatus.className = `sync-status ${status}`;
+        els.syncStatus.innerHTML = `<span class="sync-dot"></span><span>${labels[status]}</span>`;
+        els.syncStatus.style.display = 'flex';
+        // "Synced" is reassuring but shouldn't linger forever — fade it out after a few
+        // seconds so the topbar doesn't stay cluttered once everything is confirmed saved.
+        if (status === 'synced') {
+          syncStatusHideTimer = setTimeout(() => {
+            if (els.syncStatus) els.syncStatus.style.display = 'none';
+          }, 4000);
+        }
+      }
+
+      window.addEventListener('online', () => {
+        if (currentProjectId && isFirebaseReady) setSyncStatus('synced');
+      });
+      window.addEventListener('offline', () => {
+        if (currentProjectId) setSyncStatus('offline');
+      });
+
       function getStorageKey() {
         return currentUser ? `${STORAGE_KEY}_${currentUser.uid}` : STORAGE_KEY;
       }
@@ -3062,10 +3111,15 @@ service cloud.firestore {
       let projectListUnsubscribe = null;
       let projectDocUnsubscribe = null;
       let settlementsUnsubscribe = null;
-      let joinRequestsUnsubscribe = null;
-      let pendingJoinToken = null; // ?join=<projectId> saved across the login flow
-      let myJoinRequest = null; // { id, status, projectId } for the token above, if any
       let remoteSettlementsCache = [];
+      // Timestamp (ms) of the last state actually confirmed on the server, used both to
+      // drive the sync-status pill and to detect edit conflicts (see editExpense/saveExpense).
+      let lastRemoteUpdateAt = null;
+      let editingSnapshotUpdatedAt = null;
+      // Invite-link "request to join" flow — see joinProject URL param handling below.
+      let pendingJoinRequest = null; // { projectId } parsed from ?joinProject=
+      let joinRequestsUnsubscribe = null;
+      let joinRequestsCache = [];
       const provider = new GoogleAuthProvider();
 
       const els = {
@@ -3074,6 +3128,8 @@ service cloud.firestore {
         totalExpenses: document.getElementById('totalExpenses'),
         sharePerMember: document.getElementById('sharePerMember'),
         membersList: document.getElementById('membersList'),
+        categoryBreakdown: document.getElementById('categoryBreakdown'),
+        activityPreview: document.getElementById('activityPreview'),
         expensesTable: document.getElementById('expensesTable'),
         settlementList: document.getElementById('settlementList'),
         settlementFrom: document.getElementById('settlementFrom'),
@@ -3133,11 +3189,22 @@ service cloud.firestore {
         deleteProjectFromSettingsBtn: document.getElementById('deleteProjectFromSettingsBtn'),
         openActivityLogBtn: document.getElementById('openActivityLogBtn'),
         activityLogModal: document.getElementById('activityLogModal'),
+        onboardingModal: document.getElementById('onboardingModal'),
+        joinRequestModal: document.getElementById('joinRequestModal'),
+        submitJoinRequestBtn: document.getElementById('submitJoinRequestBtn'),
+        inviteLinkInput: document.getElementById('inviteLinkInput'),
+        copyInviteLinkBtn: document.getElementById('copyInviteLinkBtn'),
+        toggleInviteQrBtn: document.getElementById('toggleInviteQrBtn'),
+        inviteQrWrap: document.getElementById('inviteQrWrap'),
+        inviteQrImage: document.getElementById('inviteQrImage'),
+        joinRequestsCard: document.getElementById('joinRequestsCard'),
+        joinRequestsList: document.getElementById('joinRequestsList'),
         activityLogFullList: document.getElementById('activityLogFullList'),
         toast: document.getElementById('toast'),
         newMemberName: document.getElementById('newMemberName'),
         addMemberBtn: document.getElementById('addMemberBtn'),
         permissionBadge: document.getElementById('permissionBadge'),
+        syncStatus: document.getElementById('syncStatus'),
         ownerLabel: document.getElementById('ownerLabel'),
         authBtn: document.getElementById('authBtn'),
         authBtnLabel: document.getElementById('authBtnLabel'),
@@ -3171,11 +3238,6 @@ service cloud.firestore {
         userNameSidebar: document.getElementById('userNameSidebar'),
         userEmailSidebar: document.getElementById('userEmailSidebar'),
         authModal: document.getElementById('authModal'),
-        joinProjectModal: document.getElementById('joinProjectModal'),
-        joinModalTitle: document.getElementById('joinModalTitle'),
-        joinModalMessage: document.getElementById('joinModalMessage'),
-        joinModalActions: document.getElementById('joinModalActions'),
-        joinLinkInput: document.getElementById('joinLinkInput'),
         authModalTitle: document.getElementById('authModalTitle'),
         authEmail: document.getElementById('authEmail'),
         authPassword: document.getElementById('authPassword'),
@@ -3312,6 +3374,8 @@ service cloud.firestore {
         }
         if (syncRemote && isFirebaseReady && isProjectParticipant() && currentProjectId) {
           syncToFirebase();
+        } else if (syncRemote && currentProjectId && (!navigator.onLine || !isFirebaseReady)) {
+          setSyncStatus('offline');
         }
       }
 
@@ -3358,14 +3422,9 @@ service cloud.firestore {
 
       async function syncToFirebase() {
         if (!currentProjectId) return;
+        setSyncStatus('saving');
         try {
           const projectRef = doc(db, 'projects', currentProjectId);
-          // BUG FIX: this used to include every member ever added, regardless of `active`.
-          // deleteMember() only soft-deletes (active=false) so financial history stays intact,
-          // but that means a removed member's email must still be scrubbed out of the Firestore
-          // access-control lists here, or they silently keep read/write access forever even
-          // though the UI shows them as removed. `sharedWithEmails` (and `editableEmails`) are
-          // the actual source of truth for access — always derive them from *active* members only.
           const sharedWithEmails = state.members
             .filter(member => member.active !== false)
             .map(member => normalizeEmail(member.email))
@@ -3379,9 +3438,11 @@ service cloud.firestore {
           // rest of the project data. Strip them out before syncing the shared project blob.
           const { settlements, ...stateForSync } = state;
           await setDoc(projectRef, { state: stateForSync, sharedWithEmails, editableEmails, updatedAt: serverTimestamp() }, { merge: true });
+          setSyncStatus('synced');
         } catch (error) {
           console.error('Firebase save failed', error);
           showToast('تم الحفظ محليًا فقط بسبب مشكلة في Firebase', 'error');
+          setSyncStatus(navigator.onLine === false ? 'offline' : 'error');
         }
       }
 
@@ -3439,14 +3500,17 @@ service cloud.firestore {
       function subscribeToProject(projectId) {
         if (projectDocUnsubscribe) projectDocUnsubscribe();
         if (settlementsUnsubscribe) settlementsUnsubscribe();
+        if (joinRequestsUnsubscribe) joinRequestsUnsubscribe();
         currentProjectId = projectId;
         remoteSettlementsCache = [];
+        updateInviteLinkUI();
         const projectRef = doc(db, 'projects', projectId);
         projectDocUnsubscribe = onSnapshot(projectRef, (snapshot) => {
           if (snapshot.exists()) {
             const remoteData = snapshot.data();
             currentProjectOwnerId = remoteData.ownerId;
             currentProjectOwnerName = remoteData.ownerName || remoteData.ownerEmail || '';
+            lastRemoteUpdateAt = remoteData.updatedAt?.toMillis?.() ?? (remoteData.updatedAt ? new Date(remoteData.updatedAt).getTime() : lastRemoteUpdateAt);
             if (remoteData && remoteData.state) {
               state = normalizeState(remoteData.state);
               // Settlements sync via their own subcollection listener below, not the project blob.
@@ -3456,7 +3520,6 @@ service cloud.firestore {
               } catch (error) {
                 console.warn('Could not cache project state locally', error);
               }
-              reconcileDepartedMembers(remoteData);
             }
             render();
           } else {
@@ -3464,14 +3527,7 @@ service cloud.firestore {
           }
         }, (error) => {
           console.error('Firestore project error', error);
-          // permission-denied here means access to this project was just revoked (owner removed
-          // this user, or they left from another tab/device) — bail out of the project instead of
-          // leaving the UI stuck showing data the server will no longer serve.
-          if (error.code === 'permission-denied') {
-            handleRemovedFromProject();
-          } else {
-            showToast('خطأ في تحميل المشروع', 'error');
-          }
+          showToast('خطأ في تحميل المشروع', 'error');
         });
         const settlementsRef = collection(db, 'projects', projectId, 'settlements');
         settlementsUnsubscribe = onSnapshot(settlementsRef, (snapshot) => {
@@ -3485,9 +3541,22 @@ service cloud.firestore {
           render();
         }, (error) => {
           console.error('Firestore settlements error', error);
-          if (error.code === 'permission-denied') {
-            handleRemovedFromProject();
-          }
+        });
+
+        // Owner-only view of pending join requests submitted via the invite link. The rules
+        // only grant read access on /joinRequests/{id} to the project owner (not editors), so
+        // this listener will get permission-denied for anyone else — handled silently.
+        const joinRequestsQuery = query(
+          collection(db, 'joinRequests'),
+          where('projectId', '==', projectId),
+          where('status', '==', 'pending')
+        );
+        joinRequestsUnsubscribe = onSnapshot(joinRequestsQuery, (snapshot) => {
+          joinRequestsCache = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
+          renderJoinRequests();
+        }, () => {
+          joinRequestsCache = [];
+          renderJoinRequests();
         });
       }
 
@@ -3591,384 +3660,6 @@ service cloud.firestore {
         } catch (error) {
           console.error('Delete project failed', error);
           showToast('فشل حذف المشروع', 'error');
-        }
-      }
-
-      // ===== Share Project + Join Request system =====
-      // Design notes (see summary sent to the user for full rationale):
-      // - The join link embeds the raw Firestore project ID (?join=<projectId>). Project IDs
-      //   from doc(collection(db,'projects')) are random ~20-char auto-generated IDs, already
-      //   unguessable, and knowing one grants ZERO read/write access on its own — Firestore
-      //   Rules still gate every read/write to /projects/{id} on ownerId/sharedWithEmails.
-      //   So no separate opaque "joinToken" collection is needed; the ID itself is the token.
-      // - Nothing about the project (name, members, expenses) is fetched or shown before the
-      //   requester is an approved member — the join modal never reads /projects/{id} directly.
-      // - Join requests live in their own top-level collection, /joinRequests/{requestId}, whose
-      //   Firestore Rules (see delivered rules) are the actual enforcement layer: a requester can
-      //   only create a request for themselves, can never set its status, and only the project's
-      //   owner can move a request from "pending" to "approved"/"rejected".
-      // - Approval writes two documents in one writeBatch (join request -> approved, project doc
-      //   -> sharedWithEmails/members updated). Both writes are independently permitted by the
-      //   existing/new Rules for the owner, and Firestore commits a batch atomically, so there is
-      //   no window where one write lands without the other.
-
-      const JOIN_TOKEN_STORAGE_KEY = 'hesabna_pending_join_token';
-
-      function getJoinTokenFromUrl() {
-        try {
-          return new URLSearchParams(window.location.search).get('join');
-        } catch (error) {
-          return null;
-        }
-      }
-
-      // Removes ?join=... from the visible URL without touching any other query params or
-      // triggering a reload, so the invite link doesn't linger after it's been handled.
-      function clearJoinTokenFromUrl() {
-        try {
-          const url = new URL(window.location.href);
-          if (!url.searchParams.has('join')) return;
-          url.searchParams.delete('join');
-          window.history.replaceState({}, '', url.toString());
-        } catch (error) { /* no-op */ }
-      }
-
-      function openJoinModal() {
-        if (els.joinProjectModal) els.joinProjectModal.classList.add('open');
-      }
-      function closeJoinModal() {
-        closeModalEl(els.joinProjectModal);
-      }
-      window.closeJoinModal = closeJoinModal;
-
-      // Entry point: called once on load (after the join token from the URL/session has been
-      // captured) and again every time auth state changes, so the flow resumes correctly after
-      // a login/signup — including the redirect-based Google sign-in used on iOS/Safari.
-      async function handleJoinFlow() {
-        if (!pendingJoinToken) return;
-        const projectId = pendingJoinToken;
-
-        if (!currentUser) {
-          els.joinModalTitle.textContent = 'دعوة للانضمام إلى مشروع';
-          els.joinModalMessage.textContent = 'أنت على وشك طلب الانضمام إلى مشروع مشترك. سجل الدخول أولاً للمتابعة.';
-          els.joinModalActions.innerHTML = '';
-          const loginBtn = document.createElement('button');
-          loginBtn.className = 'btn btn-primary';
-          loginBtn.textContent = 'تسجيل الدخول للمتابعة';
-          loginBtn.addEventListener('click', () => { closeJoinModal(); openAuthModal('login'); });
-          els.joinModalActions.appendChild(loginBtn);
-          openJoinModal();
-          return;
-        }
-
-        // Already a participant of that project (owner or existing member)? Nothing to request.
-        if (currentProjectOwnerId === null) {
-          // If this project isn't the one currently loaded we can't cheaply know membership
-          // without reading it, and we deliberately never read /projects/{id} for a non-member.
-        }
-
-        let existing = null;
-        try {
-          existing = await getMyJoinRequestForProject(projectId);
-        } catch (error) {
-          console.error('Could not check existing join request', error);
-          showToast('تعذر التحقق من حالة طلب الانضمام', 'error');
-          return;
-        }
-        myJoinRequest = existing;
-
-        if (existing && existing.status === 'pending') {
-          els.joinModalTitle.textContent = 'طلبك قيد المراجعة';
-          els.joinModalMessage.textContent = '⏳ طلبك قيد المراجعة. سننتظر موافقة مالك المشروع، وستظهر لك المشاركة فور القبول.';
-          els.joinModalActions.innerHTML = '<button class="btn btn-secondary" onclick="closeJoinModal()">حسنًا</button>';
-          openJoinModal();
-          return;
-        }
-
-        if (existing && existing.status === 'approved') {
-          els.joinModalTitle.textContent = 'تم قبول طلبك';
-          els.joinModalMessage.textContent = '✓ تمت الموافقة على طلبك وتمت إضافتك إلى المشروع.';
-          els.joinModalActions.innerHTML = '';
-          const goBtn = document.createElement('button');
-          goBtn.className = 'btn btn-primary';
-          goBtn.textContent = 'الذهاب إلى المشروع';
-          goBtn.addEventListener('click', () => { closeJoinModal(); selectProject(projectId); pendingJoinToken = null; sessionStorage.removeItem(JOIN_TOKEN_STORAGE_KEY); clearJoinTokenFromUrl(); });
-          els.joinModalActions.appendChild(goBtn);
-          openJoinModal();
-          return;
-        }
-
-        if (existing && existing.status === 'rejected') {
-          els.joinModalTitle.textContent = 'تم رفض طلب الانضمام';
-          els.joinModalMessage.textContent = 'تم رفض طلب انضمامك السابق لهذا المشروع من قبل مالكه.';
-          els.joinModalActions.innerHTML = '<button class="btn btn-secondary" onclick="closeJoinModal()">إغلاق</button>';
-          openJoinModal();
-          return;
-        }
-
-        // No existing request: offer to send one. We don't fetch or show the project name —
-        // showing it would require a public read that the security model here deliberately avoids.
-        els.joinModalTitle.textContent = 'طلب الانضمام إلى مشروع';
-        els.joinModalMessage.textContent = 'هل تريد إرسال طلب انضمام إلى هذا المشروع؟ لن تحصل على صلاحية دخول إلا بعد موافقة مالك المشروع.';
-        els.joinModalActions.innerHTML = '';
-        const sendBtn = document.createElement('button');
-        sendBtn.className = 'btn btn-primary';
-        sendBtn.textContent = 'إرسال طلب الانضمام';
-        sendBtn.addEventListener('click', withLoading(sendBtn, async () => {
-          await createJoinRequest(projectId);
-        }));
-        const cancelBtn = document.createElement('button');
-        cancelBtn.className = 'btn btn-secondary';
-        cancelBtn.textContent = 'إلغاء';
-        cancelBtn.addEventListener('click', () => { closeJoinModal(); pendingJoinToken = null; sessionStorage.removeItem(JOIN_TOKEN_STORAGE_KEY); clearJoinTokenFromUrl(); });
-        els.joinModalActions.appendChild(sendBtn);
-        els.joinModalActions.appendChild(cancelBtn);
-        openJoinModal();
-      }
-
-      // One pending/approved/rejected request per (user, project) — enforced here for UX and,
-      // more importantly, by Firestore Rules on create (see delivered rules) so this can't be
-      // bypassed by calling createJoinRequest() directly.
-      async function getMyJoinRequestForProject(projectId) {
-        if (!currentUser) return null;
-        const q = query(
-          collection(db, 'joinRequests'),
-          where('projectId', '==', projectId),
-          where('requesterUid', '==', currentUser.uid),
-          limit(1)
-        );
-        const snap = await getDocs(q);
-        if (snap.empty) return null;
-        const docSnap = snap.docs[0];
-        return { id: docSnap.id, ...docSnap.data() };
-      }
-
-      async function createJoinRequest(projectId) {
-        if (!currentUser) return;
-        try {
-          const already = await getMyJoinRequestForProject(projectId);
-          if (already) {
-            myJoinRequest = already;
-            if (already.status === 'pending') {
-              showToast('لديك بالفعل طلب انضمام قيد المراجعة', 'error');
-            }
-            handleJoinFlow();
-            return;
-          }
-          const payload = {
-            projectId,
-            requesterUid: currentUser.uid,
-            requesterEmail: normalizeEmail(currentUser.email),
-            requesterName: currentUser.displayName || currentUser.email || 'مستخدم',
-            status: 'pending',
-            createdAt: serverTimestamp(),
-            reviewedAt: null,
-            reviewedBy: null
-          };
-          const ref = await addDoc(collection(db, 'joinRequests'), payload);
-          myJoinRequest = { id: ref.id, ...payload };
-          closeJoinModal();
-          showToast('تم إرسال طلب الانضمام، بانتظار موافقة مالك المشروع', 'success');
-        } catch (error) {
-          console.error('Create join request failed', error);
-          showToast('فشل إرسال طلب الانضمام', 'error');
-        }
-      }
-
-      // Owner-only: live list of pending join requests for the currently open project.
-      function subscribeToJoinRequests(projectId) {
-        if (joinRequestsUnsubscribe) { joinRequestsUnsubscribe(); joinRequestsUnsubscribe = null; }
-        if (!projectId || !currentUser || currentProjectOwnerId !== currentUser.uid) {
-          renderJoinRequestsList([]);
-          return;
-        }
-        const q = query(
-          collection(db, 'joinRequests'),
-          where('projectId', '==', projectId),
-          where('status', '==', 'pending')
-        );
-        joinRequestsUnsubscribe = onSnapshot(q, (snapshot) => {
-          renderJoinRequestsList(snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() })));
-        }, (error) => {
-          console.error('Join requests subscription failed', error);
-        });
-      }
-
-      function timeAgo(date) {
-        if (!date) return '';
-        const diffMs = Date.now() - date.getTime();
-        const mins = Math.floor(diffMs / 60000);
-        if (mins < 1) return 'الآن';
-        if (mins < 60) return `منذ ${mins} دقيقة`;
-        const hours = Math.floor(mins / 60);
-        if (hours < 24) return `منذ ${hours} ساعة`;
-        const days = Math.floor(hours / 24);
-        return `منذ ${days} يوم`;
-      }
-
-      function renderJoinRequestsList(requests) {
-        const countEl = document.getElementById('joinRequestsCount');
-        const panelEl = document.getElementById('joinRequestsPanel');
-        const listEl = document.getElementById('joinRequestsList');
-        if (!listEl) return;
-        const isOwner = !!(currentUser && currentProjectOwnerId === currentUser.uid);
-        if (panelEl) panelEl.style.display = isOwner ? 'block' : 'none';
-        if (countEl) countEl.textContent = String(requests.length);
-        if (!requests.length) {
-          listEl.innerHTML = '<div class="label" style="padding:12px 0;">لا توجد طلبات انضمام حاليًا.</div>';
-          return;
-        }
-        listEl.innerHTML = requests.map(reqItem => {
-          const createdDate = reqItem.createdAt && reqItem.createdAt.toDate ? reqItem.createdAt.toDate() : null;
-          return `
-            <div class="member-card" style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
-              <div>
-                <div style="font-weight:700;">${escapeHtml(reqItem.requesterName || 'مستخدم')}</div>
-                <div class="label">${escapeHtml(reqItem.requesterEmail || '')}</div>
-                <div class="label">${escapeHtml(timeAgo(createdDate))}</div>
-              </div>
-              <div style="display:flex; gap:8px;">
-                <button class="btn btn-primary" onclick="approveJoinRequest('${reqItem.id}')">قبول</button>
-                <button class="btn btn-secondary" onclick="rejectJoinRequest('${reqItem.id}')">رفض</button>
-              </div>
-            </div>`;
-        }).join('');
-      }
-
-      async function approveJoinRequest(requestId) {
-        if (!currentUser || currentProjectOwnerId !== currentUser.uid) {
-          showToast('فقط مالك المشروع يمكنه قبول طلبات الانضمام', 'error');
-          return;
-        }
-        try {
-          const reqRef = doc(db, 'joinRequests', requestId);
-          const reqSnap = await getDoc(reqRef);
-          if (!reqSnap.exists() || reqSnap.data().status !== 'pending') {
-            showToast('هذا الطلب لم يعد متاحًا', 'error');
-            return;
-          }
-          const reqData = reqSnap.data();
-          if (reqData.projectId !== currentProjectId) {
-            showToast('هذا الطلب لا يخص هذا المشروع', 'error');
-            return;
-          }
-          const alreadyMember = state.members.some(member => member.active !== false && normalizeEmail(member.email) === reqData.requesterEmail);
-          if (alreadyMember) {
-            // Nothing to add on the project side, but still resolve the request so it stops showing up.
-            const batch = writeBatch(db);
-            batch.update(reqRef, { status: 'approved', reviewedAt: serverTimestamp(), reviewedBy: currentUser.uid });
-            await batch.commit();
-            showToast('هذا المستخدم عضو بالفعل في المشروع', 'default');
-            return;
-          }
-
-          const projectRef = doc(db, 'projects', currentProjectId);
-          // If this person was a member before (left, or was removed) they'll still have an
-          // inactive record in state.members preserving their historical expenses/settlements.
-          // Reuse that record instead of creating a new one, so paidBy/split references and the
-          // member's history stay attached to a single, stable member id (no duplicates).
-          const existingInactive = state.members.find(member => member.active === false && normalizeEmail(member.email) === reqData.requesterEmail);
-          let updatedMembers;
-          if (existingInactive) {
-            updatedMembers = state.members.map(member => member.id === existingInactive.id
-              ? { ...member, name: reqData.requesterName || member.name, active: true, canEdit: false }
-              : member);
-          } else {
-            const newMember = {
-              id: crypto.randomUUID(),
-              name: reqData.requesterName || reqData.requesterEmail,
-              email: reqData.requesterEmail,
-              canEdit: false, // owner can promote to editor afterwards from the existing members UI
-              active: true,
-              createdAt: new Date().toISOString()
-            };
-            updatedMembers = [...state.members, newMember];
-          }
-          // Same access-list bug as syncToFirebase(): only *active* members belong in
-          // sharedWithEmails, otherwise a re-approved member would resurrect every previously
-          // removed member's access too.
-          const updatedSharedWithEmails = Array.from(new Set([
-            ...state.members.filter(m => m.active !== false).map(m => normalizeEmail(m.email)).filter(Boolean),
-            reqData.requesterEmail
-          ]));
-
-          // Batched so the request's "approved" status and the member's project access land
-          // together — Firestore commits a batch atomically (all writes succeed or none do).
-          const batch = writeBatch(db);
-          batch.update(reqRef, { status: 'approved', reviewedAt: serverTimestamp(), reviewedBy: currentUser.uid });
-          batch.set(projectRef, {
-            state: { members: updatedMembers },
-            sharedWithEmails: updatedSharedWithEmails,
-            updatedAt: serverTimestamp()
-          }, { merge: true });
-          await batch.commit();
-
-          state.members = updatedMembers;
-          logActivity(`تمت الموافقة على طلب انضمام ${reqData.requesterName || reqData.requesterEmail}`);
-          saveState();
-          showToast('تمت الموافقة على طلب الانضمام', 'success');
-        } catch (error) {
-          console.error('Approve join request failed', error);
-          showToast('فشل قبول طلب الانضمام', 'error');
-        }
-      }
-      window.approveJoinRequest = approveJoinRequest;
-
-      async function rejectJoinRequest(requestId) {
-        if (!currentUser || currentProjectOwnerId !== currentUser.uid) {
-          showToast('فقط مالك المشروع يمكنه رفض طلبات الانضمام', 'error');
-          return;
-        }
-        try {
-          const reqRef = doc(db, 'joinRequests', requestId);
-          const reqSnap = await getDoc(reqRef);
-          if (!reqSnap.exists() || reqSnap.data().status !== 'pending') {
-            showToast('هذا الطلب لم يعد متاحًا', 'error');
-            return;
-          }
-          const reqData = reqSnap.data();
-          await updateDoc(reqRef, { status: 'rejected', reviewedAt: serverTimestamp(), reviewedBy: currentUser.uid });
-          logActivity(`تم رفض طلب انضمام ${reqData.requesterName || reqData.requesterEmail}`);
-          saveState();
-          showToast('تم رفض طلب الانضمام', 'default');
-        } catch (error) {
-          console.error('Reject join request failed', error);
-          showToast('فشل رفض طلب الانضمام', 'error');
-        }
-      }
-      window.rejectJoinRequest = rejectJoinRequest;
-
-      function copyProjectJoinLink() {
-        if (!currentProjectId) return;
-        const link = `${window.location.origin}${window.location.pathname}?join=${currentProjectId}`;
-        if (els.joinLinkInput) els.joinLinkInput.value = link;
-        navigator.clipboard?.writeText(link).then(() => {
-          showToast('تم نسخ رابط الانضمام', 'success');
-        }).catch(() => {
-          showToast('تعذر نسخ الرابط، انسخه يدويًا', 'error');
-        });
-      }
-
-      // Keeps the share link + join-requests panels and the live subscription in sync with
-      // whichever project is currently open, without needing to be wired into every place
-      // currentProjectId changes.
-      function renderShareAndJoinPanel() {
-        const isOwner = !!(currentUser && currentProjectId && currentProjectOwnerId === currentUser.uid);
-        const shareEl = document.getElementById('shareProjectPanel');
-        if (shareEl) shareEl.style.display = isOwner ? 'block' : 'none';
-        if (isOwner && els.joinLinkInput) {
-          els.joinLinkInput.value = `${window.location.origin}${window.location.pathname}?join=${currentProjectId}`;
-        }
-        if (isOwner) {
-          if (renderShareAndJoinPanel._lastSubscribedProject !== currentProjectId) {
-            renderShareAndJoinPanel._lastSubscribedProject = currentProjectId;
-            subscribeToJoinRequests(currentProjectId);
-          }
-        } else {
-          if (joinRequestsUnsubscribe) { joinRequestsUnsubscribe(); joinRequestsUnsubscribe = null; }
-          renderShareAndJoinPanel._lastSubscribedProject = null;
-          const panelEl = document.getElementById('joinRequestsPanel');
-          if (panelEl) panelEl.style.display = 'none';
         }
       }
 
@@ -4885,6 +4576,8 @@ service cloud.firestore {
           if (projectListUnsubscribe) projectListUnsubscribe();
           if (projectDocUnsubscribe) projectDocUnsubscribe();
           if (settlementsUnsubscribe) settlementsUnsubscribe();
+          if (joinRequestsUnsubscribe) joinRequestsUnsubscribe();
+          joinRequestsCache = [];
           currentProjectId = null;
           currentProjectOwnerId = null;
           projectDocs = [];
@@ -4899,6 +4592,7 @@ service cloud.firestore {
         } else {
           state = loadState();
           if (els.appRoot) els.appRoot.classList.remove('hidden');
+          if (!maybeShowJoinRequestModal()) maybeShowOnboarding();
           if (els.loginScreen) els.loginScreen.style.display = 'none';
           if (els.authBtn) els.authBtn.style.display = 'none';
           if (els.profileSidebarBtn) els.profileSidebarBtn.style.display = 'flex';
@@ -5096,6 +4790,26 @@ service cloud.firestore {
         if (dangerZone) dangerZone.style.display = (tab === 'project' && canDeleteProject()) ? 'block' : 'none';
       }
       window.showSettingsTab = showSettingsTab;
+
+      function showSettleTab(tab) {
+        const duePanel = document.getElementById('settleTabDue');
+        const recordPanel = document.getElementById('settleTabRecord');
+        const historyPanel = document.getElementById('settleTabHistory');
+        [[duePanel, 'due'], [recordPanel, 'record'], [historyPanel, 'history']].forEach(([panel, key]) => {
+          if (!panel) return;
+          const shouldShow = tab === key;
+          panel.style.display = shouldShow ? 'block' : 'none';
+          if (shouldShow) {
+            panel.classList.remove('settings-tab-fade');
+            void panel.offsetWidth;
+            panel.classList.add('settings-tab-fade');
+          }
+        });
+        document.querySelectorAll('[data-settle-tab]').forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.settleTab === tab);
+        });
+      }
+      window.showSettleTab = showSettleTab;
 
       function showSection(section) {
         document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.section === section));
@@ -5300,7 +5014,17 @@ service cloud.firestore {
         const metrics = calculateMetrics();
         const activeMembers = getActiveMembers();
 
-        els.projectNameCard.textContent = currentProjectId ? state.projectName : 'لا يوجد مشروع محدد';
+        if (currentProjectId) {
+          const categoryTotals = {};
+          state.expenses.forEach(expense => {
+            const cat = expense.category || 'أخرى';
+            categoryTotals[cat] = (categoryTotals[cat] || 0) + Number(expense.amount || 0);
+          });
+          const topCategory = Object.entries(categoryTotals).sort((a, b) => b[1] - a[1])[0];
+          els.projectNameCard.textContent = topCategory ? topCategory[0] : 'لا توجد بعد';
+        } else {
+          els.projectNameCard.textContent = 'لا يوجد مشروع محدد';
+        }
         setStatValue(els.memberCount, activeMembers.length);
         const myMember = getCurrentMember();
         const myBalance = myMember ? metrics.balances.find(item => item.id === myMember.id) : null;
@@ -5321,12 +5045,13 @@ service cloud.firestore {
           const projectTabVisible = document.getElementById('settingsTabProject')?.style.display !== 'none';
           dangerZoneEl.style.display = (projectTabVisible && canDeleteProject()) ? 'block' : 'none';
         }
-        renderShareAndJoinPanel();
         const editStateText = currentProjectId ? (canEdit() ? 'يمكنك التعديل' : 'عرض فقط') : 'اختر مشروعًا أو أنشئ مشروعًا جديدًا';
         els.topSubtitle.textContent = `${activeMembers.length} أعضاء • ${state.expenses.length} مصروف • ${editStateText}`;
 
         updatePermissionUI();
+        updateInviteLinkUI();
         renderMembers(metrics.balances);
+        renderCategoryBreakdown();
         renderExpenses();
         renderSettlement(metrics.balances);
         populateSettlementFilterOptions();
@@ -5341,6 +5066,7 @@ service cloud.firestore {
       }
 
       function renderCategoryBreakdown() {
+        if (!els.categoryBreakdown) return;
         if (!state.expenses.length) {
           els.categoryBreakdown.innerHTML = emptyState('لا توجد مصاريف بعد لعرض التوزيع.', 'chart');
           return;
@@ -5778,7 +5504,10 @@ service cloud.firestore {
       window.rejectSettlement = rejectSettlement;
 
       function renderActivityLog() {
-        // Inline preview list no longer rendered on the dashboard; the button opens the full log modal instead.
+        if (els.activityPreview) {
+          const recent = (state.activityLog || []).slice(-3).reverse();
+          els.activityPreview.innerHTML = activityLogHtml(recent);
+        }
         if (els.activityLogModal && els.activityLogModal.classList.contains('open')) {
           renderActivityLogModal();
         }
@@ -5813,6 +5542,33 @@ service cloud.firestore {
         closeModalEl(els.activityLogModal);
       }
       window.closeActivityLogModal = closeActivityLogModal;
+
+      // Shown once per signed-in account (flagged in localStorage, scoped by uid) the first
+      // time the app becomes visible after login — explains roles + custom split briefly.
+      function maybeShowOnboarding() {
+        if (!currentUser) return;
+        const flagKey = `hesabna_onboarding_seen_${currentUser.uid}`;
+        try {
+          if (localStorage.getItem(flagKey)) return;
+        } catch (error) {
+          return; // if localStorage is unavailable, don't nag every load
+        }
+        if (els.onboardingModal) {
+          setTimeout(() => els.onboardingModal.classList.add('open'), 400);
+        }
+      }
+
+      function closeOnboardingModal() {
+        closeModalEl(els.onboardingModal);
+        if (currentUser) {
+          try {
+            localStorage.setItem(`hesabna_onboarding_seen_${currentUser.uid}`, '1');
+          } catch (error) {
+            console.warn('Could not persist onboarding flag', error);
+          }
+        }
+      }
+      window.closeOnboardingModal = closeOnboardingModal;
 
       if (els.openActivityLogBtn) els.openActivityLogBtn.addEventListener('click', openActivityLogModal);
       if (els.activityLogModal) els.activityLogModal.addEventListener('click', event => {
@@ -5891,33 +5647,6 @@ service cloud.firestore {
             </div>
           </div>
         `).join('');
-
-        renderLeaveProjectPanel();
-      }
-
-      // Owner never sees a "Leave" option (owner leaving a project doesn't make sense — they'd
-      // have to delete it or transfer ownership instead). Any other current participant
-      // (editor or read-only) gets a Leave button.
-      function renderLeaveProjectPanel() {
-        const panel = document.getElementById('leaveProjectPanel');
-        const helper = document.getElementById('leaveProjectHelperText');
-        const btn = document.getElementById('leaveProjectBtn');
-        if (!panel || !helper || !btn) return;
-        const isOwner = !!(currentProjectOwnerId && currentUser && currentUser.uid === currentProjectOwnerId);
-        if (!currentProjectId || !currentUser) {
-          panel.style.display = 'none';
-          return;
-        }
-        panel.style.display = 'block';
-        if (isOwner) {
-          helper.textContent = 'مالك المشروع لا يمكنه مغادرته. يمكنك حذف المشروع أو إضافة نظام نقل الملكية إذا كان ذلك مدعومًا.';
-          btn.style.display = 'none';
-        } else if (isProjectParticipant()) {
-          helper.textContent = 'بعد المغادرة لن تتمكن من رؤية مصروفات المشروع أو تعديلها إلا إذا تمت دعوتك مرة أخرى.';
-          btn.style.display = 'inline-flex';
-        } else {
-          panel.style.display = 'none';
-        }
       }
 
       function renderSettingsCategories() {
@@ -6114,7 +5843,7 @@ service cloud.firestore {
         closeModalEl(els.expenseModal);
       }
 
-      function saveExpense() {
+      async function saveExpense() {
         if (!guardCanEdit()) return;
         const itemName = els.expenseItem.value.trim();
         const amount = Number(els.expenseAmount.value);
@@ -6135,6 +5864,19 @@ service cloud.firestore {
           if (!amount || amount < 0 || !Number.isFinite(amount)) flagInvalidField(els.expenseAmount);
           if (!paidBy) flagInvalidField(els.expensePaidBy);
           return;
+        }
+
+        // The whole project is synced as a single blob (see syncToFirebase), so two people
+        // editing at once can't be merged field-by-field. If the server has moved on since
+        // this modal was opened, warn before silently clobbering whatever the other member
+        // just saved, instead of the usual last-write-wins.
+        if (editingExpenseId && editingSnapshotUpdatedAt !== null && lastRemoteUpdateAt !== null && editingSnapshotUpdatedAt !== lastRemoteUpdateAt) {
+          const proceed = await confirmModal(
+            'تم تحديث المشروع',
+            'عضو تاني حفظ تعديلات على المشروع وانت بتعدل المصروف ده. لو كملت الحفظ، تعديلاتك هتتطبق فوق آخر نسخة وممكن تعديلات التاني تتلغي. تحب تكمل؟',
+            { confirmText: 'أكمل الحفظ', danger: true }
+          );
+          if (!proceed) return;
         }
 
         let splitType = 'equal';
@@ -6160,6 +5902,7 @@ service cloud.firestore {
           logActivity(`تم إضافة المصروف "${itemName}" بقيمة ${formatCurrency(amount)}`);
           showToast('تم إضافة المصروف بنجاح', 'success');
         }
+        editingSnapshotUpdatedAt = null;
         saveState();
         closeExpenseModal();
         render();
@@ -6170,6 +5913,7 @@ service cloud.firestore {
         const expense = state.expenses.find(item => item.id === id);
         if (!expense) return;
         editingExpenseId = id;
+        editingSnapshotUpdatedAt = lastRemoteUpdateAt;
         els.expenseModalTitle.textContent = 'تعديل مصروف';
         els.expenseItem.value = expense.itemName;
         els.expenseAmount.value = expense.amount;
@@ -6244,6 +5988,188 @@ service cloud.firestore {
         showToast('تمت إضافة العضو', 'success');
       }
 
+      function renderJoinRequests() {
+        if (!els.joinRequestsCard || !els.joinRequestsList) return;
+        // The rules only grant read on /joinRequests to the project owner (not editors), so
+        // this panel is owner-only — showing it to editors would be misleading since their
+        // own listener can never actually receive data.
+        const isOwnerView = !!currentUser && currentUser.uid === currentProjectOwnerId;
+        if (!isOwnerView || !joinRequestsCache.length) {
+          els.joinRequestsCard.style.display = 'none';
+          return;
+        }
+        els.joinRequestsCard.style.display = 'block';
+        els.joinRequestsList.innerHTML = joinRequestsCache.map(req => `
+          <div class="member-card member-settings-row" style="display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 0; border-bottom:1px solid var(--border);">
+            <div>
+              <strong>${escapeHtml(req.requesterName || 'مستخدم')}</strong>
+              <div class="label" style="margin-top:2px;">${escapeHtml(req.requesterEmail || '')}</div>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button class="btn btn-primary" onclick="approveJoinRequest('${req.id}')">قبول</button>
+              <button class="btn btn-secondary" onclick="rejectJoinRequest('${req.id}')">رفض</button>
+            </div>
+          </div>`).join('');
+      }
+
+      async function approveJoinRequest(requestId) {
+        if (!guardCanEdit()) return;
+        const request = joinRequestsCache.find(item => item.id === requestId);
+        if (!request) return;
+        const email = normalizeEmail(request.requesterEmail);
+        if (email && state.members.some(item => item.active !== false && normalizeEmail(item.email) === email)) {
+          showToast('العضو ده موجود بالفعل في المشروع', 'error');
+        } else {
+          state = normalizeState(state);
+          // New joiners always land as read-only — the owner can grant edit access
+          // afterwards from the members list, same as adding anyone manually.
+          state.members.push({ id: crypto.randomUUID(), name: request.requesterName || email || 'عضو جديد', email, canEdit: false, active: true, createdAt: new Date().toISOString() });
+          logActivity(`تمت الموافقة على طلب انضمام "${request.requesterName || email}"`);
+          saveState();
+          render();
+          showToast('تمت إضافة العضو', 'success');
+        }
+        // The rules never allow deleting a join request (allow delete: if false) — mark it
+        // reviewed instead, which is what the "update" rule actually permits.
+        try {
+          await updateDoc(doc(db, 'joinRequests', requestId), {
+            status: 'approved',
+            reviewedBy: currentUser.uid,
+            reviewedAt: serverTimestamp()
+          });
+        } catch (error) {
+          console.warn('Could not mark join request as approved', error);
+        }
+      }
+      window.approveJoinRequest = approveJoinRequest;
+
+      async function rejectJoinRequest(requestId) {
+        if (!guardCanEdit()) return;
+        try {
+          await updateDoc(doc(db, 'joinRequests', requestId), {
+            status: 'rejected',
+            reviewedBy: currentUser.uid,
+            reviewedAt: serverTimestamp()
+          });
+          showToast('تم رفض الطلب', 'default');
+        } catch (error) {
+          console.warn('Could not reject join request', error);
+        }
+      }
+      window.rejectJoinRequest = rejectJoinRequest;
+
+      // ---- Invite link / QR ----------------------------------------------------
+      const APP_BASE_URL = 'https://hesabna.vercel.app/';
+
+      function buildInviteLink() {
+        if (!currentProjectId) return '';
+        const url = new URL(APP_BASE_URL);
+        url.searchParams.set('joinProject', currentProjectId);
+        return url.toString();
+      }
+
+      function updateInviteLinkUI() {
+        if (!els.inviteLinkInput) return;
+        const link = buildInviteLink();
+        els.inviteLinkInput.value = link;
+        if (els.inviteQrImage) {
+          els.inviteQrImage.src = link ? `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(link)}` : '';
+        }
+      }
+
+      if (els.copyInviteLinkBtn) {
+        els.copyInviteLinkBtn.addEventListener('click', async () => {
+          const link = els.inviteLinkInput ? els.inviteLinkInput.value : '';
+          if (!link) return;
+          try {
+            await navigator.clipboard.writeText(link);
+            showToast('تم نسخ رابط الدعوة', 'success');
+          } catch (error) {
+            els.inviteLinkInput.select();
+            showToast('انسخ الرابط يدويًا من الحقل', 'default');
+          }
+        });
+      }
+      if (els.toggleInviteQrBtn) {
+        els.toggleInviteQrBtn.addEventListener('click', () => {
+          if (!els.inviteQrWrap) return;
+          const showing = els.inviteQrWrap.style.display !== 'none';
+          els.inviteQrWrap.style.display = showing ? 'none' : 'block';
+          els.toggleInviteQrBtn.textContent = showing ? 'عرض QR' : 'إخفاء QR';
+        });
+      }
+
+      // ---- "Request to join" flow for whoever opens a shared invite link -------
+      function parseJoinLinkFromUrl() {
+        const params = new URLSearchParams(location.search);
+        const projectId = params.get('joinProject');
+        if (!projectId) return;
+        pendingJoinRequest = { projectId };
+        // Strip the param from the visible URL so a page refresh doesn't re-trigger the
+        // modal or accidentally resend the request after the user has already joined.
+        const cleanUrl = new URL(location.href);
+        cleanUrl.searchParams.delete('joinProject');
+        history.replaceState({}, '', cleanUrl.toString());
+      }
+      parseJoinLinkFromUrl();
+
+      function maybeShowJoinRequestModal() {
+        if (!pendingJoinRequest || !currentUser || !els.joinRequestModal) return false;
+        els.joinRequestModal.classList.add('open');
+        return true;
+      }
+
+      function closeJoinRequestModal() {
+        closeModalEl(els.joinRequestModal);
+        pendingJoinRequest = null;
+      }
+      window.closeJoinRequestModal = closeJoinRequestModal;
+
+      async function shareJoinRequestFallback(projectId) {
+        const text = `مرحبًا، عايز أنضم لمشروع (${projectId}) في حسابنا (Hesabna). بريدي: ${currentUser?.email || ''}`;
+        try {
+          if (navigator.share) {
+            await navigator.share({ title: 'طلب انضمام - حسابنا', text });
+            return;
+          }
+        } catch (error) {
+          // user cancelled the share sheet — fall through to clipboard copy
+        }
+        try {
+          await navigator.clipboard.writeText(text);
+          showToast('تعذّر إرسال الطلب مباشرة — نسخنا رسالة جاهزة، ابعتها لصاحب المشروع', 'default');
+        } catch (error) {
+          showToast('تعذّر إرسال طلب الانضمام، تواصل مع صاحب المشروع مباشرة', 'error');
+        }
+      }
+
+      if (els.submitJoinRequestBtn) {
+        els.submitJoinRequestBtn.addEventListener('click', withLoading(els.submitJoinRequestBtn, async () => {
+          if (!pendingJoinRequest || !currentUser) return;
+          const { projectId } = pendingJoinRequest;
+          try {
+            // One deterministic request per (project, user) so re-opening the link doesn't
+            // spam duplicate pending requests — the rules only check field values, not the ID.
+            const reqRef = doc(db, 'joinRequests', `${projectId}_${currentUser.uid}`);
+            await setDoc(reqRef, {
+              projectId,
+              requesterUid: currentUser.uid,
+              requesterEmail: normalizeEmail(currentUser.email),
+              requesterName: currentUser.displayName || currentUser.email || 'مستخدم',
+              status: 'pending',
+              reviewedAt: null,
+              reviewedBy: null,
+              createdAt: serverTimestamp()
+            });
+            showToast('تم إرسال طلب الانضمام، هتنضم لما صاحب المشروع يوافق', 'success');
+          } catch (error) {
+            console.warn('Join request write failed (rules likely not configured yet)', error);
+            await shareJoinRequestFallback(projectId);
+          }
+          closeJoinRequestModal();
+        }));
+      }
+
       async function renameMember(id) {
         if (!guardCanEdit()) return;
         const member = state.members.find(item => item.id === id);
@@ -6290,117 +6216,17 @@ service cloud.firestore {
         if (!confirmed) return;
         await animateExit(event?.target?.closest('.member-card'));
         member.active = false;
-        logActivity(`تمت إزالة "${member.name}" من المشروع`);
         saveState();
         render();
         showToast('تم حذف العضو مع الاحتفاظ بالبيانات السابقة', 'success', {
           label: 'تراجع',
           onClick: () => {
             member.active = true;
-            logActivity(`تمت إعادة "${member.name}" إلى المشروع`);
             saveState();
             render();
             showToast(`تم استرجاع "${member.name}"`, 'success');
           }
         });
-      }
-
-      // ---------------------------------------------------------------------------
-      // MEMBER LEAVE PROJECT
-      // ---------------------------------------------------------------------------
-      // Any non-owner member (editor or read-only) can remove themselves from a project.
-      // This can NOT go through saveState()/syncToFirebase(), because a plain member is not
-      // guaranteed to hold editableEmails write access (read-only members never do), and even
-      // when they do, the project update rule requires editableEmails/sharedWithEmails to stay
-      // byte-identical for that path — by design, so a compromised/editor account can't rewrite
-      // membership. Instead this performs a narrow, separately-authorized Firestore update that
-      // *only* removes the caller's own email from sharedWithEmails/editableEmails via
-      // arrayRemove — see the "self-leave" clause in the Firestore Rules for exactly what this
-      // is allowed to touch. It intentionally does NOT try to also patch state.members (that
-      // would require a full state write, which the self-leave rule does not permit) — the
-      // owner's client reconciles state.members automatically the next time it's online, see
-      // reconcileDepartedMembers().
-      async function leaveProject() {
-        if (!currentUser || !currentProjectId) return;
-        if (currentProjectOwnerId && currentUser.uid === currentProjectOwnerId) {
-          showToast('مالك المشروع لا يمكنه مغادرته. يمكنك حذف المشروع بدلاً من ذلك.', 'error');
-          return;
-        }
-        if (!isProjectParticipant()) return;
-        const confirmed = await confirmModal(
-          'مغادرة المشروع',
-          'هل أنت متأكد من مغادرة المشروع؟\n\nبعد المغادرة لن تتمكن من رؤية مصروفات المشروع أو تعديلها إلا إذا تمت دعوتك مرة أخرى.',
-          { confirmText: 'مغادرة المشروع' }
-        );
-        if (!confirmed) return;
-
-        const leavingProjectId = currentProjectId;
-        const ownEmail = normalizeEmail(currentUser.email);
-        try {
-          const projectRef = doc(db, 'projects', leavingProjectId);
-          await updateDoc(projectRef, {
-            sharedWithEmails: arrayRemove(ownEmail),
-            editableEmails: arrayRemove(ownEmail),
-            updatedAt: serverTimestamp()
-          });
-        } catch (error) {
-          console.error('Leave project failed', error);
-          showToast('فشلت مغادرة المشروع، حاول مرة أخرى', 'error');
-          return;
-        }
-
-        closeCurrentProjectLocally({ removeCache: true });
-        showToast('تمت مغادرة المشروع بنجاح', 'success');
-        renderProjectList();
-        render();
-      }
-      window.leaveProject = leaveProject;
-
-      // Tears down all live listeners/state tied to the currently open project and forgets its
-      // cached copy, without touching any other project's data. Shared by leaveProject() and the
-      // permission-denied handler below so both land the user back on the project list the same
-      // way, and neither one leaves a stale listener trying to re-subscribe to a project the user
-      // no longer has access to.
-      function closeCurrentProjectLocally({ removeCache = false } = {}) {
-        if (projectDocUnsubscribe) { projectDocUnsubscribe(); projectDocUnsubscribe = null; }
-        if (settlementsUnsubscribe) { settlementsUnsubscribe(); settlementsUnsubscribe = null; }
-        currentProjectId = null;
-        currentProjectOwnerId = null;
-        currentProjectOwnerName = null;
-        remoteSettlementsCache = [];
-        if (removeCache) {
-          try { localStorage.removeItem(getStorageKey()); } catch (error) { /* ignore */ }
-        }
-        state = createDefaultState();
-      }
-
-      // Fires when a realtime project listener comes back with permission-denied — the only way
-      // that happens (rules always required auth+membership to read) is that the owner just
-      // removed this user, or someone changed the membership out from under them mid-session.
-      // Never leave the app stuck on the now-inaccessible project screen.
-      function handleRemovedFromProject() {
-        closeCurrentProjectLocally({ removeCache: true });
-        showToast('تمت إزالتك من هذا المشروع.', 'error');
-        renderProjectList();
-        render();
-      }
-
-      // Runs only for the project owner (the only role with unrestricted write access to
-      // state.members). Self-leave can only safely touch sharedWithEmails/editableEmails (see
-      // leaveProject()), so a departed member's entry inside state.members is left `active: true`
-      // until the owner's own client notices the mismatch and reconciles it — this keeps the
-      // Members list, balances, and activity log correct for the owner without ever requiring a
-      // non-owner client to hold write access to the shared state blob.
-      function reconcileDepartedMembers(remoteData) {
-        if (!currentUser || remoteData.ownerId !== currentUser.uid) return;
-        const shared = new Set((remoteData.sharedWithEmails || []).map(normalizeEmail));
-        const departed = state.members.filter(member => member.active !== false && !shared.has(normalizeEmail(member.email)));
-        if (!departed.length) return;
-        departed.forEach(member => {
-          member.active = false;
-          logActivity(`غادر "${member.name}" المشروع`);
-        });
-        saveState();
       }
 
       function closeAllMemberMenus() {
@@ -6598,11 +6424,6 @@ service cloud.firestore {
       if (els.googleSignInBtn) els.googleSignInBtn.addEventListener('click', withLoading(els.googleSignInBtn, signInWithGoogle));
       if (els.createAccountBtn) els.createAccountBtn.addEventListener('click', () => { openAuthModal('signup'); closeLoginMoreMenu(); });
       if (els.downloadPdfBtn) els.downloadPdfBtn.addEventListener('click', withLoading(els.downloadPdfBtn, downloadProjectPdf));
-      const copyJoinLinkBtn = document.getElementById('copyJoinLinkBtn');
-      if (copyJoinLinkBtn) copyJoinLinkBtn.addEventListener('click', copyProjectJoinLink);
-      if (els.joinProjectModal) els.joinProjectModal.addEventListener('click', (event) => {
-        if (event.target.id === 'joinProjectModal') closeJoinModal();
-      });
       if (els.saveProfileBtn) els.saveProfileBtn.addEventListener('click', withLoading(els.saveProfileBtn, saveProfile));
       if (els.editProfileBtn) els.editProfileBtn.addEventListener('click', openProfileEditModal);
       if (els.profileEditCancelBtn) els.profileEditCancelBtn.addEventListener('click', closeProfileEditModal);
@@ -6639,15 +6460,6 @@ service cloud.firestore {
         // so the splash is guaranteed to hide even if init below fails partway.
         setTimeout(hideAppSplash, 900);
         try {
-          // Capture ?join=<projectId> before anything else touches the URL, and stash it in
-          // sessionStorage so it survives a full-page redirect (e.g. Google sign-in on iOS/Safari).
-          const urlJoinToken = getJoinTokenFromUrl();
-          if (urlJoinToken) {
-            pendingJoinToken = urlJoinToken;
-            try { sessionStorage.setItem(JOIN_TOKEN_STORAGE_KEY, urlJoinToken); } catch (e) { /* no-op */ }
-          } else {
-            try { pendingJoinToken = sessionStorage.getItem(JOIN_TOKEN_STORAGE_KEY); } catch (e) { pendingJoinToken = null; }
-          }
           diagnoseAuthIssue();
           authReadyPromise.finally(() => { completeGoogleRedirectSignIn(); });
           els.loginEmail.value = '';
@@ -6661,7 +6473,6 @@ service cloud.firestore {
                   isFirebaseReady = true;
                   showToast(`مرحبًا ${user.displayName || 'بك'}`, 'success');
                 }
-                handleJoinFlow();
               } catch (err) {
                 console.error('renderAuth failed:', err);
               } finally {
